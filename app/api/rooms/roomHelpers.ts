@@ -55,7 +55,6 @@ export function generateRoomCode(): string {
  */
 export const STAGE_ORDER: RoomStage[] = [
   RoomStage.LOBBY,
-  RoomStage.PERSONA,
   RoomStage.AVAILABILITY,
   RoomStage.GROUP_PROFILE,
   RoomStage.DESTINATIONS,
@@ -79,6 +78,16 @@ export function getNextStage(current: RoomStage): RoomStage | null {
     return null;
   }
   return STAGE_ORDER[index + 1];
+}
+
+/**
+ * Return the previous stage before `current`, or `null` if `current` is
+ * already the first stage (LOBBY) or not found in the order.
+ */
+export function getPreviousStage(current: RoomStage): RoomStage | null {
+  const index = STAGE_ORDER.indexOf(current);
+  if (index <= 0) return null;
+  return STAGE_ORDER[index - 1];
 }
 
 /** Type guard: is `value` a valid {@link RoomStage}? */

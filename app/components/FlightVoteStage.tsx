@@ -7,6 +7,7 @@ import type { VoteOption } from "@/app/components/VotePanel";
 import VotingStage from "@/app/components/VotingStage";
 import { MOCK_FLIGHT_OPTIONS } from "@/app/components/FlightStage";
 import { createAnonSupabase } from "@/lib/supabase";
+import type { TripRoom } from "@/lib/types";
 
 /**
  * FlightVoteStage — wraps {@link VotingStage} for the flight category round.
@@ -28,6 +29,7 @@ export default function FlightVoteStage({
   room,
   identity,
   members,
+  onRoomUpdated,
 }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
   const [winnerError, setWinnerError] = useState<string | null>(null);
@@ -94,8 +96,9 @@ export default function FlightVoteStage({
             | null;
           throw new Error(body?.error ?? "Failed to advance to activities");
         }
-
-        await broadcastStageChange(room.id);
+        const updated = (await stageRes.json()) as TripRoom;
+        onRoomUpdated(updated);
+        void broadcastStageChange(room.id);
         setWinnerError(null);
       } catch (err) {
         setWinnerError(

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import type { StageProps } from "@/app/components/StageRouter";
 import { createAnonSupabase } from "@/lib/supabase";
+import type { TripRoom } from "@/lib/types";
 
 /**
  * A single mocked flight category option.
@@ -86,7 +87,7 @@ export const MOCK_FLIGHT_OPTIONS: FlightOption[] = [
  *
  * Pattern mirrors `DestinationsStage` and `GroupProfileStage`.
  */
-export default function FlightStage({ room, identity, members: _members }: StageProps) {
+export default function FlightStage({ room, identity, members: _members, onRoomUpdated }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
   const [advancing, setAdvancing] = useState(false);
@@ -108,7 +109,9 @@ export default function FlightStage({ room, identity, members: _members }: Stage
           | null;
         throw new Error(body?.error ?? "Failed to advance stage");
       }
-      await broadcastStageChange(room.id);
+      const updated = (await res.json()) as TripRoom;
+      onRoomUpdated(updated);
+      void broadcastStageChange(room.id);
     } catch (err) {
       setAdvanceError(
         err instanceof Error ? err.message : "Failed to advance stage",

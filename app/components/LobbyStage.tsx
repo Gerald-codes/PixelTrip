@@ -6,7 +6,7 @@ import PersonaCard from "@/app/components/PersonaCard";
 import type { StageProps } from "@/app/components/StageRouter";
 import { broadcastMemberJoined } from "@/app/hooks/useRoomMembers";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { Persona } from "@/lib/types";
+import type { Persona, TripRoom } from "@/lib/types";
 
 /**
  * LobbyStage — the room's waiting area before planning begins.
@@ -21,7 +21,7 @@ import type { Persona } from "@/lib/types";
  * Host-only "Advance stage" control advances the room and broadcasts a
  * stage-change so all clients re-render.
  */
-export default function LobbyStage({ room, identity, members }: StageProps) {
+export default function LobbyStage({ room, identity, members, onRoomUpdated }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
   // ── Personas ─────────────────────────────────────────────────────────────────
@@ -101,6 +101,7 @@ export default function LobbyStage({ room, identity, members }: StageProps) {
   const [error, setError] = useState<string | null>(null);
 
   async function handleAdvance() {
+    if (advancing) return;
     setAdvancing(true);
     setError(null);
     try {
@@ -111,11 +112,15 @@ export default function LobbyStage({ room, identity, members }: StageProps) {
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; message?: string }
           | null;
-        throw new Error(body?.error ?? "Failed to advance stage");
+        throw new Error(body?.message ?? body?.error ?? "Failed to advance stage");
       }
-      await broadcastStageChange(room.id);
+      const updated = (await res.json()) as TripRoom;
+      // Update local state immediately — don't wait for the broadcast.
+      onRoomUpdated(updated);
+      // Fire-and-forget broadcast for other clients.
+      void broadcastStageChange(room.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to advance stage");
     } finally {
@@ -226,7 +231,7 @@ export default function LobbyStage({ room, identity, members }: StageProps) {
         <div className="flex flex-col items-start gap-2">
           <button
             type="button"
-            onClick={handleAdvance}
+            onClick={() => void handleAdvance()}
             disabled={advancing}
             className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >

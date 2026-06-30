@@ -461,6 +461,21 @@ export async function POST(request: Request) {
     );
 
   if (upsertError) {
+    const pgCode = (upsertError as { code?: string }).code;
+    // 42P01 = table does not exist — the migration hasn't been run yet.
+    if (pgCode === "42P01") {
+      console.log(
+        `[agent/group-profile] room_profiles table missing — run supabase/schema-profiles.sql`,
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Database setup incomplete: run supabase/schema-profiles.sql in the Supabase SQL editor to create the room_profiles table.",
+          retryable: false,
+        },
+        { status: 500 },
+      );
+    }
     console.log(
       `[agent/group-profile] room ${room.room_code} failed to persist: ${upsertError.message}`,
     );
@@ -505,6 +520,16 @@ export async function GET(request: Request) {
     .maybeSingle();
 
   if (error) {
+    // If the table doesn't exist yet (Postgres error code 42P01), treat it
+    // the same as "no profile yet" — return 404 so the UI shows the generate
+    // button rather than an error state.
+    const pgCode = (error as { code?: string }).code;
+    if (pgCode === "42P01") {
+      return NextResponse.json(
+        { error: "No group profile has been generated for this room yet" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json(
       { error: "Failed to load group profile" },
       { status: 500 },

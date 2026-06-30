@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { StageProps } from "@/app/components/StageRouter";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { GroupProfile } from "@/lib/types";
+import type { GroupProfile, TripRoom } from "@/lib/types";
 
 /**
  * GroupProfileStage — shows the AI-generated combined travel profile and the
@@ -28,6 +28,7 @@ export default function GroupProfileStage({
   room,
   identity,
   members,
+  onRoomUpdated,
 }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
@@ -145,11 +146,13 @@ export default function GroupProfileStage({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; message?: string }
           | null;
-        throw new Error(body?.error ?? "Failed to advance stage");
+        throw new Error(body?.message ?? body?.error ?? "Failed to advance stage");
       }
-      await broadcastStageChange(room.id);
+      const updated = (await res.json()) as TripRoom;
+      onRoomUpdated(updated);
+      void broadcastStageChange(room.id);
     } catch (err) {
       setAdvanceError(
         err instanceof Error ? err.message : "Failed to advance stage",

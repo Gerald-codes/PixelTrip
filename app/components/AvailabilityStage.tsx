@@ -6,7 +6,7 @@ import type { StageProps } from "@/app/components/StageRouter";
 import { broadcastMemberJoined } from "@/app/hooks/useRoomMembers";
 import { calculateOverlap, type DateRange } from "@/lib/overlap";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { Availability, DestinationPreference } from "@/lib/types";
+import type { Availability, DestinationPreference, TripRoom } from "@/lib/types";
 
 /**
  * AvailabilityStage — each member submits their available date ranges and the
@@ -35,6 +35,7 @@ export default function AvailabilityStage({
   room,
   identity,
   members,
+  onRoomUpdated,
 }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
@@ -98,6 +99,18 @@ export default function AvailabilityStage({
       setHydrated(true);
     })();
   }, [fetchGroup, identity.userId]);
+
+  // Poll every 4 s so every member's tab picks up other members' submissions
+  // without waiting for a broadcast. The broadcast from handleSave is still
+  // sent as a fast path, but the poll is the reliable fallback.
+  const fetchGroupRef = useRef(fetchGroup);
+  fetchGroupRef.current = fetchGroup;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void fetchGroupRef.current();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // ── Form handlers ────────────────────────────────────────────────────────────
   function updateRange(index: number, patch: Partial<DraftRange>) {
@@ -237,11 +250,13 @@ export default function AvailabilityStage({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; message?: string }
           | null;
-        throw new Error(body?.error ?? "Failed to advance stage");
+        throw new Error(body?.message ?? body?.error ?? "Failed to advance stage");
       }
-      await broadcastStageChange(room.id);
+      const updated = (await res.json()) as TripRoom;
+      onRoomUpdated(updated);
+      void broadcastStageChange(room.id);
     } catch (err) {
       setAdvanceError(
         err instanceof Error ? err.message : "Failed to advance stage",

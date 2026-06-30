@@ -6,7 +6,7 @@ import type { StageProps } from "@/app/components/StageRouter";
 import type { VoteOption } from "@/app/components/VotePanel";
 import VotingStage from "@/app/components/VotingStage";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { DestinationSuggestion } from "@/lib/types";
+import type { DestinationSuggestion, TripRoom } from "@/lib/types";
 
 /**
  * DestinationVoteStage — wraps {@link VotingStage} for the destination round.
@@ -26,6 +26,7 @@ export default function DestinationVoteStage({
   room,
   identity,
   members,
+  onRoomUpdated,
 }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
@@ -123,8 +124,9 @@ export default function DestinationVoteStage({
             | null;
           throw new Error(body?.error ?? "Failed to advance to flights");
         }
-
-        await broadcastStageChange(room.id);
+        const updated = (await stageRes.json()) as TripRoom;
+        onRoomUpdated(updated);
+        void broadcastStageChange(room.id);
         setWinnerError(null);
       } catch (err) {
         setWinnerError(
