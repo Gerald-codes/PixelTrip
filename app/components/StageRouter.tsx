@@ -5,6 +5,8 @@ import { RoomStage, type TripRoom, type User } from "@/lib/types";
 import AvailabilityStage from "./AvailabilityStage";
 import DestinationVoteStage from "./DestinationVoteStage";
 import DestinationsStage from "./DestinationsStage";
+import FlightStage from "./FlightStage";
+import FlightVoteStage from "./FlightVoteStage";
 import GroupProfileStage from "./GroupProfileStage";
 import LobbyStage from "./LobbyStage";
 
@@ -21,21 +23,20 @@ export interface Identity {
 /**
  * The contract every `*Stage` component must conform to.
  *
- * StageRouter renders exactly one stage component for the room's
- * `currentStage`, passing the current room, the viewer's identity, and the
- * current member list (DB-backed).
+ * `onRoomUpdated` — called with the fresh TripRoom after any mutation so
+ *   page.tsx updates local state immediately, without waiting on a broadcast.
+ *
+ * `onGoBack` — host-only callback wired from page.tsx. Sends a backward PATCH
+ *   and calls onRoomUpdated. Undefined for non-host clients.
  */
 export interface StageProps {
   room: TripRoom;
   identity: Identity;
   members: User[];
+  onRoomUpdated: (updated: TripRoom) => void;
+  onGoBack?: () => Promise<void>;
 }
 
-/**
- * Lightweight placeholder for stages whose real component has not been built
- * yet. Replace each placeholder with the real `*Stage` component as it lands in
- * later tasks.
- */
 function StagePlaceholder({ stage }: { stage: RoomStage }) {
   return (
     <section className="mx-auto max-w-2xl rounded-lg border border-dashed border-gray-300 p-8 text-center">
@@ -50,69 +51,42 @@ function StagePlaceholder({ stage }: { stage: RoomStage }) {
   );
 }
 
-/**
- * Renders the active stage component based on `room.currentStage`.
- *
- * The switch is exhaustive over {@link RoomStage}: the `never` fallthrough makes
- * the compiler flag any stage that is added to the enum but not handled here, so
- * no stage can be silently orphaned.
- */
-export default function StageRouter({ room, identity, members }: StageProps) {
+export default function StageRouter({
+  room,
+  identity,
+  members,
+  onRoomUpdated,
+  onGoBack,
+}: StageProps) {
+  const props = { room, identity, members, onRoomUpdated, onGoBack };
+
   switch (room.currentStage) {
     case RoomStage.LOBBY:
-      return <LobbyStage room={room} identity={identity} members={members} />;
+      return <LobbyStage {...props} />;
     case RoomStage.AVAILABILITY:
-      return (
-        <AvailabilityStage
-          room={room}
-          identity={identity}
-          members={members}
-        />
-      );
+      return <AvailabilityStage {...props} />;
     case RoomStage.GROUP_PROFILE:
-      return (
-        <GroupProfileStage
-          room={room}
-          identity={identity}
-          members={members}
-        />
-      );
+      return <GroupProfileStage {...props} />;
     case RoomStage.DESTINATIONS:
-      return (
-        <DestinationsStage
-          room={room}
-          identity={identity}
-          members={members}
-        />
-      );
+      return <DestinationsStage {...props} />;
     case RoomStage.DESTINATION_VOTE:
-      return (
-        <DestinationVoteStage
-          room={room}
-          identity={identity}
-          members={members}
-        />
-      );
-    case RoomStage.PERSONA:
+      return <DestinationVoteStage {...props} />;
     case RoomStage.FLIGHTS:
+      return <FlightStage {...props} />;
     case RoomStage.FLIGHT_VOTE:
+      return <FlightVoteStage {...props} />;
+    case RoomStage.PERSONA:
     case RoomStage.ACTIVITIES:
     case RoomStage.ITINERARY:
     case RoomStage.FEEDBACK:
     case RoomStage.NEGOTIATION:
     case RoomStage.FINAL:
-      // Placeholders for now; each will be swapped for its real *Stage
-      // component (which conforms to StageProps) in later tasks.
       return <StagePlaceholder stage={room.currentStage} />;
     default:
       return assertNeverStage(room.currentStage);
   }
 }
 
-/**
- * Compile-time exhaustiveness guard. If a new {@link RoomStage} is added without
- * a matching case above, TypeScript will error here.
- */
 function assertNeverStage(stage: never): never {
   throw new Error(`Unhandled room stage: ${String(stage)}`);
 }

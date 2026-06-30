@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import DestinationCard from "@/app/components/DestinationCard";
 import type { StageProps } from "@/app/components/StageRouter";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { DestinationSuggestion } from "@/lib/types";
+import type { DestinationSuggestion, TripRoom } from "@/lib/types";
 
 /**
  * DestinationsStage — the visible payoff for Demo Moment 1 ("Why this place?").
@@ -35,6 +35,8 @@ export default function DestinationsStage({
   room,
   identity,
   members: _members,
+  onRoomUpdated,
+  onGoBack,
 }: StageProps) {
   const isHost = identity.userId === room.hostUserId;
 
@@ -153,11 +155,13 @@ export default function DestinationsStage({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; message?: string }
           | null;
-        throw new Error(body?.error ?? "Failed to advance stage");
+        throw new Error(body?.message ?? body?.error ?? "Failed to advance stage");
       }
-      await broadcastStageChange(room.id);
+      const updated = (await res.json()) as TripRoom;
+      onRoomUpdated(updated);
+      void broadcastStageChange(room.id);
     } catch (err) {
       setAdvanceError(
         err instanceof Error ? err.message : "Failed to advance stage",
@@ -246,10 +250,27 @@ export default function DestinationsStage({
           </p>
           <p className="mt-1 text-sm text-red-700">{agentError.message}</p>
 
-          {agentError.needsGroupProfile && isHost && (
+      {agentError.needsGroupProfile && isHost && (
+            <div className="mt-2 flex flex-col gap-2">
+              <p className="text-sm text-red-700">
+                The group profile must be generated before destinations can be
+                researched. Go back and generate it first.
+              </p>
+              {onGoBack && (
+                <button
+                  type="button"
+                  onClick={() => void onGoBack()}
+                  className="self-start rounded-md border border-red-400 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50"
+                >
+                  ← Back to Group Profile
+                </button>
+              )}
+            </div>
+          )}
+
+          {agentError.needsGroupProfile && !isHost && (
             <p className="mt-2 text-sm text-red-700">
-              Head back to the Group Profile stage and run the group-profile
-              agent first — destinations depend on it.
+              Waiting for the host to go back and generate the group profile.
             </p>
           )}
 
