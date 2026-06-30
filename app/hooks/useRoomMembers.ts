@@ -46,7 +46,7 @@ export function useRoomMembers(code: string, roomId: string | null): User[] {
     return () => clearInterval(interval);
   }, [code]);
 
-  // Refresh on member-joined broadcast.
+  // Refresh on member-joined; remove on member-left — no page reload.
   useEffect(() => {
     if (!roomId) return;
     const supabase = createAnonSupabase();
@@ -55,6 +55,19 @@ export function useRoomMembers(code: string, roomId: string | null): User[] {
       .on("broadcast", { event: "member-joined" }, () => {
         void fetchRef.current();
       })
+      .on(
+        "broadcast",
+        { event: "member-left" },
+        (payload: { payload?: { userId?: string } }) => {
+          const departedId = payload?.payload?.userId;
+          if (departedId) {
+            setMembers((prev) => prev.filter((m) => m.id !== departedId));
+          } else {
+            // Payload missing userId — fall back to a fresh fetch.
+            void fetchRef.current();
+          }
+        },
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(ch);
@@ -76,5 +89,28 @@ export async function broadcastMemberJoined(roomId: string): Promise<void> {
     });
   });
   await ch.send({ type: "broadcast", event: "member-joined", payload: {} });
+  void supabase.removeChannel(ch);
+}
+
+/**
+ * Broadcast that a member left so other clients remove their avatar immediately.
+ * Call this before navigating away (e.g. in a `beforeunload` handler or cleanup).
+ */
+export async function broadcastMemberLeft(
+  roomId: string,
+  userId: string,
+): Promise<void> {
+  const supabase = createAnonSupabase();
+  const ch = supabase.channel(`room:${roomId}:members`);
+  await new Promise<void>((resolve) => {
+    ch.subscribe((status) => {
+      if (status === "SUBSCRIBED") resolve();
+    });
+  });
+  await ch.send({
+    type: "broadcast",
+    event: "member-left",
+    payload: { userId },
+  });
   void supabase.removeChannel(ch);
 }

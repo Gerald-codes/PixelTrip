@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 
 import { runAgent } from "@/lib/bedrock";
 import { getServiceSupabase } from "@/lib/supabase";
-import { RoomStage, type DestinationSuggestion } from "@/lib/types";
+import {
+  RoomStage,
+  type DestinationSuggestion,
+  type BudgetLevel,
+  type TravelStyle,
+  type TripInterest,
+} from "@/lib/types";
 
 /**
  * Destination Research Agent — Demo Moment 1.
@@ -117,7 +123,56 @@ function isAgentDestinationItem(value: unknown): value is AgentDestinationItem {
 
 // ─── Prompt ───────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = [
+/** Build the vibe-weighting addition for the system prompt when vibes are present. */
+function buildVibeWeightingInstructions(vibes: string[]): string {
+  if (vibes.length === 0) return "";
+
+  const vibeDescriptions: Record<string, string> = {
+    asia: "Asian destinations (East Asia, Southeast Asia, South Asia)",
+    western_cities: "European and Western city destinations with urban culture",
+    beach_escape: "coastal and island destinations with beaches, ocean, and warm-weather activities",
+    nature_scenery: "destinations known for stunning natural landscapes, mountains, parks, and scenic vistas",
+    food_trip: "destinations celebrated for their food scene, local cuisine, and culinary experiences",
+    culture_trip: "culturally rich destinations with strong historical, artistic, or heritage significance",
+    adventure_trip: "destinations offering outdoor adventure activities, hiking, extreme sports, or wilderness exploration",
+    shopping_city: "shopping-oriented city destinations with markets, malls, and retail culture",
+    hidden_gems: "off-the-beaten-path destinations that are less touristy and offer authentic local experiences",
+    anywhere: "any destination worldwide that best fits the group's profile",
+  };
+
+  const descriptions = vibes
+    .filter((v) => v !== "anywhere")
+    .map((v) => vibeDescriptions[v] ?? v)
+    .filter(Boolean);
+
+  if (descriptions.length === 0) return "";
+
+  return [
+    "",
+    "TRAVEL VIBE WEIGHTING:",
+    `The group has expressed interest in: ${descriptions.join("; ")}.`,
+    "Weight your destination suggestions toward categories that match these vibes. Specifically:",
+    ...vibes
+      .filter((v) => v !== "anywhere")
+      .map((v) => {
+        const weightingMap: Record<string, string> = {
+          asia: "  - Prioritise Asian countries and cities.",
+          western_cities: "  - Prioritise European capitals and Western urban destinations.",
+          beach_escape: "  - Prioritise coastal, island, or beach resort destinations.",
+          nature_scenery: "  - Prioritise destinations with dramatic natural scenery, national parks, or mountain/forest landscapes.",
+          food_trip: "  - Prioritise destinations internationally recognised for food culture and culinary diversity.",
+          culture_trip: "  - Prioritise destinations with UNESCO heritage sites, museums, historical districts, or strong local traditions.",
+          adventure_trip: "  - Prioritise destinations with trekking, diving, skiing, surfing, or other active outdoor pursuits.",
+          shopping_city: "  - Prioritise destinations with vibrant retail scenes, night markets, or luxury shopping districts.",
+          hidden_gems: "  - Prioritise underrated, lesser-known destinations that deliver authentic experiences over tourist traps.",
+        };
+        return weightingMap[v] ?? `  - Consider destinations matching the \"${v}\" vibe.`;
+      }),
+    "When vibes conflict with the group's dates or budget, state the trade-off in `downsides` but still respect the vibe preference.",
+  ].join("\n");
+}
+
+const BASE_SYSTEM_PROMPT_LINES = [
   "You are PixelTrip's destination research expert.",
   "A small group of friends (2–6 people) is choosing a trip destination together. You must give them honest, specific, persona-aware recommendations — never generic popularity picks.",
   "",
@@ -140,7 +195,14 @@ const SYSTEM_PROMPT = [
   "4. Sort the array by `fitScore` descending.",
   "5. Prefer destinations that overlap with the group's stated destination interests when they fit the criteria, but include other strong candidates when a stated interest is genuinely a poor fit — and explain why.",
   "6. Keep `recommendationReason` and `personaFitSummary` concrete and concise (2–4 sentences each).",
-].join("\n");
+  "7. When member character data is provided with budgetLevel, travelStyle, tripInterests, and planningWeights — use them as authoritative signals for that member's preferences over any generic description.",
+];
+
+/** Build the full system prompt, including vibe-weighting instructions when relevant. */
+function buildSystemPrompt(travelVibes: string[]): string {
+  const vibeInstructions = buildVibeWeightingInstructions(travelVibes);
+  return [...BASE_SYSTEM_PROMPT_LINES, vibeInstructions].join("\n");
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -172,28 +234,93 @@ interface DestinationPreferenceRow {
   country_or_city: string;
 }
 
+/** Minimal shape of a `character_profiles` row as returned by Supabase. */
+interface CharacterProfileRow {
+  user_id: string;
+  display_name: string;
+  budget_level: BudgetLevel;
+  travel_style: TravelStyle;
+  trip_interests: TripInterest[];
+  generated_persona_name: string;
+  planning_weights: Record<string, number>;
+}
+
 /** Build the user-prompt payload the agent will read. */
 function buildContext(args: {
   groupProfile: Record<string, unknown>;
   users: JoinedUserRow[];
   availability: AvailabilityRow[];
   destinationPreferences: DestinationPreferenceRow[];
-}): string {
-  const members = args.users.map((u) => ({
-    userId: u.id,
-    displayName: u.display_name,
-    persona: u.personas
-      ? {
-          name: u.personas.name,
-          budgetLevel: u.personas.budget_level,
-          travelPace: u.personas.travel_pace,
-          interests: u.personas.interests,
-          flexibility: u.personas.flexibility,
-          decisionStyle: u.personas.decision_style,
-          description: u.personas.description,
-        }
-      : null,
-  }));
+  characterProfiles: CharacterProfileRow[];
+}): { userPrompt: string; travelVibes: string[] } {
+  // Index character profiles by user_id for O(1) lookup.
+  const profileByUserId = new Map<string, CharacterProfileRow>(
+    args.characterProfiles.map((cp) => [cp.user_id, cp]),
+  );
+
+  // Separate vibe-prefixed preferences from plain destination preferences.
+  const travelVibes: string[] = [];
+  const plainPreferences: DestinationPreferenceRow[] = [];
+
+  for (const pref of args.destinationPreferences) {
+    if (pref.country_or_city.startsWith("vibe:")) {
+      const vibeName = pref.country_or_city.slice("vibe:".length).trim();
+      if (vibeName && !travelVibes.includes(vibeName)) {
+        travelVibes.push(vibeName);
+      }
+    } else {
+      plainPreferences.push(pref);
+    }
+  }
+
+  const members = args.users.map((u) => {
+    const cp = profileByUserId.get(u.id);
+
+    if (cp) {
+      // Requirement 6.2: use CharacterProfile data when available.
+      return {
+        userId: u.id,
+        displayName: u.display_name,
+        characterProfile: {
+          generatedPersonaName: cp.generated_persona_name,
+          budgetLevel: cp.budget_level,
+          travelStyle: cp.travel_style,
+          tripInterests: cp.trip_interests,
+          planningWeights: cp.planning_weights,
+        },
+        // Include legacy persona as supplemental context if it exists.
+        persona: u.personas
+          ? {
+              name: u.personas.name,
+              budgetLevel: u.personas.budget_level,
+              travelPace: u.personas.travel_pace,
+              interests: u.personas.interests,
+              flexibility: u.personas.flexibility,
+              decisionStyle: u.personas.decision_style,
+              description: u.personas.description,
+            }
+          : null,
+      };
+    }
+
+    // Requirement 6.3: fall back to persona data when no CharacterProfile exists.
+    return {
+      userId: u.id,
+      displayName: u.display_name,
+      characterProfile: null,
+      persona: u.personas
+        ? {
+            name: u.personas.name,
+            budgetLevel: u.personas.budget_level,
+            travelPace: u.personas.travel_pace,
+            interests: u.personas.interests,
+            flexibility: u.personas.flexibility,
+            decisionStyle: u.personas.decision_style,
+            description: u.personas.description,
+          }
+        : null,
+    };
+  });
 
   const dateRanges = args.availability.map((a) => ({
     userId: a.user_id,
@@ -201,22 +328,26 @@ function buildContext(args: {
     endDate: a.end_date,
   }));
 
-  const destinationInterests = args.destinationPreferences.map((p) => ({
+  const destinationInterests = plainPreferences.map((p) => ({
     userId: p.user_id,
     countryOrCity: p.country_or_city,
   }));
 
-  return JSON.stringify(
+  const userPrompt = JSON.stringify(
     {
       today: new Date().toISOString().slice(0, 10),
       groupProfile: args.groupProfile,
       members,
       dateRanges,
       destinationInterests,
+      // Requirement 6.4/6.5: include extracted travel vibes as a signal.
+      travelVibes: travelVibes.length > 0 ? travelVibes : undefined,
     },
     null,
     2,
   );
+
+  return { userPrompt, travelVibes };
 }
 
 // ─── POST: run the agent and persist suggestions ──────────────────────────
@@ -350,17 +481,43 @@ export async function POST(request: Request) {
     );
   }
 
-  // 5. Build context and call the agent.
-  const userPrompt = buildContext({
+  // 5. Query character_profiles for all room members.
+  //    Requirement 6.1: read character_profiles before constructing the agent prompt.
+  //    Requirement 6.8: on any error (including table-not-found / 42P01), log and fall back
+  //    to persona-only — never return 500 due to this query failing.
+  let characterProfiles: CharacterProfileRow[] = [];
+  const { data: cpData, error: cpError } = await supabase
+    .from("character_profiles")
+    .select(
+      "user_id, display_name, budget_level, travel_style, trip_interests, generated_persona_name, planning_weights",
+    )
+    .eq("room_id", roomId);
+
+  if (cpError) {
+    console.log(
+      `[agent/destinations] character_profiles unavailable for room ${room.room_code} (falling back to persona-only):`,
+      cpError.message,
+    );
+    // Fall back gracefully — characterProfiles stays empty, existing persona data is used.
+  } else {
+    characterProfiles = (cpData as CharacterProfileRow[]) ?? [];
+  }
+
+  // 6. Build context and call the agent.
+  const { userPrompt, travelVibes } = buildContext({
     groupProfile: profileRow as Record<string, unknown>,
     users: (usersData as unknown as JoinedUserRow[]) ?? [],
     availability: (availabilityResult.data as AvailabilityRow[]) ?? [],
     destinationPreferences:
       (preferencesResult.data as DestinationPreferenceRow[]) ?? [],
+    characterProfiles,
   });
 
+  // Build the system prompt, enriched with vibe-weighting instructions when vibes exist.
+  const systemPrompt = buildSystemPrompt(travelVibes);
+
   const result = await runAgent<unknown>({
-    systemPrompt: SYSTEM_PROMPT,
+    systemPrompt,
     userPrompt,
     maxTokens: 3000,
   });
@@ -376,7 +533,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 6. Validate the agent's output shape.
+  // 7. Validate the agent's output shape.
   const data = result.data;
   if (
     !Array.isArray(data) ||
@@ -396,7 +553,7 @@ export async function POST(request: Request) {
   // Defensive: sort by fitScore descending in case the model didn't.
   const sorted = [...data].sort((a, b) => b.fitScore - a.fitScore);
 
-  // 7. Replace any prior suggestions for this room (re-runs replace).
+  // 8. Replace any prior suggestions for this room (re-runs replace).
   const { error: deleteError } = await supabase
     .from("destination_suggestions")
     .delete()
@@ -413,7 +570,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 8. Persist new suggestions. Map camelCase → snake_case.
+  // 9. Persist new suggestions. Map camelCase → snake_case.
   const inserts = sorted.map((item) => ({
     room_id: roomId,
     destination_name: item.destinationName,

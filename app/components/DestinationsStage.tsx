@@ -174,12 +174,12 @@ export default function DestinationsStage({
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="rounded-lg border border-gray-200 p-6">
-        <p className="text-sm uppercase tracking-wide text-gray-500">
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold">Destination ideas</h2>
-        <p className="mt-2 text-gray-600">
+        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Destination ideas</h2>
+        <p className="mt-2 text-[#1E3A5F]">
           Real reasoning, not just popularity picks. Each suggestion explains
           why it fits your group&apos;s dates, budget, and travel styles —
           and where it doesn&apos;t.
@@ -188,25 +188,25 @@ export default function DestinationsStage({
 
       {/* Initial loading */}
       {suggestions === null && !loadError && (
-        <div className="rounded-lg border border-gray-200 p-6 text-sm text-gray-500">
+        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 text-sm font-semibold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F]">
           Loading suggestions…
         </div>
       )}
 
       {/* Load error (separate from agent failure) */}
       {loadError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
           {loadError}
         </div>
       )}
 
       {/* Empty state — host can generate, members wait */}
       {suggestions !== null && suggestions.length === 0 && !generating && (
-        <div className="rounded-lg border border-gray-200 p-6">
+        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
           {isHost ? (
             <>
-              <h3 className="text-lg font-semibold">No suggestions yet</h3>
-              <p className="mt-1 text-sm text-gray-600">
+              <h3 className="text-lg font-bold text-[#1E3A5F]">No suggestions yet</h3>
+              <p className="mt-1 text-sm text-[#1E3A5F]">
                 Run the destination research agent to generate 3–5
                 recommendations tailored to this group and travel window.
                 This usually takes 10–20 seconds.
@@ -214,13 +214,13 @@ export default function DestinationsStage({
               <button
                 type="button"
                 onClick={() => void handleGenerate()}
-                className="mt-4 rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+                className="mt-4 border-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
               >
                 Generate destination suggestions
               </button>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm font-semibold text-[#1E3A5F]">
               Waiting for the host to generate destinations…
             </p>
           )}
@@ -229,11 +229,11 @@ export default function DestinationsStage({
 
       {/* Researching (host-triggered) */}
       {generating && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
-          <p className="font-semibold text-blue-900">
+        <div className="border-4 border-[#38BDF8] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+          <p className="font-bold text-[#1E3A5F]">
             Researching destinations…
           </p>
-          <p className="mt-1 text-sm text-blue-800">
+          <p className="mt-1 text-sm text-[#1E3A5F]">
             Weighing seasonality, weather, crowds, prices, and persona fit for
             your group. This takes about 10–20 seconds.
           </p>
@@ -242,17 +242,17 @@ export default function DestinationsStage({
 
       {/* Agent error */}
       {agentError && !generating && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-semibold text-red-800">
+        <div className="border-4 border-red-600 bg-red-50 p-4 shadow-[4px_4px_0px_#1E3A5F]">
+          <p className="text-sm font-bold text-red-800">
             {agentError.needsGroupProfile
               ? "Group profile missing"
               : "Couldn't generate destinations"}
           </p>
-          <p className="mt-1 text-sm text-red-700">{agentError.message}</p>
+          <p className="mt-1 text-sm font-semibold text-red-700">{agentError.message}</p>
 
       {agentError.needsGroupProfile && isHost && (
             <div className="mt-2 flex flex-col gap-2">
-              <p className="text-sm text-red-700">
+              <p className="text-sm font-semibold text-red-700">
                 The group profile must be generated before destinations can be
                 researched. Go back and generate it first.
               </p>
@@ -260,7 +260,7 @@ export default function DestinationsStage({
                 <button
                   type="button"
                   onClick={() => void onGoBack()}
-                  className="self-start rounded-md border border-red-400 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50"
+                  className="self-start border-2 border-red-600 bg-red-50 px-3 py-1.5 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                 >
                   ← Back to Group Profile
                 </button>
@@ -269,7 +269,7 @@ export default function DestinationsStage({
           )}
 
           {agentError.needsGroupProfile && !isHost && (
-            <p className="mt-2 text-sm text-red-700">
+            <p className="mt-2 text-sm font-semibold text-red-700">
               Waiting for the host to go back and generate the group profile.
             </p>
           )}
@@ -278,7 +278,7 @@ export default function DestinationsStage({
             <button
               type="button"
               onClick={() => void handleGenerate()}
-              className="mt-3 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700"
+              className="mt-3 border-2 border-red-600 bg-red-600 px-3 py-1.5 text-sm font-bold text-white shadow-[3px_3px_0px_#991B1B] hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
               Retry
             </button>
@@ -294,16 +294,16 @@ export default function DestinationsStage({
           ))}
 
           {isHost && (
-            <div className="flex flex-col items-start gap-2 rounded-lg border border-gray-200 p-4">
+            <div className="flex flex-col items-start gap-2 border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
               <button
                 type="button"
                 onClick={() => void handleGenerate()}
                 disabled={generating}
-                className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="border-4 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1.5 text-sm font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Regenerate suggestions
               </button>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs font-semibold text-[#1E3A5F]">
                 Re-runs the agent and replaces the list.
               </p>
             </div>
@@ -318,21 +318,21 @@ export default function DestinationsStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || !hasSuggestions}
-            className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance stage"}
           </button>
           {!hasSuggestions && !advanceError && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs font-semibold text-[#1E3A5F]">
               Generate destinations before advancing.
             </p>
           )}
           {advanceError && (
-            <p className="text-sm text-red-600">{advanceError}</p>
+            <p className="text-sm font-semibold text-red-600">{advanceError}</p>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm font-semibold text-[#1E3A5F]">
           Waiting for the host to advance to the next stage…
         </p>
       )}

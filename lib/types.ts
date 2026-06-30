@@ -218,3 +218,78 @@ export interface ConflictResolution {
   selectedResolution: string | null;
   status: "open" | "voting" | "resolved";
 }
+
+// ─── Character Creator types (additive — do not modify above) ────────────────
+
+/** How much a user is willing to spend on the trip. */
+export type BudgetLevel = "low" | "medium" | "high";
+
+/** The role a user tends to take when travelling with a group. */
+export type TravelStyle =
+  | "leader"
+  | "planner"
+  | "follower"
+  | "chill"
+  | "adventurer";
+
+/** What a user most wants to get out of the trip. */
+export type TripInterest =
+  | "food"
+  | "scenery"
+  | "adventure"
+  | "shopping"
+  | "nightlife"
+  | "culture"
+  | "relaxation"
+  | "hidden_gems"
+  | "flexible";
+
+/** High-level travel vibe used to drive guided destination discovery. */
+export type TravelVibe =
+  | "asia"
+  | "western_cities"
+  | "beach_escape"
+  | "nature_scenery"
+  | "food_trip"
+  | "culture_trip"
+  | "adventure_trip"
+  | "shopping_city"
+  | "hidden_gems"
+  | "anywhere";
+
+/**
+ * Layered pixel-avatar configuration derived from a user's character choices.
+ * Each field is a key that maps to a specific inline SVG layer component.
+ */
+export interface AvatarConfig {
+  baseBody: string;      // always "default" for MVP
+  outfit: string;        // e.g. "backpacker", "casual", "luxury"
+  headwear: string;      // e.g. "captain_hat", "beanie"
+  handheldItem: string;  // e.g. "bubble_tea", "camera"
+  accessory?: string;    // optional future layer
+}
+
+/**
+ * A user's full character profile for a specific room.
+ * Created via CharacterCreator and persisted to `character_profiles`.
+ */
+export interface CharacterProfile {
+  id: string;
+  userId: string;
+  roomId: string;
+  displayName: string;
+  budgetLevel: BudgetLevel;
+  travelStyle: TravelStyle;
+  tripInterests: TripInterest[];
+  avatarConfig: AvatarConfig;
+  generatedPersonaName: string;
+  planningWeights: Record<string, number>; // e.g. { food: 0.8, scenery: 0.2 }
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Minimal identity record derived from localStorage on the client. */
+export interface Identity {
+  userId: string;
+  displayName: string;
+}

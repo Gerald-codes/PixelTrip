@@ -161,7 +161,6 @@ interface PrereqError {
   message: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = ReturnType<typeof import("@/lib/supabase").getServiceSupabase>;
 
 interface RoomSnapshot {

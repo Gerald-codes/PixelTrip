@@ -269,21 +269,21 @@ export default function VotingStage({
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="rounded-lg border border-gray-200 p-6">
-        <p className="text-sm uppercase tracking-wide text-gray-500">
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold">{title}</h2>
-        {description && <p className="mt-2 text-gray-600">{description}</p>}
+        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">{title}</h2>
+        {description && <p className="mt-2 text-[#1E3A5F]">{description}</p>}
       </div>
 
       {loadError && !results && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
           {loadError}
         </div>
       )}
 
-      <div className="rounded-lg border border-gray-200 p-6">
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
         <VotePanel
           options={options}
           selectedOption={selectedOption}
@@ -296,17 +296,17 @@ export default function VotingStage({
         />
 
         {castError && (
-          <p className="mt-3 text-sm text-red-600">{castError}</p>
+          <p className="mt-3 text-sm font-semibold text-red-600">{castError}</p>
         )}
       </div>
 
       {/* Tie-break panel: rendered only when the round closes on a tie. */}
       {isTied && (
-        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-6">
-          <h3 className="text-lg font-semibold text-amber-900">
+        <div className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-[4px_4px_0px_#1E3A5F]">
+          <h3 className="text-lg font-bold text-[#1E3A5F]">
             It&apos;s a tie
           </h3>
-          <p className="mt-1 text-sm text-amber-900">
+          <p className="mt-1 text-sm font-semibold text-[#1E3A5F]">
             {tiedOptions.length} options are tied for the lead.
             {isHost ? (
               <> As the host, pick one to move the group forward.</>
@@ -323,13 +323,13 @@ export default function VotingStage({
                   type="button"
                   onClick={() => void resolveTie(opt)}
                   disabled={resolvingTie}
-                  className="rounded-md border border-amber-500 bg-white px-3 py-2 text-left text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="border-4 border-[#1E3A5F] bg-[#FB923C] px-3 py-2 text-left text-sm font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Go with &ldquo;{opt}&rdquo;
                 </button>
               ))}
               {tieError && (
-                <p className="text-sm text-red-600">{tieError}</p>
+                <p className="text-sm font-semibold text-red-600">{tieError}</p>
               )}
             </div>
           )}
@@ -346,23 +346,23 @@ export default function VotingStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || (!hasClearWinner && !isTied)}
-            className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : advanceLabel}
           </button>
           {!hasClearWinner && !isTied && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs font-semibold text-[#1E3A5F]">
               Wait for everyone to vote before advancing.
             </p>
           )}
           {advanceError && (
-            <p className="text-sm text-red-600">{advanceError}</p>
+            <p className="text-sm font-semibold text-red-600">{advanceError}</p>
           )}
         </div>
       )}
 
       {!isHost && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm font-semibold text-[#1E3A5F]">
           Waiting for the host to advance to the next stage…
         </p>
       )}

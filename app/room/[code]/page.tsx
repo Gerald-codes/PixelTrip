@@ -1,9 +1,28 @@
 "use client";
 
+/**
+ * app/room/[code]/page.tsx — thin loader.
+ *
+ * Responsibilities:
+ * - Identity derivation (getOrCreateUserId, getDisplayName, etc.)
+ * - Initial room fetch (loading state, error state)
+ * - useRoomMembers hook call
+ * - useCharacterProfiles hook call
+ * - Initial user upsert to /api/users
+ * - handleGoBack (host-only previous-stage PATCH, delegated to RoomShell via onGoBack)
+ *
+ * Everything else — persistent header, member strip, stage-change subscription,
+ * 3-second polling, sync button — lives in RoomShell.
+ *
+ * Requirements: 3.1, 3.6, 7.1, 7.2
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import RoomShell from "@/app/components/RoomShell";
 import StageRouter, { type Identity } from "@/app/components/StageRouter";
-import { broadcastMemberJoined, useRoomMembers } from "@/app/hooks/useRoomMembers";
+import { broadcastMemberJoined, broadcastMemberLeft, useRoomMembers } from "@/app/hooks/useRoomMembers";
+import { useCharacterProfiles } from "@/app/hooks/useCharacterProfiles";
 import {
   getDisplayName,
   getOrCreateUserId,
@@ -19,17 +38,6 @@ interface RoomPageProps {
 type LoadState = "loading" | "ready" | "error";
 
 const IS_DEV = process.env.NODE_ENV === "development";
-
-/** Returns true when any of the mutable room fields changed. */
-function roomChanged(prev: TripRoom, next: TripRoom): boolean {
-  return (
-    prev.currentStage !== next.currentStage ||
-    prev.selectedDestination !== next.selectedDestination ||
-    prev.selectedFlightOption !== next.selectedFlightOption ||
-    prev.currentItineraryId !== next.currentItineraryId ||
-    prev.finalItineraryId !== next.finalItineraryId
-  );
-}
 
 export default function RoomPage({ params }: RoomPageProps) {
   const code = params.code.toUpperCase();
@@ -96,6 +104,9 @@ export default function RoomPage({ params }: RoomPageProps) {
   // ── Members ───────────────────────────────────────────────────────────────
   const members = useRoomMembers(code, room?.id ?? null);
 
+  // ── Character Profiles ────────────────────────────────────────────────────
+  const characterProfiles = useCharacterProfiles(room?.id ?? null);
+
   // Ensure this user is in the room DB row.
   const joinedRef = useRef(false);
   useEffect(() => {
@@ -124,95 +135,47 @@ export default function RoomPage({ params }: RoomPageProps) {
     })();
   }, [room?.id, identity]);
 
-  // ── Stage sync: broadcast + polling ──────────────────────────────────────
-  // Broadcast gives instant updates for other clients.
-  // Polling every 3 s catches any missed broadcast.
-  // Both compare all mutable fields — not just currentStage.
-
-  const refetchRef = useRef(fetchRoom);
-  refetchRef.current = fetchRoom;
-  const roomRef = useRef(room);
-  roomRef.current = room;
-
-  const applyUpdate = useCallback((updated: TripRoom) => {
-    setRoom((prev) => {
-      if (!prev) return updated;
-      if (!roomChanged(prev, updated)) return prev;
-      if (IS_DEV) {
-        console.log(
-          `[room] stage updated: ${prev.currentStage} → ${updated.currentStage}`,
-        );
-      }
-      return updated;
-    });
-  }, []);
-
-  // 3-second polling fallback.
+  // Broadcast member-left when the user navigates away or closes the tab.
+  // Uses pagehide (fires reliably on mobile/bfcache) + beforeunload fallback.
+  // sendBeacon is used so the message is sent even as the page unloads.
   useEffect(() => {
-    if (!room?.id) return;
-    const interval = setInterval(() => {
-      void refetchRef
-        .current()
-        .then((updated) => {
-          if (updated) applyUpdate(updated);
-        })
-        .catch(() => {});
-    }, 3000);
-    return () => clearInterval(interval);
-    // Re-register interval only when room id changes (not on every stage change).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room?.id, applyUpdate]);
+    if (!room?.id || !identity?.userId) return;
+    const roomId = room.id;
+    const userId = identity.userId;
 
-  // Supabase broadcast listener.
-  useEffect(() => {
-    if (!room?.id) return;
-    const supabase = createAnonSupabase();
-    const ch = supabase.channel(`room:${room.id}:stage`);
-    ch
-      .on("broadcast", { event: "stage-change" }, () => {
-        void refetchRef
-          .current()
-          .then((updated) => {
-            if (updated) applyUpdate(updated);
-          })
-          .catch(() => {});
-      })
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(ch);
+    const handleLeave = () => {
+      // Fire-and-forget; best-effort (page may be closing).
+      void broadcastMemberLeft(roomId, userId);
     };
-  }, [room?.id, applyUpdate]);
 
-  // ── Manual sync (Sync room button) ────────────────────────────────────────
-  const [syncing, setSyncing] = useState(false);
+    window.addEventListener("pagehide", handleLeave);
+    window.addEventListener("beforeunload", handleLeave);
+    return () => {
+      window.removeEventListener("pagehide", handleLeave);
+      window.removeEventListener("beforeunload", handleLeave);
+      // Also broadcast on React unmount (SPA navigation away from the room page).
+      handleLeave();
+    };
+  }, [room?.id, identity?.userId]);
 
-  async function handleSync() {
-    if (syncing) return;
-    setSyncing(true);
-    try {
-      const updated = await fetchRoom();
-      if (updated) applyUpdate(updated);
-    } catch {
-      // Silent — the user can try again
-    } finally {
-      setSyncing(false);
-    }
-  }
+  // ── applyUpdate: called by RoomShell via onRoomUpdated ────────────────────
+  // page.tsx owns the room state; RoomShell calls this whenever it detects a change.
+  const applyUpdate = useCallback((updated: TripRoom) => {
+    setRoom(updated);
+  }, []);
 
   // ── Go back (host-only previous stage) ───────────────────────────────────
   const [goingBack, setGoingBack] = useState(false);
-  const [goBackError, setGoBackError] = useState<string | null>(null);
 
   const handleGoBack = useCallback(async () => {
-    if (goingBack || !room) return;
+    if (goingBack || !room || !identity) return;
     setGoingBack(true);
-    setGoBackError(null);
     try {
       const res = await fetch(`/api/rooms/${room.roomCode}/stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          requestingUserId: identity?.userId,
+          requestingUserId: identity.userId,
           direction: "backward",
         }),
       });
@@ -224,26 +187,16 @@ export default function RoomPage({ params }: RoomPageProps) {
       }
       const updated = (await res.json()) as TripRoom;
       applyUpdate(updated);
-      // Fire-and-forget broadcast for other clients.
+      // Broadcast so other clients pick up the change immediately.
       void broadcastStageChangeFf(room.id);
-    } catch (err) {
-      setGoBackError(
-        err instanceof Error ? err.message : "Failed to go back",
-      );
     } finally {
       setGoingBack(false);
     }
-  }, [goingBack, room, identity?.userId, applyUpdate]);
-
-  // ── Invite link ───────────────────────────────────────────────────────────
-  const inviteLink = useMemo(() => {
-    if (typeof window === "undefined") return `/?join=${code}`;
-    return `${window.location.origin}/?join=${code}`;
-  }, [code]);
+  }, [goingBack, room, identity, applyUpdate]);
 
   const isHost = identity?.userId === room?.hostUserId;
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render: loading / error states ───────────────────────────────────────
   if (loadState === "loading" || !identity) {
     return (
       <main className="flex min-h-screen items-center justify-center p-8">
@@ -264,71 +217,29 @@ export default function RoomPage({ params }: RoomPageProps) {
     );
   }
 
+  // ── Render: RoomShell wrapping StageRouter ────────────────────────────────
   return (
-    <main className="min-h-screen p-8">
-      <header className="mx-auto mb-6 flex max-w-2xl flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">
-            Room <span className="font-mono">{room.roomCode}</span>
-          </h1>
-          <span className="text-sm text-gray-500">
-            {members.length}{" "}
-            {members.length === 1 ? "member" : "members"} online
-          </span>
-        </div>
-
-        <p className="text-sm text-gray-500">Invite: {inviteLink}</p>
-
-        {/* Sync + dev indicator row */}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => void handleSync()}
-            disabled={syncing}
-            className="rounded-md border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {syncing ? "Syncing…" : "↻ Sync room"}
-          </button>
-          <span className="text-xs text-gray-400">
-            If your screen looks stuck, sync the room state.
-          </span>
-
-          {/* Host go-back button — visible to host only */}
-          {isHost && (
-            <button
-              type="button"
-              onClick={() => void handleGoBack()}
-              disabled={goingBack}
-              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {goingBack ? "Going back…" : "← Previous stage"}
-            </button>
-          )}
-          {goBackError && (
-            <span className="text-xs text-red-600">{goBackError}</span>
-          )}
-
-          {/* Dev-only stage badge */}
-          {IS_DEV && (
-            <span className="ml-auto rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-500">
-              {room.currentStage}
-            </span>
-          )}
-        </div>
-      </header>
-
+    <RoomShell
+      room={room}
+      identity={identity}
+      members={members}
+      characterProfiles={characterProfiles}
+      onRoomUpdated={applyUpdate}
+      onGoBack={isHost ? handleGoBack : undefined}
+    >
       <StageRouter
         room={room}
         identity={identity}
         members={members}
+        characterProfiles={characterProfiles}
         onRoomUpdated={applyUpdate}
         onGoBack={isHost ? handleGoBack : undefined}
       />
-    </main>
+    </RoomShell>
   );
 }
 
-/** Fire-and-forget broadcast helper for `page.tsx` — never awaited. */
+/** Fire-and-forget broadcast helper — never awaited by callers. */
 async function broadcastStageChangeFf(roomId: string): Promise<void> {
   try {
     const supabase = createAnonSupabase();
@@ -341,6 +252,6 @@ async function broadcastStageChangeFf(roomId: string): Promise<void> {
     await ch.send({ type: "broadcast", event: "stage-change", payload: {} });
     void supabase.removeChannel(ch);
   } catch {
-    // best-effort
+    // best-effort — other clients will catch up via polling
   }
 }

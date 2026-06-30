@@ -11,8 +11,9 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center p-8">
-          <p className="text-gray-600">Loading…</p>
+        /* Hero gradient matches LandingForm so there's no flash on load */
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1E3A5F] to-[#38BDF8] p-8">
+          <p className="font-bold text-[#FEF3C7]">Loading…</p>
         </main>
       }
     >

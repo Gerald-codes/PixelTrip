@@ -165,33 +165,33 @@ export default function GroupProfileStage({
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="rounded-lg border border-gray-200 p-6">
-        <p className="text-sm uppercase tracking-wide text-gray-500">
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold">Group profile</h2>
-        <p className="mt-2 text-gray-600">
+        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Group profile</h2>
+        <p className="mt-2 text-[#1E3A5F]">
           Here&apos;s how the AI sees your group — overlapping window, common
           interests, and the friction points to keep in mind before we pick a
           destination.
         </p>
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs font-semibold text-[#1E3A5F]">
           {members.length} {members.length === 1 ? "member" : "members"} in this
           room.
         </p>
       </div>
 
       {profileLoading && !profile ? (
-        <div className="rounded-lg border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Loading group profile…</p>
+        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+          <p className="text-sm font-semibold text-[#1E3A5F]">Loading group profile…</p>
         </div>
       ) : profileLoadError ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-          <p className="text-sm text-red-700">{profileLoadError}</p>
+        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-[4px_4px_0px_#1E3A5F]">
+          <p className="text-sm font-semibold text-red-700">{profileLoadError}</p>
           <button
             type="button"
             onClick={() => void fetchProfile()}
-            className="mt-3 rounded-md border border-red-300 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-100"
+            className="mt-3 border-2 border-red-600 bg-red-50 px-3 py-1 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
           >
             Try again
           </button>
@@ -199,13 +199,13 @@ export default function GroupProfileStage({
       ) : profile ? (
         <ProfileView profile={profile} />
       ) : notFound ? (
-        <div className="rounded-lg border border-gray-200 p-6">
+        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
           {isHost ? (
             <>
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-bold text-[#1E3A5F]">
                 Generate the group profile
               </h3>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="mt-1 text-sm text-[#1E3A5F]">
                 The AI will summarise your group from everyone&apos;s personas,
                 availability, and destination interests.
               </p>
@@ -213,19 +213,19 @@ export default function GroupProfileStage({
                 type="button"
                 onClick={() => void handleGenerate()}
                 disabled={generating}
-                className="mt-4 rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 border-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {generating ? "Generating…" : "Generate group profile"}
               </button>
               {generateError && (
                 <div className="mt-3 flex flex-col items-start gap-2">
-                  <p className="text-sm text-red-600">{generateError}</p>
+                  <p className="text-sm font-semibold text-red-600">{generateError}</p>
                   {generateRetryable && (
                     <button
                       type="button"
                       onClick={() => void handleGenerate()}
                       disabled={generating}
-                      className="rounded-md border border-red-300 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="border-2 border-red-600 bg-red-50 px-3 py-1 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {generating ? "Retrying…" : "Retry"}
                     </button>
@@ -234,7 +234,7 @@ export default function GroupProfileStage({
               )}
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm font-semibold text-[#1E3A5F]">
               Waiting for the host to generate the group profile…
             </p>
           )}
@@ -247,21 +247,21 @@ export default function GroupProfileStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || !profile}
-            className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance stage"}
           </button>
           {!profile && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs font-semibold text-[#1E3A5F]">
               Generate the group profile before advancing.
             </p>
           )}
           {advanceError && (
-            <p className="text-sm text-red-600">{advanceError}</p>
+            <p className="text-sm font-semibold text-red-600">{advanceError}</p>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm font-semibold text-[#1E3A5F]">
           Waiting for the host to advance to the next stage…
         </p>
       )}
@@ -274,8 +274,8 @@ export default function GroupProfileStage({
 function ProfileView({ profile }: { profile: GroupProfile }) {
   return (
     <>
-      <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-4 text-lg font-semibold">Combined profile</h3>
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">Combined profile</h3>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Budget range" value={profile.budgetRange} />
           <Field
@@ -289,16 +289,16 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
             value={
               profile.travelWindow ? (
                 <>
-                  <span className="font-mono">
+                  <span className="font-mono font-bold">
                     {profile.travelWindow.startDate}
                   </span>{" "}
                   →{" "}
-                  <span className="font-mono">
+                  <span className="font-mono font-bold">
                     {profile.travelWindow.endDate}
                   </span>
                 </>
               ) : (
-                <span className="text-gray-500">No common window yet</span>
+                <span className="font-semibold text-[#1E3A5F] opacity-60">No common window yet</span>
               )
             }
           />
@@ -308,21 +308,21 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
               profile.dominantPersonaTraits.length > 0 ? (
                 <TagList tags={profile.dominantPersonaTraits} tone="neutral" />
               ) : (
-                <span className="text-gray-500">None identified</span>
+                <span className="font-semibold text-[#1E3A5F] opacity-60">None identified</span>
               )
             }
           />
         </dl>
 
         <div className="mt-6">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             Common interests
           </p>
           <div className="mt-2">
             {profile.commonInterests.length > 0 ? (
               <TagList tags={profile.commonInterests} tone="info" />
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm font-semibold text-[#1E3A5F] opacity-60">
                 No shared interests surfaced.
               </p>
             )}
@@ -332,26 +332,26 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
 
       <div
         role="alert"
-        className="rounded-lg border border-amber-300 bg-amber-50 p-6"
+        className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-[4px_4px_0px_#1E3A5F]"
       >
         <div className="flex items-center gap-2">
           <span aria-hidden="true">⚠️</span>
-          <h3 className="text-lg font-semibold text-amber-900">
+          <h3 className="text-lg font-bold text-[#1E3A5F]">
             Tension points
           </h3>
         </div>
-        <p className="mt-1 text-sm text-amber-800">
+        <p className="mt-1 text-sm font-semibold text-[#1E3A5F]">
           Worth flagging before we pick a destination so we can plan around
           them.
         </p>
         {profile.tensionPoints.length > 0 ? (
-          <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-amber-900">
+          <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-[#1E3A5F]">
             {profile.tensionPoints.map((point, i) => (
               <li key={`${point}-${i}`}>{point}</li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-amber-900">
+          <p className="mt-3 text-sm font-semibold text-[#1E3A5F]">
             None — this group is well aligned.
           </p>
         )}
@@ -369,10 +369,10 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-gray-500">
+      <dt className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-gray-900">{value}</dd>
+      <dd className="mt-1 text-sm font-semibold text-[#1E3A5F]">{value}</dd>
     </div>
   );
 }
@@ -386,14 +386,14 @@ function TagList({
 }) {
   const toneClass =
     tone === "info"
-      ? "bg-blue-100 text-blue-800"
-      : "bg-gray-100 text-gray-800";
+      ? "bg-[#38BDF8] text-[#1E3A5F] border-2 border-[#1E3A5F]"
+      : "bg-[#4ADE80] text-[#1E3A5F] border-2 border-[#1E3A5F]";
   return (
     <ul className="flex flex-wrap gap-1.5">
       {tags.map((tag, i) => (
         <li
           key={`${tag}-${i}`}
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${toneClass}`}
+          className={`px-2.5 py-0.5 text-xs font-bold shadow-[2px_2px_0px_#1E3A5F] ${toneClass}`}
         >
           {tag}
         </li>

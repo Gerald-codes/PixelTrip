@@ -26,10 +26,10 @@ export default function DestinationCard({
   suggestion: DestinationSuggestion;
 }) {
   return (
-    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <article className="overflow-hidden border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]">
       {/* Header: name + fit score */}
-      <header className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-4">
-        <h3 className="text-2xl font-bold text-gray-900">
+      <header className="flex items-start justify-between gap-4 border-b-4 border-[#1E3A5F] bg-[#38BDF8] px-6 py-4">
+        <h3 className="text-2xl font-bold text-[#1E3A5F]">
           {suggestion.destinationName}
         </h3>
         <FitScoreBadge score={suggestion.fitScore} />
@@ -39,12 +39,12 @@ export default function DestinationCard({
         {/* Recommendation reason — the hero "why" */}
         <section
           aria-label="Why this destination"
-          className="rounded-lg border-l-4 border-blue-500 bg-blue-50 px-4 py-3"
+          className="border-l-4 border-[#38BDF8] bg-[#e0f2fe] px-4 py-3"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             Why this place
           </p>
-          <p className="mt-1 text-base leading-relaxed text-blue-900">
+          <p className="mt-1 text-base font-semibold leading-relaxed text-[#1E3A5F]">
             {suggestion.recommendationReason}
           </p>
         </section>
@@ -78,15 +78,15 @@ export default function DestinationCard({
         {/* Best activities */}
         {suggestion.bestActivities.length > 0 && (
           <section aria-label="Best activities">
-            <h4 className="text-sm font-semibold text-gray-700">
+            <h4 className="text-sm font-bold text-[#1E3A5F]">
               Best activities
             </h4>
-            <ul className="mt-2 flex flex-col gap-1 text-sm text-gray-700">
+            <ul className="mt-2 flex flex-col gap-1 text-sm font-semibold text-[#1E3A5F]">
               {suggestion.bestActivities.map((activity, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span
                     aria-hidden="true"
-                    className="mt-1 inline-block h-1.5 w-1.5 flex-none rounded-full bg-blue-500"
+                    className="mt-1 inline-block h-1.5 w-1.5 flex-none bg-[#38BDF8]"
                   />
                   <span>{activity}</span>
                 </li>
@@ -99,12 +99,12 @@ export default function DestinationCard({
         {suggestion.downsides.length > 0 && (
           <section
             aria-label="Trade-offs"
-            className="rounded-lg border-l-4 border-amber-500 bg-amber-50 px-4 py-3"
+            className="border-l-4 border-[#FB923C] bg-amber-50 px-4 py-3"
           >
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+            <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
               Honest trade-offs
             </h4>
-            <ul className="mt-1 flex flex-col gap-1 text-sm text-amber-900">
+            <ul className="mt-1 flex flex-col gap-1 text-sm font-semibold text-[#1E3A5F]">
               {suggestion.downsides.map((d, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span aria-hidden="true" className="select-none">
@@ -120,12 +120,12 @@ export default function DestinationCard({
         {/* Persona fit — small footer section */}
         <section
           aria-label="Persona fit"
-          className="border-t border-gray-100 pt-4"
+          className="border-t-4 border-[#1E3A5F] pt-4"
         >
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             Fit for this group
           </h4>
-          <p className="mt-1 text-sm leading-relaxed text-gray-700">
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-[#1E3A5F]">
             {suggestion.personaFitSummary}
           </p>
         </section>
@@ -141,16 +141,16 @@ function FitScoreBadge({ score }: { score: number }) {
   const rounded = Math.round(score);
   const tone =
     rounded >= 80
-      ? "bg-green-100 text-green-800 border-green-200"
+      ? "bg-[#4ADE80] text-[#1E3A5F] border-[#1E3A5F]"
       : rounded >= 60
-        ? "bg-blue-100 text-blue-800 border-blue-200"
+        ? "bg-[#38BDF8] text-[#1E3A5F] border-[#1E3A5F]"
         : rounded >= 40
-          ? "bg-amber-100 text-amber-800 border-amber-200"
-          : "bg-red-100 text-red-800 border-red-200";
+          ? "bg-[#FB923C] text-[#1E3A5F] border-[#1E3A5F]"
+          : "bg-red-400 text-white border-red-700";
   return (
     <span
       aria-label={`Fit score ${rounded} out of 100`}
-      className={`inline-flex flex-none items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold ${tone}`}
+      className={`inline-flex flex-none items-center gap-1 border-2 px-3 py-1 text-sm font-bold shadow-[2px_2px_0px_#1E3A5F] ${tone}`}
     >
       <span className="text-xs uppercase tracking-wide opacity-70">Fit</span>
       <span>{rounded}</span>
@@ -171,27 +171,22 @@ function ReasoningTile({
 }) {
   const toneClasses =
     tone === "sky"
-      ? "border-sky-200 bg-sky-50"
-      : "border-emerald-200 bg-emerald-50";
-  const headingClasses =
-    tone === "sky" ? "text-sky-800" : "text-emerald-800";
-  const bodyClasses = tone === "sky" ? "text-sky-900" : "text-emerald-900";
+      ? "border-[#38BDF8] bg-[#e0f2fe]"
+      : "border-[#4ADE80] bg-[#f0fdf4]";
   return (
-    <div className={`rounded-lg border px-4 py-3 ${toneClasses}`}>
-      <p
-        className={`text-xs font-semibold uppercase tracking-wide ${headingClasses}`}
-      >
+    <div className={`border-2 px-4 py-3 shadow-[2px_2px_0px_#1E3A5F] ${toneClasses}`}>
+      <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
         {label}
       </p>
-      <p className={`mt-1 text-sm leading-relaxed ${bodyClasses}`}>{body}</p>
+      <p className="mt-1 text-sm font-semibold leading-relaxed text-[#1E3A5F]">{body}</p>
     </div>
   );
 }
 
 const CROWD_TONES = {
-  low: "bg-green-100 text-green-800 border-green-200",
-  moderate: "bg-amber-100 text-amber-800 border-amber-200",
-  high: "bg-red-100 text-red-800 border-red-200",
+  low: "bg-[#4ADE80] text-[#1E3A5F] border-[#1E3A5F]",
+  moderate: "bg-[#FB923C] text-[#1E3A5F] border-[#1E3A5F]",
+  high: "bg-red-400 text-white border-red-700",
 } as const;
 
 const CROWD_LABELS = {
@@ -203,7 +198,7 @@ const CROWD_LABELS = {
 function CrowdPill({ level }: { level: "low" | "moderate" | "high" }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${CROWD_TONES[level]}`}
+      className={`inline-flex items-center gap-1 border-2 px-2.5 py-1 text-xs font-bold shadow-[2px_2px_0px_#1E3A5F] ${CROWD_TONES[level]}`}
     >
       <span aria-hidden="true">👥</span>
       <span>{CROWD_LABELS[level]}</span>
@@ -212,9 +207,9 @@ function CrowdPill({ level }: { level: "low" | "moderate" | "high" }) {
 }
 
 const PRICE_TONES = {
-  budget: "bg-green-100 text-green-800 border-green-200",
-  moderate: "bg-blue-100 text-blue-800 border-blue-200",
-  premium: "bg-purple-100 text-purple-800 border-purple-200",
+  budget: "bg-[#4ADE80] text-[#1E3A5F] border-[#1E3A5F]",
+  moderate: "bg-[#38BDF8] text-[#1E3A5F] border-[#1E3A5F]",
+  premium: "bg-[#A855F7] text-white border-[#1E3A5F]",
 } as const;
 
 const PRICE_LABELS = {
@@ -230,7 +225,7 @@ function PricePill({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${PRICE_TONES[level]}`}
+      className={`inline-flex items-center gap-1 border-2 px-2.5 py-1 text-xs font-bold shadow-[2px_2px_0px_#1E3A5F] ${PRICE_TONES[level]}`}
     >
       <span aria-hidden="true">💸</span>
       <span>{PRICE_LABELS[level]}</span>

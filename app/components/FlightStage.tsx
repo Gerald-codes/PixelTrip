@@ -124,17 +124,17 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* Stage header */}
-      <div className="rounded-lg border border-gray-200 p-6">
-        <p className="text-sm uppercase tracking-wide text-gray-500">
+      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold">Flight options</h2>
-        <p className="mt-2 text-gray-600">
+        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Flight options</h2>
+        <p className="mt-2 text-[#1E3A5F]">
           Review the three flight categories below. When you&apos;re ready,
           the host will move to a vote so the group can pick which approach
           fits best.
           {room.selectedDestination && (
-            <span className="ml-1 font-medium text-gray-800">
+            <span className="ml-1 font-bold text-[#1E3A5F]">
               Destination: {room.selectedDestination}.
             </span>
           )}
@@ -155,16 +155,16 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing}
-            className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance to flight vote"}
           </button>
           {advanceError && (
-            <p className="text-sm text-red-600">{advanceError}</p>
+            <p className="text-sm font-semibold text-red-600">{advanceError}</p>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm font-semibold text-[#1E3A5F]">
           Waiting for the host to advance to the flight vote…
         </p>
       )}
@@ -176,14 +176,14 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
 
 function FlightOptionCard({ option }: { option: FlightOption }) {
   const categoryColors: Record<FlightOption["value"], string> = {
-    budget: "border-green-300 bg-green-50",
-    comfort: "border-purple-300 bg-purple-50",
-    best_value: "border-blue-300 bg-blue-50",
+    budget: "border-[#4ADE80] bg-[#FEF3C7]",
+    comfort: "border-[#A855F7] bg-[#FEF3C7]",
+    best_value: "border-[#38BDF8] bg-[#FEF3C7]",
   };
   const labelColors: Record<FlightOption["value"], string> = {
-    budget: "text-green-800",
-    comfort: "text-purple-800",
-    best_value: "text-blue-800",
+    budget: "text-[#1E3A5F]",
+    comfort: "text-[#1E3A5F]",
+    best_value: "text-[#1E3A5F]",
   };
 
   const stopsLabel =
@@ -195,10 +195,10 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
   return (
     <article
-      className={`overflow-hidden rounded-xl border-2 ${categoryColors[option.value]} shadow-sm`}
+      className={`overflow-hidden border-4 ${categoryColors[option.value]} shadow-[4px_4px_0px_#1E3A5F]`}
     >
       {/* Card header */}
-      <header className="flex items-start justify-between gap-4 border-b border-inherit px-6 py-4">
+      <header className="flex items-start justify-between gap-4 border-b-4 border-inherit px-6 py-4">
         <h3 className={`text-xl font-bold ${labelColors[option.value]}`}>
           {option.label}
         </h3>
@@ -211,19 +211,19 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
       <div className="flex flex-col gap-4 px-6 py-5">
         {/* What this category means */}
-        <p className="text-sm leading-relaxed text-gray-800">
+        <p className="text-sm font-semibold leading-relaxed text-[#1E3A5F]">
           {option.explanation}
         </p>
 
         {/* Itinerary impact — amber callout so it stands out */}
         <section
           aria-label="Itinerary impact"
-          className="rounded-lg border-l-4 border-amber-500 bg-amber-50 px-4 py-3"
+          className="border-l-4 border-[#FB923C] bg-amber-50 px-4 py-3"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             How this affects your itinerary
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-amber-900">
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-[#1E3A5F]">
             {option.itineraryImpact}
           </p>
         </section>
@@ -234,11 +234,11 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex flex-col items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-center shadow-sm">
-      <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2.5 py-1 text-center shadow-[2px_2px_0px_#1E3A5F]">
+      <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
         {label}
       </span>
-      <span className="text-sm font-semibold text-gray-900">{value}</span>
+      <span className="text-sm font-bold text-[#1E3A5F]">{value}</span>
     </span>
   );
 }

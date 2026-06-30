@@ -3,10 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { StageProps } from "@/app/components/StageRouter";
+import CustomDestinationInput from "@/app/components/CustomDestinationInput";
+import DestinationSuggestionPicker from "@/app/components/DestinationSuggestionPicker";
+import TravelVibeSelector from "@/app/components/TravelVibeSelector";
 import { broadcastMemberJoined } from "@/app/hooks/useRoomMembers";
+import { buildDestinationInterests, hydrateFromPreferences } from "@/lib/destinationEncoding";
 import { calculateOverlap, type DateRange } from "@/lib/overlap";
 import { createAnonSupabase } from "@/lib/supabase";
-import type { Availability, DestinationPreference, TripRoom } from "@/lib/types";
+import type { Availability, DestinationPreference, TravelVibe, TripRoom } from "@/lib/types";
 
 /**
  * AvailabilityStage — each member submits their available date ranges and the
@@ -43,7 +47,9 @@ export default function AvailabilityStage({
   const [draftRanges, setDraftRanges] = useState<DraftRange[]>([
     { startDate: "", endDate: "" },
   ]);
-  const [draftInterestsText, setDraftInterestsText] = useState<string>("");
+  const [selectedVibes, setSelectedVibes] = useState<TravelVibe[]>([]);
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const [customDestinations, setCustomDestinations] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -88,13 +94,14 @@ export default function AvailabilityStage({
         const myRanges = data.availability
           .filter((a) => a.userId === identity.userId)
           .map((a) => ({ startDate: a.startDate, endDate: a.endDate }));
-        const myInterests = data.destinationPreferences
-          .filter((p) => p.userId === identity.userId)
-          .map((p) => p.countryOrCity);
+        const myPrefs = data.destinationPreferences.filter(
+          (p) => p.userId === identity.userId,
+        );
+        const { vibes, chips, customs } = hydrateFromPreferences(myPrefs);
         if (myRanges.length > 0) setDraftRanges(myRanges);
-        if (myInterests.length > 0) {
-          setDraftInterestsText(myInterests.join(", "));
-        }
+        if (vibes.length > 0) setSelectedVibes(vibes);
+        if (chips.length > 0) setSelectedChips(chips);
+        if (customs.length > 0) setCustomDestinations(customs);
       }
       setHydrated(true);
     })();
@@ -112,7 +119,6 @@ export default function AvailabilityStage({
     return () => clearInterval(interval);
   }, []);
 
-  // ── Form handlers ────────────────────────────────────────────────────────────
   function updateRange(index: number, patch: Partial<DraftRange>) {
     setDraftRanges((prev) =>
       prev.map((r, i) => (i === index ? { ...r, ...patch } : r)),
@@ -125,13 +131,6 @@ export default function AvailabilityStage({
     setDraftRanges((prev) =>
       prev.length === 1 ? prev : prev.filter((_, i) => i !== index),
     );
-  }
-
-  function parseInterests(text: string): string[] {
-    return text
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
   }
 
   async function handleSave() {
@@ -161,7 +160,7 @@ export default function AvailabilityStage({
       }
     }
 
-    const interests = parseInterests(draftInterestsText);
+    const interests = buildDestinationInterests(selectedVibes, selectedChips, customDestinations);
 
     setSaving(true);
     try {
@@ -268,54 +267,152 @@ export default function AvailabilityStage({
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="rounded-lg border border-gray-200 p-6">
-        <p className="text-sm uppercase tracking-wide text-gray-500">
-          Current stage
+      {/* Stage header card */}
+      <div
+        style={{
+          border: "3px solid #1E3A5F",
+          boxShadow: "4px 4px 0px #1E3A5F",
+          backgroundColor: "#38BDF8",
+          padding: "24px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "0.75rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: "#1E3A5F",
+            fontFamily: "monospace",
+            fontWeight: 700,
+          }}
+        >
+          ▶ Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold">Availability</h2>
-        <p className="mt-2 text-gray-600">
+        <h2
+          className="mt-1 text-2xl font-bold"
+          style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+        >
+          Availability
+        </h2>
+        <p
+          className="mt-2"
+          style={{ color: "#1E3A5F", fontFamily: "monospace", fontSize: "0.875rem" }}
+        >
           Share when you can travel and which countries or cities you&apos;re
           interested in. We&apos;ll find a window that works for everyone.
         </p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-6">
+      {/* Date ranges card */}
+      <div
+        style={{
+          border: "3px solid #1E3A5F",
+          boxShadow: "4px 4px 0px #1E3A5F",
+          backgroundColor: "#FEF3C7",
+          padding: "24px",
+        }}
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Your dates</h3>
-          {saving && <span className="text-xs text-gray-500">Saving…</span>}
+          <h3
+            className="text-lg font-semibold"
+            style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+          >
+            📅 Your dates
+          </h3>
+          {saving && (
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "#FB923C",
+                fontFamily: "monospace",
+                fontWeight: 700,
+              }}
+            >
+              Saving…
+            </span>
+          )}
         </div>
 
         <ul className="flex flex-col gap-3">
           {draftRanges.map((range, i) => (
             <li
               key={i}
-              className="flex flex-col gap-2 rounded-md bg-gray-50 p-3 sm:flex-row sm:items-end"
+              className="flex flex-col gap-2 sm:flex-row sm:items-end"
+              style={{
+                border: "2px solid #1E3A5F",
+                backgroundColor: "#FEF3C7",
+                padding: "12px",
+                boxShadow: "2px 2px 0px #1E3A5F",
+              }}
             >
               <label className="flex flex-1 flex-col text-sm">
-                <span className="mb-1 text-gray-600">Start</span>
+                <span
+                  className="mb-1"
+                  style={{ color: "#1E3A5F", fontFamily: "monospace", fontWeight: 700 }}
+                >
+                  Start
+                </span>
                 <input
                   type="date"
                   value={range.startDate}
                   onChange={(e) =>
                     updateRange(i, { startDate: e.target.value })
                   }
-                  className="rounded border border-gray-300 px-2 py-1"
+                  style={{
+                    border: "2px solid #1E3A5F",
+                    borderRadius: 0,
+                    backgroundColor: "#FEF3C7",
+                    color: "#1E3A5F",
+                    padding: "4px 8px",
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
+                    outline: "none",
+                  }}
+                  className="focus-visible:ring-2 focus-visible:ring-[#38BDF8] focus-visible:ring-offset-1"
                 />
               </label>
               <label className="flex flex-1 flex-col text-sm">
-                <span className="mb-1 text-gray-600">End</span>
+                <span
+                  className="mb-1"
+                  style={{ color: "#1E3A5F", fontFamily: "monospace", fontWeight: 700 }}
+                >
+                  End
+                </span>
                 <input
                   type="date"
                   value={range.endDate}
                   onChange={(e) => updateRange(i, { endDate: e.target.value })}
-                  className="rounded border border-gray-300 px-2 py-1"
+                  style={{
+                    border: "2px solid #1E3A5F",
+                    borderRadius: 0,
+                    backgroundColor: "#FEF3C7",
+                    color: "#1E3A5F",
+                    padding: "4px 8px",
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
+                    outline: "none",
+                  }}
+                  className="focus-visible:ring-2 focus-visible:ring-[#38BDF8] focus-visible:ring-offset-1"
                 />
               </label>
               <button
                 type="button"
                 onClick={() => removeRange(i)}
                 disabled={draftRanges.length === 1}
-                className="rounded border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  border: "2px solid #1E3A5F",
+                  borderRadius: 0,
+                  backgroundColor: draftRanges.length === 1 ? "#FEF3C7" : "#FB923C",
+                  color: "#1E3A5F",
+                  padding: "4px 12px",
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: draftRanges.length === 1 ? "not-allowed" : "pointer",
+                  opacity: draftRanges.length === 1 ? 0.5 : 1,
+                  boxShadow: draftRanges.length === 1 ? "none" : "2px 2px 0px #1E3A5F",
+                  whiteSpace: "nowrap",
+                }}
               >
                 Remove
               </button>
@@ -326,100 +423,316 @@ export default function AvailabilityStage({
         <button
           type="button"
           onClick={addRange}
-          className="mt-3 rounded border border-dashed border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+          style={{
+            marginTop: "12px",
+            border: "2px dashed #1E3A5F",
+            borderRadius: 0,
+            backgroundColor: "transparent",
+            color: "#1E3A5F",
+            padding: "6px 16px",
+            fontFamily: "monospace",
+            fontWeight: 700,
+            fontSize: "0.875rem",
+            cursor: "pointer",
+          }}
+          className="hover:bg-[#FEF3C7]"
         >
           + Add another date range
         </button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-2 text-lg font-semibold">
-          Countries or cities you&apos;d like to visit
+      {/* Destination discovery card */}
+      <div
+        style={{
+          border: "3px solid #1E3A5F",
+          boxShadow: "4px 4px 0px #1E3A5F",
+          backgroundColor: "#FEF3C7",
+          padding: "24px",
+        }}
+      >
+        <h3
+          className="mb-4 text-lg font-semibold"
+          style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+        >
+          🗺️ Where do you feel like going?
         </h3>
-        <p className="mb-3 text-sm text-gray-500">
-          Separate multiple destinations with commas (e.g. &ldquo;Tokyo, Lisbon,
-          Iceland&rdquo;).
-        </p>
-        <textarea
-          value={draftInterestsText}
-          onChange={(e) => setDraftInterestsText(e.target.value)}
-          rows={3}
-          placeholder="Tokyo, Lisbon, Iceland"
-          className="w-full rounded border border-gray-300 px-2 py-1"
-        />
+        <div className="flex flex-col gap-4">
+          <TravelVibeSelector
+            value={selectedVibes}
+            onChange={setSelectedVibes}
+            disabled={saving}
+          />
+          {selectedVibes.filter((v) => v !== "anywhere").length > 0 && (
+            <div>
+              <p
+                style={{
+                  fontSize: "0.75rem",
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  color: "#1E3A5F",
+                  marginBottom: "8px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Suggested destinations
+              </p>
+              <DestinationSuggestionPicker
+                selectedVibes={selectedVibes}
+                value={selectedChips}
+                onChange={setSelectedChips}
+                disabled={saving}
+              />
+            </div>
+          )}
+          <div>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                fontFamily: "monospace",
+                fontWeight: 700,
+                color: "#1E3A5F",
+                marginBottom: "8px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Custom destinations
+            </p>
+            <CustomDestinationInput
+              value={customDestinations}
+              onChange={setCustomDestinations}
+            />
+          </div>
+        </div>
       </div>
 
+      {/* Save button */}
       <div className="flex flex-col items-start gap-2">
         <button
           type="button"
           onClick={() => void handleSave()}
           disabled={saving || !hydrated}
-          className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          style={{
+            border: "3px solid #1E3A5F",
+            borderRadius: 0,
+            backgroundColor: saving || !hydrated ? "#A855F7" : "#4ADE80",
+            color: "#1E3A5F",
+            padding: "10px 28px",
+            fontFamily: "monospace",
+            fontWeight: 700,
+            fontSize: "1rem",
+            cursor: saving || !hydrated ? "not-allowed" : "pointer",
+            opacity: saving || !hydrated ? 0.6 : 1,
+            boxShadow: saving || !hydrated ? "none" : "4px 4px 0px #1E3A5F",
+            transition: "opacity 0.1s",
+          }}
         >
-          {saving ? "Saving…" : "Save"}
+          {saving ? "Saving…" : "💾 Save"}
         </button>
-        {saveError && <p className="text-sm text-red-600">{saveError}</p>}
+        {saveError && (
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#FB923C",
+              fontFamily: "monospace",
+              fontWeight: 700,
+              border: "2px solid #FB923C",
+              padding: "6px 10px",
+              backgroundColor: "#FEF3C7",
+            }}
+          >
+            ⚠ {saveError}
+          </p>
+        )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-3 text-lg font-semibold">Group overlap</h3>
+      {/* Group overlap card */}
+      <div
+        style={{
+          border: "3px solid #1E3A5F",
+          boxShadow: "4px 4px 0px #1E3A5F",
+          backgroundColor: "#FEF3C7",
+          padding: "24px",
+        }}
+      >
+        <h3
+          className="mb-3 text-lg font-semibold"
+          style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+        >
+          🔗 Group overlap
+        </h3>
         {groupError ? (
-          <p className="text-sm text-red-600">{groupError}</p>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#FB923C",
+              fontFamily: "monospace",
+              fontWeight: 700,
+            }}
+          >
+            ⚠ {groupError}
+          </p>
         ) : !groupData ? (
-          <p className="text-sm text-gray-500">Loading group availability…</p>
+          <p style={{ fontSize: "0.875rem", color: "#1E3A5F", fontFamily: "monospace" }}>
+            Loading group availability…
+          </p>
         ) : !allSubmitted ? (
-          <p className="text-sm text-gray-600">
-            Waiting on {waitingOnCount}{" "}
+          <p style={{ fontSize: "0.875rem", color: "#1E3A5F", fontFamily: "monospace" }}>
+            ⏳ Waiting on {waitingOnCount}{" "}
             {waitingOnCount === 1 ? "member" : "members"}…
           </p>
         ) : overlap ? (
-          <p className="text-sm">
-            <span className="font-medium text-green-700">Overlap:</span>{" "}
-            <span className="font-mono">{overlap.startDate}</span> to{" "}
-            <span className="font-mono">{overlap.endDate}</span>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              fontFamily: "monospace",
+              color: "#1E3A5F",
+            }}
+          >
+            <span style={{ fontWeight: 700, color: "#4ADE80" }}>✓ Overlap found:</span>{" "}
+            <span
+              style={{
+                backgroundColor: "#4ADE80",
+                border: "2px solid #1E3A5F",
+                padding: "2px 6px",
+                fontWeight: 700,
+              }}
+            >
+              {overlap.startDate}
+            </span>
+            {" "}→{" "}
+            <span
+              style={{
+                backgroundColor: "#4ADE80",
+                border: "2px solid #1E3A5F",
+                padding: "2px 6px",
+                fontWeight: 700,
+              }}
+            >
+              {overlap.endDate}
+            </span>
           </p>
         ) : (
-          <p className="text-sm text-red-600">
-            No overlap found — adjust your dates so the group shares at least
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#FB923C",
+              fontFamily: "monospace",
+              fontWeight: 700,
+            }}
+          >
+            ✗ No overlap found — adjust your dates so the group shares at least
             one common day.
           </p>
         )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-3 text-lg font-semibold">Submissions</h3>
+      {/* Submissions card */}
+      <div
+        style={{
+          border: "3px solid #1E3A5F",
+          boxShadow: "4px 4px 0px #1E3A5F",
+          backgroundColor: "#FEF3C7",
+          padding: "24px",
+        }}
+      >
+        <h3
+          className="mb-3 text-lg font-semibold"
+          style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+        >
+          👥 Submissions
+        </h3>
         {members.length === 0 ? (
-          <p className="text-sm text-gray-500">No members yet.</p>
+          <p style={{ fontSize: "0.875rem", color: "#1E3A5F", fontFamily: "monospace" }}>
+            No members yet.
+          </p>
         ) : (
           <ul className="flex flex-col gap-3">
             {members.map((member) => {
               const submission = submissionsByUser.get(member.id);
               const isSelf = member.id === identity.userId;
               return (
-                <li key={member.id} className="rounded-md bg-gray-50 px-3 py-2">
+                <li
+                  key={member.id}
+                  style={{
+                    border: "2px solid #1E3A5F",
+                    backgroundColor: isSelf ? "#38BDF8" : "#FEF3C7",
+                    padding: "10px 14px",
+                    boxShadow: "2px 2px 0px #1E3A5F",
+                  }}
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">
+                    <span
+                      style={{
+                        fontFamily: "monospace",
+                        fontWeight: 700,
+                        color: "#1E3A5F",
+                        fontSize: "0.875rem",
+                      }}
+                    >
                       {member.displayName || "Traveller"}
                       {isSelf && (
-                        <span className="ml-1 text-gray-400">(you)</span>
+                        <span
+                          style={{
+                            marginLeft: "6px",
+                            fontWeight: 400,
+                            color: "#1E3A5F",
+                            opacity: 0.65,
+                          }}
+                        >
+                          (you)
+                        </span>
                       )}
                     </span>
                     {!submission && (
-                      <span className="text-xs text-gray-500">
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontFamily: "monospace",
+                          color: "#FB923C",
+                          fontWeight: 700,
+                          border: "1px solid #FB923C",
+                          padding: "2px 6px",
+                          backgroundColor: "#FEF3C7",
+                        }}
+                      >
                         Not yet submitted
+                      </span>
+                    )}
+                    {submission && (
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontFamily: "monospace",
+                          color: "#1E3A5F",
+                          fontWeight: 700,
+                          border: "1px solid #4ADE80",
+                          padding: "2px 6px",
+                          backgroundColor: "#4ADE80",
+                        }}
+                      >
+                        ✓ Submitted
                       </span>
                     )}
                   </div>
                   {submission && (
-                    <div className="mt-1 text-sm text-gray-700">
+                    <div
+                      className="mt-2"
+                      style={{
+                        fontSize: "0.8125rem",
+                        fontFamily: "monospace",
+                        color: "#1E3A5F",
+                      }}
+                    >
                       <p>
-                        <span className="text-gray-500">Dates: </span>
+                        <span style={{ fontWeight: 700 }}>Dates: </span>
                         {submission.ranges
                           .map((r) => `${r.startDate} → ${r.endDate}`)
                           .join(", ")}
                       </p>
-                      <p>
-                        <span className="text-gray-500">Interests: </span>
+                      <p className="mt-1">
+                        <span style={{ fontWeight: 700 }}>Interests: </span>
                         {submission.interests.length > 0
                           ? submission.interests.join(", ")
                           : "(none)"}
@@ -433,30 +746,73 @@ export default function AvailabilityStage({
         )}
       </div>
 
+      {/* Host advance / waiting message */}
       {isHost ? (
         <div className="flex flex-col items-start gap-2">
           <button
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || !canAdvance}
-            className="rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            style={{
+              border: "3px solid #1E3A5F",
+              borderRadius: 0,
+              backgroundColor: advancing || !canAdvance ? "#FEF3C7" : "#FB923C",
+              color: "#1E3A5F",
+              padding: "10px 28px",
+              fontFamily: "monospace",
+              fontWeight: 700,
+              fontSize: "1rem",
+              cursor: advancing || !canAdvance ? "not-allowed" : "pointer",
+              opacity: advancing || !canAdvance ? 0.6 : 1,
+              boxShadow: advancing || !canAdvance ? "none" : "4px 4px 0px #1E3A5F",
+              transition: "opacity 0.1s",
+            }}
           >
-            {advancing ? "Advancing…" : "Advance stage"}
+            {advancing ? "Advancing…" : "▶ Advance stage"}
           </button>
           {!canAdvance && !advanceError && (
-            <p className="text-xs text-gray-500">
+            <p
+              style={{
+                fontSize: "0.75rem",
+                fontFamily: "monospace",
+                color: "#1E3A5F",
+                opacity: 0.7,
+              }}
+            >
               {!allSubmitted
-                ? "Waiting for every member to submit."
-                : "No overlap yet — adjust dates before advancing."}
+                ? "⏳ Waiting for every member to submit."
+                : "✗ No overlap yet — adjust dates before advancing."}
             </p>
           )}
           {advanceError && (
-            <p className="text-sm text-red-600">{advanceError}</p>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "#FB923C",
+                fontFamily: "monospace",
+                fontWeight: 700,
+                border: "2px solid #FB923C",
+                padding: "6px 10px",
+                backgroundColor: "#FEF3C7",
+              }}
+            >
+              ⚠ {advanceError}
+            </p>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">
-          Waiting for the host to advance to the next stage…
+        <p
+          style={{
+            fontSize: "0.875rem",
+            fontFamily: "monospace",
+            color: "#1E3A5F",
+            border: "2px solid #1E3A5F",
+            padding: "10px 16px",
+            backgroundColor: "#FEF3C7",
+            boxShadow: "2px 2px 0px #1E3A5F",
+          }}
+        >
+          ⏳ Waiting for the host to advance to the next stage…
         </p>
       )}
     </section>

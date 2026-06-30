@@ -1,6 +1,6 @@
 "use client";
 
-import { RoomStage, type TripRoom, type User } from "@/lib/types";
+import { RoomStage, type CharacterProfile, type TripRoom, type User } from "@/lib/types";
 
 import AvailabilityStage from "./AvailabilityStage";
 import DestinationVoteStage from "./DestinationVoteStage";
@@ -28,6 +28,9 @@ export interface Identity {
  *
  * `onGoBack` — host-only callback wired from page.tsx. Sends a backward PATCH
  *   and calls onRoomUpdated. Undefined for non-host clients.
+ *
+ * `characterProfiles` — optional array of character profiles for all room
+ *   members. Stage components that don't need it can safely ignore this prop.
  */
 export interface StageProps {
   room: TripRoom;
@@ -35,6 +38,7 @@ export interface StageProps {
   members: User[];
   onRoomUpdated: (updated: TripRoom) => void;
   onGoBack?: () => Promise<void>;
+  characterProfiles?: CharacterProfile[];
 }
 
 function StagePlaceholder({ stage }: { stage: RoomStage }) {
@@ -57,8 +61,9 @@ export default function StageRouter({
   members,
   onRoomUpdated,
   onGoBack,
+  characterProfiles,
 }: StageProps) {
-  const props = { room, identity, members, onRoomUpdated, onGoBack };
+  const props = { room, identity, members, onRoomUpdated, onGoBack, characterProfiles };
 
   switch (room.currentStage) {
     case RoomStage.LOBBY:

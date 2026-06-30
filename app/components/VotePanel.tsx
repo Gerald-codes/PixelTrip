@@ -93,17 +93,17 @@ export default function VotePanel({
   return (
     <div className="flex flex-col gap-4">
       {typeof totalVoters === "number" && (
-        <p className="text-sm text-gray-600">
+        <p className="text-sm font-semibold text-[#1E3A5F]">
           {typeof totalVotes === "number" ? (
             <>
-              <span className="font-semibold text-gray-900">
+              <span className="font-bold text-[#1E3A5F]">
                 {totalVotes}/{totalVoters}
               </span>{" "}
               voted
             </>
           ) : (
             <>
-              <span className="font-semibold text-gray-900">{totalVoters}</span>{" "}
+              <span className="font-bold text-[#1E3A5F]">{totalVoters}</span>{" "}
               {totalVoters === 1 ? "voter" : "voters"} in this room
             </>
           )}
@@ -120,18 +120,23 @@ export default function VotePanel({
 
           // Compose border / background to make state instantly readable.
           const borderClass = isWinner
-            ? "border-green-500 ring-2 ring-green-300"
+            ? "border-[#4ADE80]"
             : isSelected
-              ? "border-blue-600"
-              : "border-gray-200";
+              ? "border-[#38BDF8]"
+              : "border-[#1E3A5F]";
           const bgClass = isSelected
-            ? "bg-blue-50"
+            ? "bg-[#e0f2fe]"
             : isWinner
-              ? "bg-green-50"
-              : "bg-white";
+              ? "bg-[#f0fdf4]"
+              : "bg-[#FEF3C7]";
+          const shadowClass = isWinner
+            ? "shadow-[4px_4px_0px_#4ADE80]"
+            : isSelected
+              ? "shadow-[4px_4px_0px_#38BDF8]"
+              : "shadow-[4px_4px_0px_#1E3A5F]";
           const hoverClass = locked
             ? ""
-            : "hover:border-gray-400 hover:shadow-sm";
+            : "hover:bg-[#fde68a] hover:shadow-[3px_3px_0px_#1E3A5F]";
           const cursorClass = locked ? "cursor-default" : "cursor-pointer";
 
           return (
@@ -144,20 +149,20 @@ export default function VotePanel({
                 }}
                 disabled={locked}
                 aria-pressed={isSelected}
-                className={`flex w-full flex-col gap-2 rounded-lg border-2 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:cursor-default ${borderClass} ${bgClass} ${hoverClass} ${cursorClass}`}
+                className={`flex w-full flex-col gap-2 border-4 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[#38BDF8] disabled:cursor-default ${borderClass} ${bgClass} ${shadowClass} ${hoverClass} ${cursorClass}`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-base font-semibold text-gray-900">
+                  <span className="text-base font-bold text-[#1E3A5F]">
                     {option.label}
                   </span>
                   <span className="flex flex-none items-center gap-2">
                     {isSelected && (
-                      <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-semibold text-white">
+                      <span className="border-2 border-[#1E3A5F] bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
                         Your vote
                       </span>
                     )}
                     {isWinner && (
-                      <span className="rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">
+                      <span className="border-2 border-[#1E3A5F] bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
                         {hasMultipleWinners ? "Tied for lead" : "Winner"}
                       </span>
                     )}
@@ -165,7 +170,7 @@ export default function VotePanel({
                 </div>
 
                 {option.description && (
-                  <div className="text-sm text-gray-700">
+                  <div className="text-sm font-semibold text-[#1E3A5F]">
                     {option.description}
                   </div>
                 )}
@@ -174,7 +179,7 @@ export default function VotePanel({
                     The parent withholds the tally until everyone has voted so
                     the round stays anonymous in progress. */}
                 {tally && (
-                  <p className="text-xs font-medium text-gray-600">
+                  <p className="text-xs font-bold text-[#1E3A5F]">
                     {optionTally} {optionTally === 1 ? "vote" : "votes"}
                   </p>
                 )}
@@ -185,7 +190,7 @@ export default function VotePanel({
       </ul>
 
       {hasVoted && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs font-semibold text-[#1E3A5F]">
           Your vote is locked in. Wait for everyone else to vote to see the
           results.
         </p>

@@ -144,16 +144,26 @@ export default function LandingForm() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
+    /* Hero section: two-stop gradient from deep navy → sky blue */
+    <main className="flex min-h-screen flex-col items-center justify-center gap-10 bg-gradient-to-br from-[#1E3A5F] to-[#38BDF8] p-8">
+
+      {/* Title block */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold">PixelTrip</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-5xl font-black tracking-tight text-[#FEF3C7] drop-shadow-[3px_3px_0px_#1E3A5F]">
+          🗺️ PixelTrip
+        </h1>
+        <p className="mt-3 text-lg font-semibold text-[#FEF3C7]">
           Collaborative AI travel planning with 8-bit personas.
         </p>
       </div>
 
-      <div className="w-full max-w-md rounded-lg border border-gray-200 p-6">
-        <div className="mb-6 flex gap-2" role="tablist">
+      {/* Card */}
+      <div
+        className="w-full max-w-md border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]"
+        /* no border-radius — pixel card style */
+      >
+        {/* Mode tabs */}
+        <div className="mb-6 flex gap-3" role="tablist">
           <button
             type="button"
             role="tab"
@@ -162,13 +172,13 @@ export default function LandingForm() {
               setMode("create");
               setErrorMessage("");
             }}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium ${
+            className={`flex-1 border-2 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
               mode === "create"
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-700"
+                ? "border-[#1E3A5F] bg-[#FB923C] text-[#1E3A5F]"
+                : "border-[#1E3A5F] bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#FB923C]/30"
             }`}
           >
-            Create a room
+            ✈️ Create Room
           </button>
           <button
             type="button"
@@ -178,71 +188,76 @@ export default function LandingForm() {
               setMode("join");
               setErrorMessage("");
             }}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium ${
+            className={`flex-1 border-2 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
               mode === "join"
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-700"
+                ? "border-[#1E3A5F] bg-[#38BDF8] text-[#1E3A5F]"
+                : "border-[#1E3A5F] bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#38BDF8]/30"
             }`}
           >
-            Join a room
+            🚪 Join Room
           </button>
         </div>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">Display name</span>
+            <span className="font-bold text-[#1E3A5F]">Display name</span>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayNameState(e.target.value)}
               placeholder="e.g. Alex"
-              className="rounded-md border border-gray-300 px-3 py-2"
+              className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2 font-medium text-[#1E3A5F] placeholder-[#1E3A5F]/40 shadow-[2px_2px_0px_#1E3A5F] outline-none focus:bg-white"
               maxLength={40}
             />
           </label>
 
           {mode === "join" && (
             <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium">Room code</span>
+              <span className="font-bold text-[#1E3A5F]">Room code</span>
               <input
                 type="text"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="e.g. AB12CD"
-                className="rounded-md border border-gray-300 px-3 py-2 font-mono uppercase"
+                className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2 font-mono font-bold uppercase tracking-widest text-[#1E3A5F] placeholder-[#1E3A5F]/40 shadow-[2px_2px_0px_#1E3A5F] outline-none focus:bg-white"
                 maxLength={6}
               />
             </label>
           )}
 
           {errorMessage && (
-            <p className="text-sm text-red-600">{errorMessage}</p>
+            <p className="border-2 border-red-600 bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 shadow-[2px_2px_0px_#991b1b]">
+              ⚠️ {errorMessage}
+            </p>
           )}
 
+          {/* CTA button — sunset orange, retro 8-bit style */}
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-md bg-black px-4 py-2 font-medium text-white disabled:opacity-50"
+            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-3 font-black text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] transition-all hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting
-              ? "Please wait…"
+              ? "⏳ Please wait…"
               : mode === "create"
-                ? "Create room"
-                : "Join room"}
+                ? "🚀 Create room"
+                : "🎮 Join room"}
           </button>
         </form>
 
+        {/* Room created success panel */}
         {createdRoom && (
-          <div className="mt-6 rounded-md bg-gray-50 p-4 text-sm">
-            <p className="font-medium">Room created!</p>
-            <p className="mt-1">
+          <div className="mt-6 border-4 border-[#4ADE80] bg-[#FEF3C7] p-4 text-sm shadow-[4px_4px_0px_#1E3A5F]">
+            <p className="font-black text-[#1E3A5F]">🎉 Room created!</p>
+            <p className="mt-2 text-[#1E3A5F]">
               Code:{" "}
-              <span className="font-mono font-bold">
+              <span className="font-mono font-black tracking-widest text-[#A855F7]">
                 {createdRoom.roomCode}
               </span>
             </p>
-            <p className="mt-1 break-all text-gray-600">
-              Share this link: {inviteLink}
+            <p className="mt-2 break-all font-medium text-[#1E3A5F]">
+              Share this link:{" "}
+              <span className="font-mono text-xs text-[#1E3A5F]/70">{inviteLink}</span>
             </p>
           </div>
         )}
