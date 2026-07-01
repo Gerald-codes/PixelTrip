@@ -2,13 +2,18 @@
 
 import { RoomStage, type CharacterProfile, type TripRoom, type User } from "@/lib/types";
 
+import ActivitiesStage from "./ActivitiesStage";
 import AvailabilityStage from "./AvailabilityStage";
+import FeedbackStage from "./FeedbackStage";
 import DestinationVoteStage from "./DestinationVoteStage";
 import DestinationsStage from "./DestinationsStage";
 import FlightStage from "./FlightStage";
 import FlightVoteStage from "./FlightVoteStage";
 import GroupProfileStage from "./GroupProfileStage";
+import ItineraryStage from "./ItineraryStage";
 import LobbyStage from "./LobbyStage";
+import NegotiationStage from "./NegotiationStage";
+import FinalStage from "./FinalStage";
 
 /**
  * The browser-side identity of the current user (no auth — a localStorage UUID
@@ -80,12 +85,17 @@ export default function StageRouter({
       return <FlightStage {...props} />;
     case RoomStage.FLIGHT_VOTE:
       return <FlightVoteStage {...props} />;
-    case RoomStage.PERSONA:
     case RoomStage.ACTIVITIES:
+      return <ActivitiesStage {...props} />;
     case RoomStage.ITINERARY:
+      return <ItineraryStage {...props} />;
     case RoomStage.FEEDBACK:
+      return <FeedbackStage {...props} />;
     case RoomStage.NEGOTIATION:
+      return <NegotiationStage {...props} />;
     case RoomStage.FINAL:
+      return <FinalStage {...props} />;
+    case RoomStage.PERSONA:
       return <StagePlaceholder stage={room.currentStage} />;
     default:
       return assertNeverStage(room.currentStage);
