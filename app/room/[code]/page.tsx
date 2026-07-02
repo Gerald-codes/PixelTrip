@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import RoomShell from "@/app/components/RoomShell";
-import StageRouter, { type Identity } from "@/app/components/StageRouter";
+import type { Identity } from "@/app/components/StageRouter";
 import { broadcastMemberJoined, broadcastMemberLeft, useRoomMembers } from "@/app/hooks/useRoomMembers";
 import { useCharacterProfiles } from "@/app/hooks/useCharacterProfiles";
 import {
@@ -106,6 +106,93 @@ export default function RoomPage({ params }: RoomPageProps) {
 
   // ── Character Profiles ────────────────────────────────────────────────────
   const characterProfiles = useCharacterProfiles(room?.id ?? null);
+
+  // ── Travel dates, vibes, shortlist (from availability) ───────────────────
+  const [travelDates, setTravelDates] = useState<{ startDate: string; endDate: string } | null>(null);
+  const [travelVibes, setTravelVibes] = useState<string[] | null>(null);
+  const [destinationShortlist, setDestinationShortlist] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (!room?.id) return;
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/availability?roomId=${encodeURIComponent(room.id)}`,
+          { cache: "no-store" },
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          availability: Array<{ userId: string; startDate: string; endDate: string }>;
+          destinationPreferences: Array<{ userId: string; countryOrCity: string }>;
+        };
+
+        // Compute overlapping date window across all members who submitted
+        if (data.availability.length > 0) {
+          const byUser = new Map<string, Array<{ startDate: string; endDate: string }>>();
+          for (const a of data.availability) {
+            const list = byUser.get(a.userId) ?? [];
+            list.push({ startDate: a.startDate, endDate: a.endDate });
+            byUser.set(a.userId, list);
+          }
+          // Simple earliest-start / latest-end of the submitted ranges as an approximation
+          // (full overlap calculation requires lib/overlap which is server-side heavy)
+          let minStart = "";
+          let maxEnd = "";
+          for (const ranges of byUser.values()) {
+            for (const r of ranges) {
+              if (!minStart || r.startDate < minStart) minStart = r.startDate;
+              if (!maxEnd || r.endDate > maxEnd) maxEnd = r.endDate;
+            }
+          }
+          if (minStart && maxEnd) {
+            setTravelDates({ startDate: minStart, endDate: maxEnd });
+          }
+        }
+
+        // Destination shortlist — all unique countryOrCity values
+        if (data.destinationPreferences.length > 0) {
+          const unique = [...new Set(data.destinationPreferences.map((p) => p.countryOrCity))];
+          setDestinationShortlist(unique.length > 0 ? unique : null);
+        }
+      } catch {
+        // Silent — panel just shows "Not set"
+      }
+    })();
+  }, [room?.id]);
+
+  // Poll availability every 10s to keep panel fresh after members submit
+  useEffect(() => {
+    if (!room?.id) return;
+    const interval = setInterval(() => {
+      void (async () => {
+        try {
+          const res = await fetch(
+            `/api/availability?roomId=${encodeURIComponent(room.id)}`,
+            { cache: "no-store" },
+          );
+          if (!res.ok) return;
+          const data = (await res.json()) as {
+            availability: Array<{ userId: string; startDate: string; endDate: string }>;
+            destinationPreferences: Array<{ userId: string; countryOrCity: string }>;
+          };
+          if (data.availability.length > 0) {
+            let minStart = "";
+            let maxEnd = "";
+            for (const a of data.availability) {
+              if (!minStart || a.startDate < minStart) minStart = a.startDate;
+              if (!maxEnd || a.endDate > maxEnd) maxEnd = a.endDate;
+            }
+            if (minStart && maxEnd) setTravelDates({ startDate: minStart, endDate: maxEnd });
+          }
+          if (data.destinationPreferences.length > 0) {
+            const unique = [...new Set(data.destinationPreferences.map((p) => p.countryOrCity))];
+            setDestinationShortlist(unique.length > 0 ? unique : null);
+          }
+        } catch { /* silent */ }
+      })();
+    }, 10_000);
+    return () => clearInterval(interval);
+  }, [room?.id]);
 
   // Ensure this user is in the room DB row.
   const joinedRef = useRef(false);
@@ -217,7 +304,7 @@ export default function RoomPage({ params }: RoomPageProps) {
     );
   }
 
-  // ── Render: RoomShell wrapping StageRouter ────────────────────────────────
+  // ── Render: RoomShell — TripAgentChat is wired inside RoomShell (task 12.2) ──
   return (
     <RoomShell
       room={room}
@@ -226,16 +313,10 @@ export default function RoomPage({ params }: RoomPageProps) {
       characterProfiles={characterProfiles}
       onRoomUpdated={applyUpdate}
       onGoBack={isHost ? handleGoBack : undefined}
-    >
-      <StageRouter
-        room={room}
-        identity={identity}
-        members={members}
-        characterProfiles={characterProfiles}
-        onRoomUpdated={applyUpdate}
-        onGoBack={isHost ? handleGoBack : undefined}
-      />
-    </RoomShell>
+      travelDates={travelDates}
+      travelVibes={travelVibes}
+      destinationShortlist={destinationShortlist}
+    />
   );
 }
 

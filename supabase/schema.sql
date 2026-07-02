@@ -110,7 +110,8 @@ create table destination_suggestions (
 create index destination_suggestions_room_id_idx on destination_suggestions (room_id);
 
 -- votes --------------------------------------------------------------------
--- Maps to Vote. The unique constraint blocks duplicate votes per round.
+-- Maps to Vote. The unique constraint blocks duplicate votes per option per round.
+-- Updated to allow one user to vote for multiple options (e.g. multiple destinations).
 create table votes (
   id              uuid primary key default gen_random_uuid(),
   room_id         uuid not null references trip_rooms (id) on delete cascade,
@@ -118,7 +119,7 @@ create table votes (
   vote_type       text not null check (vote_type in ('destination', 'flight', 'conflict_resolution')),
   selected_option text not null,
   created_at      timestamptz not null default now(),
-  constraint votes_room_user_type_unique unique (room_id, user_id, vote_type)
+  constraint votes_room_user_type_option_unique unique (room_id, user_id, vote_type, selected_option)
 );
 
 create index votes_room_type_idx on votes (room_id, vote_type);

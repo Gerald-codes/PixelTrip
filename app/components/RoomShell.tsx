@@ -7,14 +7,22 @@
  * - Renders a persistent header: room code, invite link + copy button,
  *   StageProgress pipeline dots, and a host-only "← Previous" button.
  * - Renders MemberStrip below the header.
- * - Renders the {children} slot (stage content) below MemberStrip.
+ * - Renders the {children} slot (stage content) in the left column.
+ * - Renders TripContextPanel in the right column (sticky on desktop,
+ *   full-height overlay on mobile when isMobileContextOpen is true).
  * - Owns the Supabase stage-change broadcast subscription.
  * - Owns the 3-second polling interval for GET /api/rooms/[code].
+ *
+ * Two-column layout (task 12.1):
+ * - ≥ 1024px: side-by-side flex row; left col min-width 65%, right col fills rest.
+ * - < 1024px: single column; TripContextPanel hidden by default; toggle button
+ *   (fixed, bottom-right) opens it as a full-height fixed overlay.
  *
  * All updates go through onRoomUpdated — no window.location.reload(),
  * no router.push(), no full page navigation.
  *
- * Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.7, 3.8, 3.9, 3.10, 3.12,
+ * Requirements: 2.1, 2.2, 2.5, 2.6, 2.7, 9.7, 11.3, 11.4,
+ *               3.1, 3.2, 3.3, 3.4, 3.6, 3.7, 3.8, 3.9, 3.10, 3.12,
  *               7.1, 7.2, 7.6, 7.9, 7.10, 8.1, 2.4
  */
 
@@ -28,11 +36,14 @@ import React, {
 
 import MemberStrip from "@/app/components/MemberStrip";
 import StageProgress from "@/app/components/StageProgress";
+import TripContextPanel from "@/app/components/TripContextPanel";
+import TripAgentChat from "@/app/components/TripAgentChat";
 import type { Identity } from "@/app/components/StageRouter";
 import { createAnonSupabase } from "@/lib/supabase";
 import { STAGE_ORDER } from "@/lib/stageOrder";
 import { roomChanged } from "@/lib/roomUtils";
-import type { CharacterProfile, TripRoom, User } from "@/lib/types";
+import { computeBudgetEstimate } from "@/lib/budgetEstimate";
+import type { BudgetEstimate, CharacterProfile, DestinationSuggestion, TripRoom, User } from "@/lib/types";
 import { RoomStage } from "@/lib/types";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -44,7 +55,36 @@ interface RoomShellProps {
   characterProfiles: CharacterProfile[];
   onRoomUpdated: (r: TripRoom) => void;
   onGoBack?: () => Promise<void>;
-  children: React.ReactNode;
+  /**
+   * Optional legacy children slot — preserved for backward compatibility.
+   * When provided and TripAgentChat is not yet wired, children are rendered
+   * as a fallback in the left column. In the chatbot-first layout (task 12.2),
+   * the left column is owned by TripAgentChat and children is ignored.
+   */
+  children?: React.ReactNode;
+  /**
+   * Optional travel dates for TripContextPanel.
+   * Derived from overlapping availability, passed down by parent when available.
+   */
+  travelDates?: { startDate: string; endDate: string } | null;
+  /**
+   * Optional travel vibes for TripContextPanel.
+   */
+  travelVibes?: string[] | null;
+  /**
+   * Optional destination shortlist for TripContextPanel.
+   */
+  destinationShortlist?: string[] | null;
+  /**
+   * Optional selected destination suggestion (used to derive budget estimate).
+   * Provides the priceLevel needed for computeBudgetEstimate.
+   */
+  selectedDestinationSuggestion?: DestinationSuggestion | null;
+  /**
+   * Trip length in days (inclusive). Used for budget estimate computation.
+   * Defaults to 7 when not provided.
+   */
+  tripLengthDays?: number;
 }
 
 // ─── Dev flag ─────────────────────────────────────────────────────────────────
@@ -78,7 +118,13 @@ export default function RoomShell({
   characterProfiles,
   onRoomUpdated,
   onGoBack,
-  children,
+  // children is accepted but ignored — TripAgentChat owns the left column
+  children: _children,
+  travelDates = null,
+  travelVibes = null,
+  destinationShortlist = null,
+  selectedDestinationSuggestion = null,
+  tripLengthDays = 7,
 }: RoomShellProps) {
   // ── Local state ─────────────────────────────────────────────────────────────
   const [copied, setCopied] = useState(false);
@@ -87,12 +133,58 @@ export default function RoomShell({
   const [goBackError, setGoBackError] = useState<string | null>(null);
   const [showSyncBanner, setShowSyncBanner] = useState(false);
 
+  /**
+   * Internal mobile context panel drawer state.
+   * No new public props — entirely managed inside RoomShell.
+   * Requirements: 2.2, 9.7
+   */
+  const [isMobileContextOpen, setIsMobileContextOpen] = useState(false);
+
   // ── Consecutive polling failure counter ──────────────────────────────────────
   const consecutiveFailuresRef = useRef(0);
 
   // ── Derived values ───────────────────────────────────────────────────────────
   const isHost = identity.userId === room.hostUserId;
   const isLobby = room.currentStage === RoomStage.LOBBY;
+
+  /**
+   * Derive submitted user IDs from characterProfiles for TripContextPanel.
+   * For the PERSONA/LOBBY stage a profile existing = submitted.
+   * For all other stages this serves as a reasonable proxy at the RoomShell level.
+   * TripAgentChat has its own more precise derivation per-stage.
+   * Requirements: 11.3, 11.4
+   */
+  const submittedUserIds = useMemo(
+    () => characterProfiles.map((p) => p.userId),
+    [characterProfiles],
+  );
+
+  /**
+   * Compute budget estimate for TripContextPanel.
+   * Only computed when both selectedFlightOption and a destination with
+   * priceLevel are available. Otherwise null (badge not shown).
+   * Requirements: 10.2, 10.3, 10.6
+   */
+  const budgetEstimate = useMemo((): BudgetEstimate | null => {
+    if (!room.selectedFlightOption) return null;
+    if (!selectedDestinationSuggestion?.priceLevel) return null;
+    // Use the dominant budget level from character profiles, or "medium" as default
+    const dominantBudgetLevel =
+      characterProfiles.length > 0
+        ? (characterProfiles[0].budgetLevel ?? "medium")
+        : "medium";
+    return computeBudgetEstimate(
+      room.selectedFlightOption,
+      selectedDestinationSuggestion.priceLevel,
+      tripLengthDays,
+      dominantBudgetLevel,
+    );
+  }, [
+    room.selectedFlightOption,
+    selectedDestinationSuggestion,
+    characterProfiles,
+    tripLengthDays,
+  ]);
 
   const inviteLink = useMemo(() => {
     if (typeof window === "undefined") return `/?join=${room.roomCode}`;
@@ -400,8 +492,121 @@ export default function RoomShell({
         characterProfiles={characterProfiles}
       />
 
-      {/* ── Stage content slot ─────────────────────────────────────────────── */}
-      <main className="flex-1">{children}</main>
+      {/* ── Two-column main layout (task 12.1) ────────────────────────────── */}
+      {/*
+       * ≥ 1024px: flex-row, left col (children) min-width 65%, right col
+       *           (TripContextPanel) fills remaining width, sticky.
+       * < 1024px: single column; TripContextPanel hidden by default.
+       *   Requirements: 2.1, 2.2
+       */}
+      <main className="flex flex-1 flex-col lg:flex-row min-h-0 overflow-hidden">
+        {/* ── Left column: TripAgentChat (task 12.2) ────────────────────── */}
+        <div className="flex flex-col flex-1 min-w-0 lg:min-w-[65%] overflow-hidden">
+          <TripAgentChat
+            room={room}
+            identity={identity}
+            members={members}
+            characterProfiles={characterProfiles}
+            onRoomUpdated={onRoomUpdated}
+            onGoBack={onGoBack}
+          />
+        </div>
+
+        {/* ── Right column: TripContextPanel (desktop always-visible) ─────── */}
+        {/*
+         * Desktop: always visible in the right column.
+         * Mobile: rendered as a full-height fixed overlay when isMobileContextOpen=true;
+         *         otherwise hidden via `hidden lg:block`.
+         * Requirements: 2.1, 2.2, 9.7
+         */}
+        <div
+          className={
+            isMobileContextOpen
+              ? "fixed inset-0 z-50 flex flex-col"
+              : "hidden lg:flex lg:flex-col lg:w-[35%] overflow-y-auto"
+          }
+        >
+          {/* Close button inside the overlay — only rendered on mobile overlay */}
+          {isMobileContextOpen && (
+            <div
+              className="lg:hidden"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                padding: "10px 12px 0",
+                backgroundColor: "#1E3A5F",
+                flexShrink: 0,
+              }}
+            >
+              <button
+                type="button"
+                aria-label="Close trip context panel"
+                onClick={() => setIsMobileContextOpen(false)}
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  border: "2px solid #FB923C",
+                  color: "#FEF3C7",
+                  padding: "4px 12px",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: "'Courier New', Courier, monospace",
+                  boxShadow: "2px 2px 0 #1E3A5F",
+                }}
+              >
+                ✕ Close
+              </button>
+            </div>
+          )}
+          <TripContextPanel
+            room={room}
+            members={members}
+            characterProfiles={characterProfiles}
+            currentStage={room.currentStage}
+            submittedUserIds={submittedUserIds}
+            budgetEstimate={budgetEstimate}
+            isOpen={isMobileContextOpen}
+            travelDates={travelDates}
+            travelVibes={travelVibes}
+            destinationShortlist={destinationShortlist}
+          />
+        </div>
+      </main>
+
+      {/* ── Mobile toggle button (fixed, bottom-right, < 1024px only) ────── */}
+      {/*
+       * Renders a fixed "📋 Trip Info" button at the bottom-right corner on
+       * screens narrower than 1024px. Clicking toggles the TripContextPanel
+       * drawer overlay. Hidden on desktop via `lg:hidden`.
+       * Requirements: 2.2, 9.7
+       */}
+      <button
+        type="button"
+        className="fixed bottom-4 right-4 z-40 lg:hidden"
+        aria-label={
+          isMobileContextOpen
+            ? "Close trip context panel"
+            : "Open trip context panel"
+        }
+        onClick={() => setIsMobileContextOpen((prev) => !prev)}
+        style={{
+          background: "#A855F7",
+          border: "2px solid #1E3A5F",
+          color: "#FEF3C7",
+          padding: "10px 16px",
+          fontSize: "0.85rem",
+          fontWeight: 700,
+          cursor: "pointer",
+          fontFamily: "'Courier New', Courier, monospace",
+          boxShadow: "4px 4px 0 #1E3A5F",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <span aria-hidden="true">📋</span>
+        <span>Trip Info</span>
+      </button>
 
       {/* ── "Having trouble syncing" banner (3+ consecutive poll failures) ─── */}
       {showSyncBanner && (

@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Pixel-art focus-visible ring ────────────────────────────────────────────
+   Applied to interactive elements in VoteableFlightCard, VoteableDestinationCard,
+   and other new chatbot-first components.
+   Requirement: 12.5 — outline: 3px solid #A855F7; outline-offset: 2px
+────────────────────────────────────────────────────────────────────────────── */
+
+.voteable-flight-card__vote-btn:focus-visible {
+  outline: 3px solid #A855F7;
+  outline-offset: 2px;
+}
+
+.voteable-destination-card__vote-btn:focus-visible {
+  outline: 3px solid #A855F7;
+  outline-offset: 2px;
+}

@@ -293,3 +293,44 @@ export interface Identity {
   userId: string;
   displayName: string;
 }
+
+// ─── Chatbot-first refactor types (additive — do not modify above) ───────────
+
+/**
+ * A single message in the Trip Agent conversation thread.
+ *
+ * Messages are append-only and session-scoped (React state only — not
+ * persisted to Supabase). The thread is never cleared during a session.
+ */
+export interface AgentMessage {
+  id: string;          // nanoid or crypto.randomUUID()
+  stage: RoomStage;    // stage that produced this message
+  text: string;        // ≤40 words, ≤2 sentences
+  timestamp: number;   // Date.now() when appended
+  type: "intro" | "confirmation" | "waiting" | "error" | "system";
+}
+
+/**
+ * Computed per-person budget estimate for the trip.
+ *
+ * Pure, local computation — no API calls. Produced by `computeBudgetEstimate()`
+ * in `lib/budgetEstimate.ts` and passed to `TripContextPanel` / `BudgetStatusBadge`.
+ * Only available when `room.selectedFlightOption` and a selected destination with
+ * a `priceLevel` are both non-null.
+ */
+export interface BudgetEstimate {
+  flightCost: number;        // flat lookup by flight category (FLIGHT_COSTS[category])
+  dailyCost: number;         // destinationMultiplier × tripLengthDays × dailyCostByBudgetLevel
+  totalPerPerson: number;    // flightCost + dailyCost
+  status: "within" | "near" | "over";
+  costDriverLine: string;    // ≤80 chars — identifies the dominant cost component
+  tripLengthDays: number;    // inclusive day count (endDate − startDate + 1)
+}
+
+/**
+ * Stage submission tracking for a single user in the current stage.
+ *
+ * Used by `WaitingState` and per-member `ReadyBadge` to distinguish between
+ * users who have completed the current stage and those who have not yet submitted.
+ */
+export type StageSubmissionStatus = "submitted" | "pending";
