@@ -70,13 +70,21 @@ export default function ItineraryStage({
     }
   }, [room.id]);
 
-  // ── On mount: load latest + all versions ─────────────────────────────────
+  // ── On mount: load latest + all versions; auto-generate if empty ─────────
   useEffect(() => {
     setLoading(true);
-    void Promise.all([fetchLatestItinerary(), fetchAllVersions()]).finally(() => {
+    void Promise.all([fetchLatestItinerary(), fetchAllVersions()]).then(() => {
       setLoading(false);
+      // Auto-generate if no itinerary exists yet (host only, once per mount).
+      setItinerary((current) => {
+        if (!current && isHost) {
+          void handleGenerate();
+        }
+        return current;
+      });
     });
-  }, [fetchLatestItinerary, fetchAllVersions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Realtime subscription ─────────────────────────────────────────────────
   useEffect(() => {

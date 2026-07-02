@@ -135,44 +135,45 @@ export default function VoteableFlightCard({
 
   // Reconcile with server: accept server value when it is ≥ local optimistic count.
   // This prevents a double-increment if the poll arrives after an optimistic update.
+  // Also sync localHasVoted DOWN — if the server says this option is no longer the
+  // user's vote (they changed to a different option), clear the local voted state.
   useEffect(() => {
     if (voteCount >= displayedCount) {
       setDisplayedCount(voteCount);
     }
-    // Sync hasVoted from server only when it becomes true (never un-vote server-side).
-    if (hasVoted) {
-      setLocalHasVoted(true);
-    }
+    // If server says hasVoted is true, mark locally as voted.
+    // If server says hasVoted is false (user changed to another option), unmark.
+    setLocalHasVoted(hasVoted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voteCount, hasVoted]);
 
   // ── Vote handler ───────────────────────────────────────────────────────────
-  async function handleVoteClick() {
-    if (localHasVoted || isVoting) return;
+  async function handleVoteClick(clickedCategory: string) {
+    if (isVoting) return;
+    // If clicking the same option already voted, treat as a no-op.
+    if (localHasVoted && clickedCategory === category) return;
 
     const previousCount = displayedCount;
-    // 1. Optimistic update
-    setDisplayedCount((prev) => prev + 1);
+    const wasVoted = localHasVoted;
+
+    // Optimistic update: increment if new vote, otherwise it's a change
+    if (!localHasVoted) {
+      setDisplayedCount((prev) => prev + 1);
+    }
     setLocalHasVoted(true);
     setVoteError(null);
     setIsVoting(true);
 
     try {
-      // 2. Delegate the actual POST to the parent-provided callback
-      await onVote(category);
-      // 3a. 2xx: retain optimistic state (already set above)
+      await onVote(clickedCategory);
     } catch (err: unknown) {
-      // Determine whether this is a 409 (duplicate) vs 5xx/network error.
-      // onVote is expected to throw an Error whose message contains the HTTP
-      // status code on server errors (e.g. "409", "500"). If it is "409" we
-      // retain the optimistic state; for anything else we revert.
       const message = err instanceof Error ? err.message : String(err);
       if (message.includes("409")) {
-        // 3b. Duplicate vote — retain optimistic state
+        // Duplicate — retain
       } else {
-        // 3c. 5xx or network error — revert
+        // Revert on real failure
         setDisplayedCount(previousCount);
-        setLocalHasVoted(false);
+        setLocalHasVoted(wasVoted);
         setVoteError("Vote failed — please try again");
       }
     } finally {
@@ -183,7 +184,6 @@ export default function VoteableFlightCard({
   // ── Derived display values ─────────────────────────────────────────────────
   const categoryLabel = CATEGORY_LABELS[category];
   const accentColour = CATEGORY_ACCENT[category];
-  const isDisabled = localHasVoted || isVoting;
 
   const stopsLabel =
     stops === 0
@@ -206,6 +206,9 @@ export default function VoteableFlightCard({
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        minWidth: 0,
+        maxWidth: "100%",
+        width: "100%",
       }}
     >
       {/* ── Card header: category name + accent bar ── */}
@@ -322,11 +325,11 @@ export default function VoteableFlightCard({
       >
         <button
           type="button"
-          onClick={() => void handleVoteClick()}
-          disabled={isDisabled}
+          onClick={() => void handleVoteClick(category)}
+          disabled={isVoting}
           aria-label={
             localHasVoted
-              ? `You have already voted for ${categoryLabel}`
+              ? `Change vote — currently voted for ${categoryLabel}`
               : `Vote for ${categoryLabel} flights`
           }
           aria-pressed={localHasVoted}
@@ -339,13 +342,17 @@ export default function VoteableFlightCard({
             fontFamily: "'Courier New', Courier, monospace",
             fontSize: 14,
             fontWeight: 700,
-            color: isDisabled ? SAND_CREAM : DEEP_NAVY,
-            backgroundColor: isDisabled ? DEEP_NAVY : SUNSET_ORANGE,
+            color: isVoting ? SAND_CREAM : DEEP_NAVY,
+            backgroundColor: localHasVoted
+              ? "#4ADE80"   // green = voted
+              : isVoting
+                ? DEEP_NAVY
+                : SUNSET_ORANGE,
             border: `3px solid ${DEEP_NAVY}`,
             borderRadius: 0,
-            boxShadow: isDisabled ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
-            cursor: isDisabled ? "not-allowed" : "pointer",
-            opacity: isDisabled ? 0.65 : 1,
+            boxShadow: isVoting ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
+            cursor: isVoting ? "not-allowed" : "pointer",
+            opacity: isVoting ? 0.65 : 1,
             transition: "background-color 0.1s, box-shadow 0.1s",
             outline: "none",
           }}
@@ -357,7 +364,7 @@ export default function VoteableFlightCard({
             e.currentTarget.style.outline = "none";
           }}
         >
-          🗳 {localHasVoted ? "Voted" : "Vote"}
+          🗳 {isVoting ? "Saving…" : localHasVoted ? "Voted ✓" : "Vote"}
         </button>
 
         {/* Inline error message */}
@@ -404,9 +411,11 @@ function FlightBadge({ label, value, bg }: FlightBadgeProps) {
         border: `2px solid ${DEEP_NAVY}`,
         borderRadius: 0,
         boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
-        padding: "4px 10px",
-        minWidth: 60,
+        padding: "4px 8px",
+        minWidth: 0,           // allow shrinking inside flex containers
+        maxWidth: "100%",
         fontFamily: "'Courier New', Courier, monospace",
+        overflow: "hidden",
       }}
     >
       <span
@@ -418,6 +427,7 @@ function FlightBadge({ label, value, bg }: FlightBadgeProps) {
           color: DEEP_NAVY,
           lineHeight: 1,
           marginBottom: 2,
+          whiteSpace: "nowrap",
         }}
       >
         {label}
@@ -428,7 +438,9 @@ function FlightBadge({ label, value, bg }: FlightBadgeProps) {
           fontWeight: 700,
           color: DEEP_NAVY,
           lineHeight: 1.2,
-          whiteSpace: "nowrap",
+          wordBreak: "break-word",    // wrap long values instead of overflowing
+          overflowWrap: "break-word",
+          textAlign: "center",
         }}
       >
         {value}

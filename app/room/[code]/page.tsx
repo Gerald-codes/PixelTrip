@@ -111,6 +111,8 @@ export default function RoomPage({ params }: RoomPageProps) {
   const [travelDates, setTravelDates] = useState<{ startDate: string; endDate: string } | null>(null);
   const [travelVibes, setTravelVibes] = useState<string[] | null>(null);
   const [destinationShortlist, setDestinationShortlist] = useState<string[] | null>(null);
+  const [selectedDestinationSuggestion, setSelectedDestinationSuggestion] = useState<{ priceLevel: "budget" | "moderate" | "premium" } | null>(null);
+  const [tripLengthDays, setTripLengthDays] = useState<number>(7);
 
   useEffect(() => {
     if (!room?.id) return;
@@ -150,15 +152,58 @@ export default function RoomPage({ params }: RoomPageProps) {
         }
 
         // Destination shortlist — all unique countryOrCity values
+        // Also parse vibe: prefixed rows into travelVibes
         if (data.destinationPreferences.length > 0) {
           const unique = [...new Set(data.destinationPreferences.map((p) => p.countryOrCity))];
           setDestinationShortlist(unique.length > 0 ? unique : null);
+
+          // Parse vibe:xxx rows into human-readable vibe names
+          const vibes = unique
+            .filter((v) => v.startsWith("vibe:"))
+            .map((v) => v.replace("vibe:", "").replace(/_/g, " "));
+          setTravelVibes(vibes.length > 0 ? vibes : null);
         }
       } catch {
         // Silent — panel just shows "Not set"
       }
     })();
   }, [room?.id]);
+
+  // ── Fetch selected destination priceLevel for budget estimate ────────────
+  // Runs whenever room.selectedDestination changes (set after flight vote).
+  useEffect(() => {
+    if (!room?.id || !room.selectedDestination) {
+      setSelectedDestinationSuggestion(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/agents/destinations?roomId=${encodeURIComponent(room.id)}`,
+          { cache: "no-store" },
+        );
+        if (!res.ok) return;
+        const suggestions = (await res.json()) as Array<{
+          destinationName: string;
+          priceLevel: "budget" | "moderate" | "premium";
+        }>;
+        const match = suggestions.find(
+          (s) => s.destinationName === room.selectedDestination,
+        );
+        if (match) setSelectedDestinationSuggestion({ priceLevel: match.priceLevel });
+      } catch { /* silent */ }
+    })();
+  }, [room?.id, room?.selectedDestination]);
+
+  // ── Compute trip length from travel dates ─────────────────────────────────
+  useEffect(() => {
+    if (!travelDates) return;
+    const start = Date.parse(travelDates.startDate);
+    const end = Date.parse(travelDates.endDate);
+    if (!isNaN(start) && !isNaN(end) && end >= start) {
+      setTripLengthDays(Math.floor((end - start) / 86_400_000) + 1);
+    }
+  }, [travelDates]);
 
   // Poll availability every 10s to keep panel fresh after members submit
   useEffect(() => {
@@ -187,6 +232,10 @@ export default function RoomPage({ params }: RoomPageProps) {
           if (data.destinationPreferences.length > 0) {
             const unique = [...new Set(data.destinationPreferences.map((p) => p.countryOrCity))];
             setDestinationShortlist(unique.length > 0 ? unique : null);
+            const vibes = unique
+              .filter((v) => v.startsWith("vibe:"))
+              .map((v) => v.replace("vibe:", "").replace(/_/g, " "));
+            setTravelVibes(vibes.length > 0 ? vibes : null);
           }
         } catch { /* silent */ }
       })();
@@ -316,6 +365,8 @@ export default function RoomPage({ params }: RoomPageProps) {
       travelDates={travelDates}
       travelVibes={travelVibes}
       destinationShortlist={destinationShortlist}
+      selectedDestinationSuggestion={selectedDestinationSuggestion}
+      tripLengthDays={tripLengthDays}
     />
   );
 }

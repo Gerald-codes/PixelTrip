@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Global overflow guard ───────────────────────────────────────────────────
+   Prevents any element from forcing horizontal page scroll.
+   All text wraps; long unbreakable strings (URLs, codes) break at container
+   boundary. Required at 320–390px viewports.
+────────────────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Force all flex/grid children to respect their container width */
+.min-w-0-auto > * {
+  min-width: 0;
+}
+
 /* ── Pixel-art focus-visible ring ────────────────────────────────────────────
    Applied to interactive elements in VoteableFlightCard, VoteableDestinationCard,
    and other new chatbot-first components.

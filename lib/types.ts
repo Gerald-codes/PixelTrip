@@ -322,6 +322,7 @@ export interface BudgetEstimate {
   flightCost: number;        // flat lookup by flight category (FLIGHT_COSTS[category])
   dailyCost: number;         // destinationMultiplier × tripLengthDays × dailyCostByBudgetLevel
   totalPerPerson: number;    // flightCost + dailyCost
+  budgetLimitPerPerson: number; // BUDGET_THRESHOLDS for the most conservative budget level
   status: "within" | "near" | "over";
   costDriverLine: string;    // ≤80 chars — identifies the dominant cost component
   tripLengthDays: number;    // inclusive day count (endDate − startDate + 1)

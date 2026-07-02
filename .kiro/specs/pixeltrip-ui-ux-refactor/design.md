@@ -821,3 +821,185 @@ Key generators:
 
 - Snapshot tests for `PixelAvatar` with all 3 × 5 × 9 = 135 valid primary avatar combinations to catch unintended layer regressions.
 - Manual review of colour contrast on all refactored stage components before release.
+
+---
+
+## Addendum: Budget, Trip Info, Vote Change, Tie Handling, Responsive, HCI
+
+This addendum covers Requirements 10–15. All additions are client-derived or additive; no existing API route, Supabase column, or shared type is modified destructively.
+
+### Budget Estimation (`lib/budget.ts`)
+
+Pure, unit-testable module — no rendering, no I/O.
+
+```typescript
+export type BudgetStatus = 'pending' | 'within' | 'near' | 'over';
+
+export interface BudgetEstimate {
+  estimatedTotalPerPerson: number;   // USD
+  budgetLimitPerPerson: number;      // USD, from most budget-sensitive member
+  percentageUsed: number;            // round(estimate / limit * 100), uncapped
+  status: BudgetStatus;
+}
+
+// Per-person caps keyed by the LOWEST budgetLevel present in the group.
+const BUDGET_CAPS: Record<BudgetLevel, number> = {
+  low: 800, medium: 1500, high: 3000,
+};
+
+// Flight contribution (per person) by selected option.
+const FLIGHT_COST: Record<'budget' | 'comfort' | 'best_value', number> = {
+  budget: 215, best_value: 335, comfort: 520,
+};
+
+// Destination priceLevel contribution per day (per person).
+const PRICE_LEVEL_PER_DAY: Record<'budget' | 'moderate' | 'premium', number> = {
+  budget: 90, moderate: 150, premium: 260,
+};
+
+export function computeBudgetEstimate(input: {
+  priceLevel: 'budget' | 'moderate' | 'premium' | null;
+  flightOption: 'budget' | 'comfort' | 'best_value' | null;
+  tripDays: number | null;
+  memberBudgetLevels: BudgetLevel[];   // from CharacterProfile rows
+}): BudgetEstimate;
+```
+
+Rules:
+- **Most budget-sensitive traveller** — `budgetLimitPerPerson = BUDGET_CAPS[min(memberBudgetLevels)]` where `low < medium < high`. Empty members list → default to `medium`.
+- **Estimate** — `FLIGHT_COST[flightOption] + PRICE_LEVEL_PER_DAY[priceLevel] * tripDays`. A per-day activity allowance is folded into `PRICE_LEVEL_PER_DAY`.
+- **Pending** — if `priceLevel`, `flightOption`, or `tripDays` is null, return `status: 'pending'` and do not compute a misleading number.
+- **Status thresholds** — `within` ≤ 85%, `near` ≤ 100%, `over` > 100%.
+
+The stage/`TripInfoPanel` reads `priceLevel` from the selected destination's persisted `DestinationSuggestion` (matched by `selectedDestination` name), `flightOption` from `TripRoom.selectedFlightOption`, `tripDays` from the availability overlap window length, and `memberBudgetLevels` from `characterProfiles`.
+
+### Components
+
+#### BudgetStatusBadge — `app/components/BudgetStatusBadge.tsx`
+
+```typescript
+interface BudgetStatusBadgeProps { status: BudgetStatus; }
+```
+
+Renders a pixel-bordered pill: `within` grass-green, `near` sunset-orange, `over` deep-navy text on sunset-orange with a ⚠ icon, `pending` sand-cream muted. Deep-navy text on all coloured surfaces for WCAG AA.
+
+#### BudgetBar — `app/components/BudgetBar.tsx`
+
+```typescript
+interface BudgetBarProps { estimate: BudgetEstimate; }
+```
+
+Pixel-bordered track (sand-cream) with a fill whose width is `min(percentageUsed, 100)%`, coloured by status. Shows `"$estimate / $limit per person"` and the `BudgetStatusBadge`. When `status === 'over'`, renders the plain-language threshold warning beneath the bar. When `pending`, renders a muted "Estimate pending — pick a destination and flight" line and no fill.
+
+#### TripInfoPanel — `app/components/TripInfoPanel.tsx`
+
+```typescript
+interface TripInfoPanelProps {
+  room: TripRoom;
+  members: User[];
+  characterProfiles: CharacterProfile[];
+  travelWindow: { startDate: string; endDate: string } | null;
+  priceLevel: 'budget' | 'moderate' | 'premium' | null;
+}
+```
+
+Rendered inside `RoomShell`, below the header, above `{children}`. Shows, in a compact pixel-card row: `BudgetBar`, travel window, destination, flight option (human label), member count + compact avatars, and the current-decision label derived from `currentStage`. Collapses to a single summary row below `md` (Tailwind `hidden md:flex` for the expanded layout, a compact fallback for mobile). Current-decision mapping:
+
+```typescript
+const STAGE_DECISION_LABEL: Record<RoomStage, string> = {
+  LOBBY: 'Building characters', PERSONA: 'Choosing personas',
+  AVAILABILITY: 'Sharing availability', GROUP_PROFILE: 'Reviewing group profile',
+  DESTINATIONS: 'Exploring destinations', DESTINATION_VOTE: 'Voting on destination',
+  FLIGHTS: 'Reviewing flights', FLIGHT_VOTE: 'Voting on flight',
+  ACTIVITIES: 'Collecting activities', ITINERARY: 'Reviewing itinerary',
+  FEEDBACK: 'Giving feedback', NEGOTIATION: 'Resolving conflicts', FINAL: 'Trip finalised',
+};
+```
+
+### Vote Change Before Lock
+
+The existing `/api/votes` POST already upserts on `(room_id, user_id, vote_type)` via the DB unique constraint, so changing a vote is an UPDATE, never a duplicate. Design changes are client-side in `VotingStage` / `VotePanel`:
+
+- `VotePanel` no longer hard-locks after the first cast. It locks only when the parent passes `locked = true`.
+- `VotingStage` computes `locked = roundClosed || hostLocked` and passes it down. Before lock, clicking another option re-POSTs with the new `selectedOption`; the route updates the row and the client re-fetches the tally and broadcasts `votes-updated`.
+- Copy: "Tap another option to change your vote" before lock; "Vote locked" after.
+
+No route or schema change — the upsert-on-conflict behaviour is the enforcement point for "one active vote".
+
+### Tie Handling
+
+`GET /api/votes/[roomId]/[voteType]` already returns `winner: string | null` and `tiedOptions: string[]`. Design adds an agent-mediated path when `tiedOptions.length >= 2`:
+
+- **Reuse** the existing conflict/negotiation concept but with a dedicated, additive route `POST /api/agents/tiebreak` (JSON-only, follows the agent contract) that accepts `{ roomId, voteType, tiedOptions, context }` and returns `{ conflictSummary, proposedOptions: ConflictOption[] }`. Reusing the existing `conflict_resolutions` table (already in schema) to persist the record.
+- Flow: tie detected → host clicks "Ask the AI to help decide" → `POST /api/agents/tiebreak` → persist a `conflict_resolutions` row (`status: 'voting'`) → render options via `VotingStage` with `voteType = "conflict_resolution"` → on winner, apply decision (set `selected_destination` / `selected_flight_option` via existing routes) and advance.
+- **Never-stuck guarantee**: if a resolution round itself ties, the host sees a final manual picker over the tied options. This fallback is always present, so no tie can block the pipeline.
+- Tie detection lives in a shared helper `lib/voteTally.ts` (`detectTie(tally): string[]`) so `destination`, `flight`, and future vote types share one implementation.
+
+### Responsive Strategy
+
+- Tailwind breakpoints: default (mobile), `md:` (tablet), `lg:` (desktop). No custom breakpoints.
+- Cards use `break-words` / `truncate` + `min-w-0` on flex children to prevent overflow. Vote option labels and destination names use `break-words`; compact chips use `truncate`.
+- `RoomShell` header and `TripInfoPanel` stack vertically below `md` and use a horizontal row at `md+`.
+- `MemberStrip` is always `overflow-x-auto` with `flex-nowrap`.
+- Verified at 320px width: no element forces horizontal page scroll (smoke check via a `min-w-0` audit).
+
+### HCI Mapping
+
+Requirement 15 is satisfied by existing + new components; no new component is required purely for HCI. Traceability:
+
+| Heuristic | Realised by |
+|---|---|
+| Visibility of status | `StageProgress`, `TripInfoPanel` current decision, saving/advancing/generating states, "n/N voted" |
+| Real-world language | `STAGE_DECISION_LABEL`, human flight/vibe labels, `vibe:` prefix hidden |
+| User control & freedom | Host "Previous stage", vote change before lock (Req 12), editable character/availability |
+| Consistency & standards | Shared palette, pixel card + retro button styles, shared selector/chip/badge patterns |
+| Error prevention | Disabled CTAs until valid, host advance gated on prerequisites |
+| Recognition over recall | Cards/chips/mood-board, hydration pre-selects prior input |
+| Aesthetic & minimalist | Stage-scoped main content, compact persistent chrome |
+| Error recovery | Inline plain-language errors + form-state retention |
+
+---
+
+## Additional Correctness Properties (Requirements 10–15)
+
+### Property 20: Budget estimate arithmetic and status thresholds
+
+*For any* valid `(priceLevel, flightOption, tripDays ≥ 1, non-empty memberBudgetLevels)`, `computeBudgetEstimate` returns `estimatedTotalPerPerson = FLIGHT_COST[flightOption] + PRICE_LEVEL_PER_DAY[priceLevel] * tripDays`, `budgetLimitPerPerson = BUDGET_CAPS[min(memberBudgetLevels)]`, `percentageUsed = round(estimate/limit*100)`, and `status` matches the thresholds (`within` ≤ 85, `near` ≤ 100, `over` > 100). *For any* input with a null `priceLevel`, `flightOption`, or `tripDays`, `status === 'pending'`.
+
+**Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.8, 10.9**
+
+### Property 21: Budget limit tracks the most budget-sensitive traveller
+
+*For any* non-empty list of member budget levels, `budgetLimitPerPerson` equals `BUDGET_CAPS` of the minimum level present (`low < medium < high`) — adding a higher-budget member never raises the limit.
+
+**Validates: Requirements 10.2, 10.7**
+
+### Property 22: One active vote per (room, user, voteType) across changes
+
+*For any* sequence of vote submissions by a single user in one round before lock, the database contains exactly one row for that `(roomId, userId, voteType)`, and its `selectedOption` equals the last submitted option.
+
+**Validates: Requirements 12.1, 12.2, 12.5**
+
+### Property 23: Votes are immutable once locked
+
+*For any* round where `locked` is true (all voted or host-locked), any further vote-change attempt for that round leaves the stored vote unchanged.
+
+**Validates: Requirements 12.3**
+
+### Property 24: Tie detection is exact
+
+*For any* tally map, `detectTie` returns every option whose count equals the maximum when two or more options share that maximum, and returns an empty array when a single option holds the strict maximum or the tally is empty.
+
+**Validates: Requirements 13.1, 13.2**
+
+### Property 25: Tie handling always has a progress path
+
+*For any* closed round classified as a tie, the workflow exposes at least one action that resolves it (agent-mediated resolution vote, or host manual selection over the tied options), so the room can always advance.
+
+**Validates: Requirements 13.5, 13.6, 13.8**
+
+### Property 26: No text overflow forces page-level horizontal scroll
+
+*For any* stage rendered at a 320px viewport width with maximally long field values (destination name, persona summary, display name), the document body does not exceed the viewport width (no horizontal page scroll).
+
+**Validates: Requirements 14.4, 14.6**

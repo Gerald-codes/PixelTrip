@@ -43,7 +43,7 @@ import { createAnonSupabase } from "@/lib/supabase";
 import { STAGE_ORDER } from "@/lib/stageOrder";
 import { roomChanged } from "@/lib/roomUtils";
 import { computeBudgetEstimate } from "@/lib/budgetEstimate";
-import type { BudgetEstimate, CharacterProfile, DestinationSuggestion, TripRoom, User } from "@/lib/types";
+import type { BudgetEstimate, BudgetLevel, CharacterProfile, DestinationSuggestion, TripRoom, User } from "@/lib/types";
 import { RoomStage } from "@/lib/types";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -168,16 +168,19 @@ export default function RoomShell({
   const budgetEstimate = useMemo((): BudgetEstimate | null => {
     if (!room.selectedFlightOption) return null;
     if (!selectedDestinationSuggestion?.priceLevel) return null;
-    // Use the dominant budget level from character profiles, or "medium" as default
-    const dominantBudgetLevel =
-      characterProfiles.length > 0
-        ? (characterProfiles[0].budgetLevel ?? "medium")
+    // Use the MOST CONSERVATIVE (lowest) budget level across all character profiles.
+    // This ensures the estimate respects the most budget-sensitive traveller.
+    const ORDER: BudgetLevel[] = ["low", "medium", "high"];
+    const levels = characterProfiles.map((cp) => cp.budgetLevel);
+    const conservativeBudgetLevel: BudgetLevel =
+      levels.length > 0
+        ? ORDER[Math.min(...levels.map((l) => ORDER.indexOf(l)))]
         : "medium";
     return computeBudgetEstimate(
       room.selectedFlightOption,
       selectedDestinationSuggestion.priceLevel,
       tripLengthDays,
-      dominantBudgetLevel,
+      conservativeBudgetLevel,
     );
   }, [
     room.selectedFlightOption,
@@ -389,16 +392,17 @@ export default function RoomShell({
           </div>
 
           {/* Row 2: invite link + copy button */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-sky-100">Invite link:</span>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="shrink-0 text-xs text-sky-100">Invite:</span>
             <code
-              className="truncate text-xs text-white"
+              className="min-w-0 flex-1 truncate text-xs text-white"
               style={{
                 background: "rgba(0,0,0,0.25)",
                 padding: "2px 8px",
                 border: "1px solid rgba(255,255,255,0.2)",
-                maxWidth: 260,
+                maxWidth: "100%",
               }}
+              title={inviteLink}
             >
               {inviteLink}
             </code>
@@ -407,6 +411,7 @@ export default function RoomShell({
               onClick={handleCopy}
               aria-label="Copy invite link"
               style={{
+                flexShrink: 0,
                 background: copied ? "#4ADE80" : "#FB923C",
                 border: copied
                   ? "2px solid #16A34A"
@@ -492,16 +497,17 @@ export default function RoomShell({
         characterProfiles={characterProfiles}
       />
 
-      {/* ── Two-column main layout (task 12.1) ────────────────────────────── */}
+      {/* ── Two-column main layout ────────────────────────────────────────── */}
       {/*
-       * ≥ 1024px: flex-row, left col (children) min-width 65%, right col
-       *           (TripContextPanel) fills remaining width, sticky.
-       * < 1024px: single column; TripContextPanel hidden by default.
+       * ≥ 1024px: flex-row, left col grows to fill ~65% via flex-[3], right
+       *           col fills ~35% via flex-[1]. Both columns have min-w-0 so
+       *           content cannot force overflow.
+       * < 1024px: single column, TripContextPanel hidden.
        *   Requirements: 2.1, 2.2
        */}
-      <main className="flex flex-1 flex-col lg:flex-row min-h-0 overflow-hidden">
-        {/* ── Left column: TripAgentChat (task 12.2) ────────────────────── */}
-        <div className="flex flex-col flex-1 min-w-0 lg:min-w-[65%] overflow-hidden">
+      <main className="flex flex-1 flex-col lg:flex-row min-h-0">
+        {/* ── Left column: TripAgentChat ─────────────────────────────────── */}
+        <div className="flex min-w-0 flex-1 flex-col lg:flex-[3]">
           <TripAgentChat
             room={room}
             identity={identity}
@@ -512,18 +518,17 @@ export default function RoomShell({
           />
         </div>
 
-        {/* ── Right column: TripContextPanel (desktop always-visible) ─────── */}
+        {/* ── Right column: TripContextPanel ──────────────────────────────── */}
         {/*
-         * Desktop: always visible in the right column.
-         * Mobile: rendered as a full-height fixed overlay when isMobileContextOpen=true;
-         *         otherwise hidden via `hidden lg:block`.
+         * Desktop: always visible, flex-[1] (~35% of the row).
+         * Mobile: full-height fixed overlay when isMobileContextOpen=true.
          * Requirements: 2.1, 2.2, 9.7
          */}
         <div
           className={
             isMobileContextOpen
               ? "fixed inset-0 z-50 flex flex-col"
-              : "hidden lg:flex lg:flex-col lg:w-[35%] overflow-y-auto"
+              : "hidden lg:flex lg:flex-[1] lg:flex-col lg:min-w-0 overflow-y-auto"
           }
         >
           {/* Close button inside the overlay — only rendered on mobile overlay */}

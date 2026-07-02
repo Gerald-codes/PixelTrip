@@ -26,16 +26,16 @@ export default function DestinationCard({
   suggestion: DestinationSuggestion;
 }) {
   return (
-    <article className="overflow-hidden border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]">
+    <article className="w-full max-w-full overflow-hidden border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]">
       {/* Header: name + fit score */}
-      <header className="flex items-start justify-between gap-4 border-b-4 border-[#1E3A5F] bg-[#38BDF8] px-6 py-4">
-        <h3 className="text-2xl font-bold text-[#1E3A5F]">
+      <header className="flex flex-wrap items-start gap-3 border-b-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-4 sm:px-6">
+        <h3 className="min-w-0 flex-1 break-words text-xl font-bold text-[#1E3A5F] sm:text-2xl">
           {suggestion.destinationName}
         </h3>
         <FitScoreBadge score={suggestion.fitScore} />
       </header>
 
-      <div className="flex flex-col gap-5 px-6 py-5">
+      <div className="flex flex-col gap-5 px-4 py-4 sm:px-6 sm:py-5">
         {/* Recommendation reason — the hero "why" */}
         <section
           aria-label="Why this destination"
@@ -44,12 +44,12 @@ export default function DestinationCard({
           <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             Why this place
           </p>
-          <p className="mt-1 text-base font-semibold leading-relaxed text-[#1E3A5F]">
+          <p className="mt-1 break-words text-base font-semibold leading-relaxed text-[#1E3A5F]">
             {suggestion.recommendationReason}
           </p>
         </section>
 
-        {/* Weather + seasonality — concrete timing reasoning */}
+        {/* Weather + seasonality */}
         <section
           aria-label="Timing and weather"
           className="grid grid-cols-1 gap-3 sm:grid-cols-2"
@@ -66,7 +66,7 @@ export default function DestinationCard({
           />
         </section>
 
-        {/* Crowd + price level — compact pills */}
+        {/* Crowd + price level */}
         <section
           aria-label="Crowd and price"
           className="flex flex-wrap items-center gap-2"
@@ -83,19 +83,19 @@ export default function DestinationCard({
             </h4>
             <ul className="mt-2 flex flex-col gap-1 text-sm font-semibold text-[#1E3A5F]">
               {suggestion.bestActivities.map((activity, i) => (
-                <li key={i} className="flex items-start gap-2">
+                <li key={i} className="flex min-w-0 items-start gap-2">
                   <span
                     aria-hidden="true"
                     className="mt-1 inline-block h-1.5 w-1.5 flex-none bg-[#38BDF8]"
                   />
-                  <span>{activity}</span>
+                  <span className="break-words">{activity}</span>
                 </li>
               ))}
             </ul>
           </section>
         )}
 
-        {/* Downsides — visually distinct so they can't be missed */}
+        {/* Downsides */}
         {suggestion.downsides.length > 0 && (
           <section
             aria-label="Trade-offs"
@@ -106,18 +106,16 @@ export default function DestinationCard({
             </h4>
             <ul className="mt-1 flex flex-col gap-1 text-sm font-semibold text-[#1E3A5F]">
               {suggestion.downsides.map((d, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span aria-hidden="true" className="select-none">
-                    •
-                  </span>
-                  <span>{d}</span>
+                <li key={i} className="flex min-w-0 items-start gap-2">
+                  <span aria-hidden="true" className="select-none">•</span>
+                  <span className="break-words">{d}</span>
                 </li>
               ))}
             </ul>
           </section>
         )}
 
-        {/* Persona fit — small footer section */}
+        {/* Persona fit */}
         <section
           aria-label="Persona fit"
           className="border-t-4 border-[#1E3A5F] pt-4"
@@ -125,7 +123,7 @@ export default function DestinationCard({
           <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             Fit for this group
           </h4>
-          <p className="mt-1 text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+          <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
             {suggestion.personaFitSummary}
           </p>
         </section>

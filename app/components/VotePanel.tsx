@@ -44,6 +44,8 @@ export interface VotePanelProps {
   selectedOption: string | null;
   onCast: (value: string) => Promise<void>;
   disabled?: boolean;
+  /** When true, the vote is finalized and cannot be changed. */
+  locked?: boolean;
   tally?: Record<string, number>;
   totalVoters?: number;
   totalVotes?: number;
@@ -67,6 +69,7 @@ export default function VotePanel({
   selectedOption,
   onCast,
   disabled = false,
+  locked = false,
   tally,
   totalVoters,
   totalVotes,
@@ -89,6 +92,9 @@ export default function VotePanel({
 
   const hasMultipleWinners = winningValues.size > 1;
   const hasVoted = selectedOption !== null;
+  // Interaction is blocked when: round is locked, disabled (in-flight), or
+  // the round is resolved with results shown.
+  const interactionBlocked = locked || disabled || showResults;
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,8 +121,9 @@ export default function VotePanel({
           const isSelected = option.value === selectedOption;
           const isWinner = winningValues.has(option.value);
           const optionTally = tally?.[option.value] ?? 0;
-          // Locked once the viewer has cast OR while disabled/in flight.
-          const locked = hasVoted || disabled;
+          // Users can change their vote before lock. Block clicks only when
+          // the round is locked/disabled, or when clicking the already-selected option.
+          const clickBlocked = interactionBlocked || (isSelected && !locked);
 
           // Compose border / background to make state instantly readable.
           const borderClass = isWinner
@@ -134,28 +141,30 @@ export default function VotePanel({
             : isSelected
               ? "shadow-[4px_4px_0px_#38BDF8]"
               : "shadow-[4px_4px_0px_#1E3A5F]";
-          const hoverClass = locked
+          const hoverClass = interactionBlocked
             ? ""
             : "hover:bg-[#fde68a] hover:shadow-[3px_3px_0px_#1E3A5F]";
-          const cursorClass = locked ? "cursor-default" : "cursor-pointer";
+          const cursorClass = interactionBlocked ? "cursor-default" : "cursor-pointer";
 
           return (
             <li key={option.value}>
               <button
                 type="button"
                 onClick={() => {
-                  if (locked) return;
+                  if (interactionBlocked) return;
+                  // Allow re-selecting a different option (vote change)
+                  if (isSelected) return; // clicking same option is a no-op
                   void onCast(option.value);
                 }}
-                disabled={locked}
+                disabled={interactionBlocked}
                 aria-pressed={isSelected}
-                className={`flex w-full flex-col gap-2 border-4 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[#38BDF8] disabled:cursor-default ${borderClass} ${bgClass} ${shadowClass} ${hoverClass} ${cursorClass}`}
+                className={`flex w-full min-w-0 flex-col gap-2 border-4 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[#38BDF8] disabled:cursor-default ${borderClass} ${bgClass} ${shadowClass} ${hoverClass} ${cursorClass}`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="text-base font-bold text-[#1E3A5F]">
+                <div className="flex min-w-0 items-start justify-between gap-2">
+                  <span className="min-w-0 flex-1 break-words text-base font-bold text-[#1E3A5F]">
                     {option.label}
                   </span>
-                  <span className="flex flex-none items-center gap-2">
+                  <span className="flex flex-none flex-wrap items-center gap-1">
                     {isSelected && (
                       <span className="border-2 border-[#1E3A5F] bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
                         Your vote
@@ -163,21 +172,18 @@ export default function VotePanel({
                     )}
                     {isWinner && (
                       <span className="border-2 border-[#1E3A5F] bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
-                        {hasMultipleWinners ? "Tied for lead" : "Winner"}
+                        {hasMultipleWinners ? "Tied" : "Winner"}
                       </span>
                     )}
                   </span>
                 </div>
 
                 {option.description && (
-                  <div className="text-sm font-semibold text-[#1E3A5F]">
+                  <div className="min-w-0 break-words text-sm font-semibold text-[#1E3A5F]">
                     {option.description}
                   </div>
                 )}
 
-                {/* Vote counts are only rendered when the parent passes a tally.
-                    The parent withholds the tally until everyone has voted so
-                    the round stays anonymous in progress. */}
                 {tally && (
                   <p className="text-xs font-bold text-[#1E3A5F]">
                     {optionTally} {optionTally === 1 ? "vote" : "votes"}
@@ -189,10 +195,14 @@ export default function VotePanel({
         })}
       </ul>
 
-      {hasVoted && (
+      {hasVoted && !locked && (
         <p className="text-xs font-semibold text-[#1E3A5F]">
-          Your vote is locked in. Wait for everyone else to vote to see the
-          results.
+          Tap another option to change your vote before the round closes.
+        </p>
+      )}
+      {hasVoted && locked && (
+        <p className="text-xs font-semibold text-[#1E3A5F]">
+          Vote locked — the round is closed.
         </p>
       )}
     </div>

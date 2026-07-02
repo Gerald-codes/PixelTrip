@@ -1,150 +1,218 @@
 "use client";
 
 /**
- * BudgetStatusBadge — per-person budget estimate status indicator.
+ * BudgetStatusBadge — per-person budget estimate with progress bar.
  *
- * Displays the computed trip budget estimate with a colour-coded status and
- * a short cost-driver explanation line below the badge.
+ * Always shows:
+ *   - Colour-coded status pill (within / near / over)
+ *   - "$estimate / $limit per person" text
+ *   - Pixel-style progress bar (clamped at 100% visual width)
+ *   - Real percentage text when over budget (e.g. "112% of budget")
+ *   - Near/over warning message
+ *   - Cost-driver sub-line
  *
- * Status colours:
- *   "within" — grass green  (#4ADE80)  estimate is comfortably under budget
- *   "near"   — sunset orange (#FB923C)  estimate is approaching the threshold
- *   "over"   — red          (#EF4444)  estimate exceeds the budget threshold
+ * Progress bar thresholds:
+ *   within  — percentageUsed < 80%   → grass-green fill
+ *   near    — 80% ≤ percentageUsed ≤ 100%  → sunset-orange fill
+ *   over    — percentageUsed > 100%  → red fill, visual bar clamped at 100%
  *
  * Visual rules (pixel-art):
- *   - Zero border-radius (no rounded corners)
- *   - 2px solid deep-navy (#1E3A5F) border
- *   - 4px 4px 0 #1E3A5F box-shadow (blocky offset shadow)
+ *   - Zero border-radius on all elements
+ *   - 2px solid deep-navy border on pill and bar
+ *   - Deep-navy text on all coloured surfaces (WCAG AA)
  *   - Monospace font throughout
- *   - No white backgrounds; deep navy (#1E3A5F) for all text
+ *   - max-width: 100% on outer wrapper — never overflows container
  *
- * Layout:
- *   - Top row: coloured status pill with "$N per person" estimate label
- *   - Sub-line: costDriverLine (≤80 chars) rendered below the badge in
- *     smaller monospace text, same deep-navy colour
- *
- * Requirements: 10.4, 10.5, 12.2, 12.5
+ * Requirements: 10.4, 10.5, 10.6, 10.7, 12.2, 12.5
  */
 
 import React from "react";
+import type { BudgetEstimate } from "@/lib/types";
 
-// ─── Prop types ───────────────────────────────────────────────────────────────
-
-interface BudgetStatusBadgeProps {
-  /** Budget status classification. */
-  status: "within" | "near" | "over";
-  /** Total per-person estimate in USD (integer or float). */
-  estimate: number;
-  /**
-   * Short explanation of the dominant cost driver.
-   * Capped at 80 characters by the upstream computeBudgetEstimate() function.
-   */
-  costDriverLine: string;
-}
-
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Palette ──────────────────────────────────────────────────────────────────
 
 const DEEP_NAVY = "#1E3A5F";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
+const SAND_CREAM = "#FEF3C7";
 
-const STATUS_COLOURS: Record<BudgetStatusBadgeProps["status"], string> = {
+// ─── Prop types ───────────────────────────────────────────────────────────────
+
+interface BudgetStatusBadgeProps {
+  /** Full budget estimate from computeBudgetEstimate(). */
+  estimate: BudgetEstimate;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const STATUS_FILL: Record<BudgetEstimate["status"], string> = {
   within: GRASS_GREEN,
   near: SUNSET_ORANGE,
   over: RED,
 };
 
-const STATUS_LABELS: Record<BudgetStatusBadgeProps["status"], string> = {
+const STATUS_LABELS: Record<BudgetEstimate["status"], string> = {
   within: "Within budget",
   near: "Near budget",
   over: "Over budget",
 };
 
+const STATUS_WARNINGS: Record<BudgetEstimate["status"], string | null> = {
+  within: null,
+  near: "Approaching the budget limit for your most budget-conscious traveller.",
+  over: "Over budget for your most budget-conscious traveller.",
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Format a USD amount as "$N" (no decimal places for whole dollars, 2dp otherwise). */
 function formatUSD(amount: number): string {
-  const rounded = Math.round(amount);
-  return `$${rounded.toLocaleString("en-US")}`;
+  return `$${Math.round(amount).toLocaleString("en-US")}`;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function BudgetStatusBadge({
-  status,
-  estimate,
-  costDriverLine,
-}: BudgetStatusBadgeProps) {
-  const bg = STATUS_COLOURS[status];
+export default function BudgetStatusBadge({ estimate }: BudgetStatusBadgeProps) {
+  const {
+    totalPerPerson,
+    budgetLimitPerPerson,
+    status,
+    costDriverLine,
+  } = estimate;
+
+  const percentageUsed = Math.round((totalPerPerson / budgetLimitPerPerson) * 100);
+  // Visual bar fill is clamped at 100%; text shows the real % when over.
+  const barFillPct = Math.min(percentageUsed, 100);
+
+  const fillColour = STATUS_FILL[status];
   const statusLabel = STATUS_LABELS[status];
-  const formattedEstimate = formatUSD(estimate);
+  const warningMessage = STATUS_WARNINGS[status];
 
   return (
     <div
       style={{
-        display: "inline-flex",
+        display: "flex",
         flexDirection: "column",
-        gap: 6,
+        gap: 8,
         fontFamily: "'Courier New', Courier, monospace",
+        maxWidth: "100%",
+        width: "100%",
+        boxSizing: "border-box",
       }}
+      aria-label={`Budget status: ${statusLabel}. ${formatUSD(totalPerPerson)} of ${formatUSD(budgetLimitPerPerson)} per person (${percentageUsed}%).`}
     >
-      {/* ── Status pill + estimate ── */}
+      {/* ── Status pill + estimate + limit ── */}
       <div
-        aria-label={`Budget status: ${statusLabel}. Estimated ${formattedEstimate} per person.`}
         style={{
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
           gap: 8,
-          paddingTop: 4,
-          paddingBottom: 4,
-          paddingLeft: 10,
-          paddingRight: 10,
-          backgroundColor: bg,
-          border: `2px solid ${DEEP_NAVY}`,
-          borderRadius: 0,
-          boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
-          userSelect: "none",
-          whiteSpace: "nowrap",
+          flexWrap: "wrap",        // wrap on narrow containers
+          minWidth: 0,
         }}
       >
-        {/* Status label */}
+        {/* Status pill */}
         <span
           style={{
-            fontSize: 12,
+            display: "inline-block",
+            flexShrink: 0,
+            backgroundColor: fillColour,
+            border: `2px solid ${DEEP_NAVY}`,
+            boxShadow: `3px 3px 0 ${DEEP_NAVY}`,
+            padding: "2px 8px",
+            fontSize: 11,
             fontWeight: 700,
             color: DEEP_NAVY,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
+            whiteSpace: "nowrap",
           }}
         >
           {statusLabel}
         </span>
 
-        {/* Divider */}
+        {/* Estimate / limit text — wrap if needed */}
         <span
-          aria-hidden="true"
           style={{
-            color: DEEP_NAVY,
-            opacity: 0.5,
             fontSize: 12,
+            fontWeight: 700,
+            color: SAND_CREAM,
+            wordBreak: "break-word",
+            minWidth: 0,
           }}
         >
-          |
+          {formatUSD(totalPerPerson)}{" "}
+          <span style={{ fontWeight: 400, opacity: 0.7 }}>
+            / {formatUSD(budgetLimitPerPerson)} per person
+          </span>
         </span>
 
-        {/* Per-person estimate */}
-        <span
+        {/* Real percentage — only shown when over budget */}
+        {status === "over" && (
+          <span
+            aria-label={`${percentageUsed}% of budget`}
+            style={{
+              flexShrink: 0,
+              fontSize: 11,
+              fontWeight: 700,
+              color: RED,
+              backgroundColor: SAND_CREAM,
+              border: `2px solid ${RED}`,
+              padding: "1px 6px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {percentageUsed}%
+          </span>
+        )}
+      </div>
+
+      {/* ── Progress bar ── */}
+      <div
+        role="progressbar"
+        aria-valuenow={barFillPct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Budget used: ${barFillPct}% visually (${percentageUsed}% actual)`}
+        style={{
+          width: "100%",
+          height: 14,
+          backgroundColor: `${SAND_CREAM}30`,
+          border: `2px solid ${SAND_CREAM}50`,
+          boxSizing: "border-box",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Fill */}
+        <div
           style={{
-            fontSize: 14,
-            fontWeight: 700,
-            color: DEEP_NAVY,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100%",
+            width: `${barFillPct}%`,
+            backgroundColor: fillColour,
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
+
+      {/* ── Near / over warning ── */}
+      {warningMessage && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 11,
+            fontWeight: 600,
+            color: status === "over" ? RED : SUNSET_ORANGE,
+            lineHeight: 1.4,
+            wordBreak: "break-word",
           }}
         >
-          {formattedEstimate}{" "}
-          <span style={{ fontSize: 11, fontWeight: 400 }}>/ person</span>
-        </span>
-      </div>
+          ⚠ {warningMessage}
+        </p>
+      )}
 
       {/* ── Cost-driver sub-line ── */}
       {costDriverLine && (
@@ -152,11 +220,10 @@ export default function BudgetStatusBadge({
           style={{
             margin: 0,
             fontSize: 11,
-            color: DEEP_NAVY,
-            fontFamily: "'Courier New', Courier, monospace",
-            opacity: 0.8,
-            maxWidth: 280,
+            color: SAND_CREAM,
+            opacity: 0.7,
             lineHeight: 1.4,
+            wordBreak: "break-word",
           }}
         >
           {costDriverLine}

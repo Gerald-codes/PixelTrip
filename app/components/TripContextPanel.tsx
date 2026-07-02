@@ -227,6 +227,8 @@ function FieldValue({
         fontWeight: notSet ? 400 : 600,
         color: notSet ? `${SAND_CREAM}80` : SAND_CREAM,
         wordBreak: "break-word",
+        overflowWrap: "break-word",
+        minWidth: 0,
       }}
     >
       {value}
@@ -290,23 +292,21 @@ export default function TripContextPanel({
     return map;
   }, [characterProfiles]);
 
-  // Derive the dominant budget level from character profiles (most common, or first)
+  // Derive the dominant budget level from character profiles (most conservative = lowest)
+  // Falls back to a label derived from the selected flight option when profiles are absent.
   const dominantBudgetLevel = React.useMemo(() => {
-    if (characterProfiles.length === 0) return null;
-    const counts: Record<string, number> = {};
-    for (const cp of characterProfiles) {
-      counts[cp.budgetLevel] = (counts[cp.budgetLevel] ?? 0) + 1;
+    if (characterProfiles.length > 0) {
+      const ORDER = ["low", "medium", "high"];
+      const levels = characterProfiles.map((cp) => cp.budgetLevel as string);
+      const minIdx = Math.min(...levels.map((l) => ORDER.indexOf(l)).filter((i) => i >= 0));
+      return minIdx >= 0 ? ORDER[minIdx] : levels[0];
     }
-    let best: string | null = null;
-    let bestCount = 0;
-    for (const [level, count] of Object.entries(counts)) {
-      if (count > bestCount) {
-        bestCount = count;
-        best = level;
-      }
-    }
-    return best;
-  }, [characterProfiles]);
+    // Derive a rough budget level from the selected flight option as a fallback.
+    if (room.selectedFlightOption === "budget") return "low";
+    if (room.selectedFlightOption === "comfort") return "high";
+    if (room.selectedFlightOption === "best_value") return "medium";
+    return null;
+  }, [characterProfiles, room.selectedFlightOption]);
 
   // Format travel dates
   const travelDatesValue = React.useMemo(() => {
@@ -314,10 +314,13 @@ export default function TripContextPanel({
     return `${travelDates.startDate} – ${travelDates.endDate}`;
   }, [travelDates]);
 
-  // Format travel vibes
+  // Format travel vibes — strip any remaining vibe: prefix, capitalise
   const travelVibesValue = React.useMemo(() => {
     if (!travelVibes || travelVibes.length === 0) return null;
-    return travelVibes.join(", ");
+    const labels = travelVibes.map((v) =>
+      v.replace(/^vibe:/, "").replace(/_/g, " "),
+    );
+    return labels.join(", ");
   }, [travelVibes]);
 
   // Determine destination display value
@@ -392,7 +395,8 @@ export default function TripContextPanel({
               color: SAND_CREAM,
               textTransform: "uppercase" as const,
               letterSpacing: "0.08em",
-              whiteSpace: "nowrap" as const,
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
             }}
             aria-label={`Current planning stage: ${stageLabel}`}
           >
@@ -544,21 +548,53 @@ export default function TripContextPanel({
         </div>
       </div>
 
-      {/* ── Budget status badge (only when estimate is available) ── */}
-      {budgetEstimate !== null && (
-        <div
-          style={{
-            padding: "12px 16px",
-            borderBottom: `2px solid ${SAND_CREAM}20`,
-          }}
-        >
-          <BudgetStatusBadge
-            status={budgetEstimate.status}
-            estimate={budgetEstimate.totalPerPerson}
-            costDriverLine={budgetEstimate.costDriverLine}
-          />
-        </div>
-      )}
+      {/* ── Budget status badge (always shown; "missing data" when not available) ── */}
+      <div
+        style={{
+          padding: "12px 16px",
+          borderBottom: `2px solid ${SAND_CREAM}20`,
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+        }}
+      >
+        <SectionLabel>Budget estimate</SectionLabel>
+        {budgetEstimate !== null ? (
+          <BudgetStatusBadge estimate={budgetEstimate} />
+        ) : (
+          /* Always show the section — list what is missing */
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'Courier New', Courier, monospace",
+                fontSize: 12,
+                color: `${SAND_CREAM}70`,
+                lineHeight: 1.5,
+              }}
+            >
+              Estimate not yet available.
+            </p>
+            <ul
+              style={{
+                margin: 0,
+                padding: "0 0 0 16px",
+                fontFamily: "'Courier New', Courier, monospace",
+                fontSize: 11,
+                color: `${SAND_CREAM}60`,
+                lineHeight: 1.6,
+              }}
+            >
+              {!budgetEstimate && (
+                <>
+                  <li>Destination with a price level (vote on a destination first)</li>
+                  <li>Selected flight option (complete the flight vote)</li>
+                </>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* ── Trip decisions summary ── */}
       <div

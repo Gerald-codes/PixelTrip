@@ -139,9 +139,22 @@ export default function VotingStage({
     results?.votes.find((v) => v.userId === identity.userId) ?? null;
   const selectedOption = myVote?.selectedOption ?? null;
 
+  // ── Derived round state (computed before handleCast so it can be a dep) ──
+  const totalVoters = results?.totalVoters ?? members.length;
+  const totalVotes = results?.totalVotes ?? 0;
+  const roundClosed =
+    totalVoters > 0 && totalVotes >= totalVoters && totalVotes > 0;
+  const hasClearWinner = roundClosed && !!results?.winner;
+  const tiedOptions = results?.tiedOptions ?? [];
+  const isTied = roundClosed && tiedOptions.length > 0;
+
   const handleCast = useCallback(
     async (value: string) => {
-      if (casting || selectedOption) return;
+      if (casting) return;
+      // Block vote changes once the round is closed (all voted).
+      if (roundClosed) return;
+      // No-op if clicking the same option already selected.
+      if (value === selectedOption) return;
       setCasting(true);
       setCastError(null);
       try {
@@ -173,7 +186,7 @@ export default function VotingStage({
         setCasting(false);
       }
     },
-    [casting, selectedOption, room.id, identity.userId, voteType],
+    [casting, selectedOption, room.id, identity.userId, voteType, roundClosed],
   );
 
   // Pick up live updates from peers' casts. Mirrors the destinations channel.
@@ -188,15 +201,7 @@ export default function VotingStage({
     };
   }, [room.id, voteType]);
 
-  // ── Derived round state ──────────────────────────────────────────────────
-  const totalVoters = results?.totalVoters ?? members.length;
-  const totalVotes = results?.totalVotes ?? 0;
-  const roundClosed =
-    totalVoters > 0 && totalVotes >= totalVoters && totalVotes > 0;
-  const hasClearWinner = roundClosed && !!results?.winner;
-  const tiedOptions = results?.tiedOptions ?? [];
-  const isTied = roundClosed && tiedOptions.length > 0;
-
+  // ── Tally for panel (hide breakdown until round closes) ───────────────
   // Until the round closes, hide the per-option breakdown so the round stays
   // anonymous in progress.
   const tallyForPanel: VotePanelProps["tally"] = roundClosed
@@ -221,25 +226,118 @@ export default function VotingStage({
     }
   }, [hasClearWinner, results?.winner, onWinner, voteType]);
 
-  // ── Tie-break (host only, MVP-style) ─────────────────────────────────────
-  const [resolvingTie, setResolvingTie] = useState(false);
-  const [tieError, setTieError] = useState<string | null>(null);
+  // ── Tie-break — AI-mediated resolution panel ─────────────────────────────
+  // When the round closes on a tie, we replace the dumb host-picker with a
+  // full AI-generated resolution flow. The host triggers the tiebreak agent,
+  // the group votes on the proposed options, and the winner is applied.
 
-  async function resolveTie(option: string) {
-    if (resolvingTie) return;
-    setResolvingTie(true);
+  type TiePhase = "idle" | "generating" | "voting" | "applying";
+
+  interface TieOption {
+    id: string;
+    description: string;
+    tradeoffs: string;
+  }
+
+  const [tiePhase, setTiePhase] = useState<TiePhase>("idle");
+  const [tieSummary, setTieSummary] = useState<string | null>(null);
+  const [tieOptions, setTieOptions] = useState<TieOption[]>([]);
+  const [tieError, setTieError] = useState<string | null>(null);
+  const [selectedTieOption, setSelectedTieOption] = useState<string | null>(null);
+  const [applyingTie, setApplyingTie] = useState(false);
+
+  // Host triggers the tiebreak agent.
+  async function handleGenerateTiebreak() {
+    if (tiePhase !== "idle") return;
+    setTiePhase("generating");
+    setTieError(null);
+    try {
+      const res = await fetch("/api/agents/tiebreak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: room.id,
+          voteType,
+          tiedOptions,
+          tally: results?.tally ?? {},
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(body?.error ?? "Failed to generate resolution options");
+      }
+      const data = (await res.json()) as {
+        conflictSummary: string;
+        proposedOptions: TieOption[];
+      };
+      setTieSummary(data.conflictSummary);
+      setTieOptions(data.proposedOptions);
+      setTiePhase("voting");
+    } catch (err) {
+      setTieError(
+        err instanceof Error ? err.message : "Failed to generate resolution options",
+      );
+      setTiePhase("idle");
+    }
+  }
+
+  // Any member can select a resolution option; host applies it.
+  function handleSelectTieOption(optionId: string) {
+    if (tiePhase !== "voting") return;
+    setSelectedTieOption(optionId);
+  }
+
+  // Host applies the selected resolution — calls back to the parent via onWinner.
+  async function handleApplyTiebreak() {
+    if (!selectedTieOption || tiePhase !== "voting" || applyingTie) return;
+    const chosen = tieOptions.find((o) => o.id === selectedTieOption);
+    if (!chosen) return;
+
+    setApplyingTie(true);
+    setTieError(null);
+    try {
+      // The chosen option's id should correspond to one of the original tied
+      // values (e.g. "pick_budget" resolves to "budget"). We extract the
+      // original option by matching the id prefix or falling back to the first
+      // tied option whose name appears in the id.
+      const resolvedValue =
+        tiedOptions.find((opt) =>
+          selectedTieOption.toLowerCase().includes(opt.toLowerCase().replace(/[^a-z]/g, "")),
+        ) ?? tiedOptions[0];
+
+      if (onWinner) {
+        await Promise.resolve(onWinner(resolvedValue));
+        firedForRef.current = resolvedValue;
+      }
+      setTiePhase("applying");
+    } catch (err) {
+      setTieError(
+        err instanceof Error ? err.message : "Failed to apply resolution",
+      );
+    } finally {
+      setApplyingTie(false);
+    }
+  }
+
+  // Manual host override — always available as a fallback.
+  async function handleManualTiebreak(option: string) {
+    if (applyingTie) return;
+    setApplyingTie(true);
     setTieError(null);
     try {
       if (onWinner) {
         await Promise.resolve(onWinner(option));
         firedForRef.current = option;
       }
+      setTiePhase("applying");
     } catch (err) {
       setTieError(
-        err instanceof Error ? err.message : "Failed to resolve tie",
+        err instanceof Error ? err.message : "Failed to apply resolution",
       );
     } finally {
-      setResolvingTie(false);
+      setApplyingTie(false);
     }
   }
 
@@ -289,6 +387,7 @@ export default function VotingStage({
           selectedOption={selectedOption}
           onCast={handleCast}
           disabled={casting}
+          locked={roundClosed}
           tally={tallyForPanel}
           totalVoters={totalVoters}
           totalVotes={totalVotes}
@@ -300,38 +399,136 @@ export default function VotingStage({
         )}
       </div>
 
-      {/* Tie-break panel: rendered only when the round closes on a tie. */}
-      {isTied && (
+      {/* ── Tie-break panel: AI-mediated resolution ───────────────────────── */}
+      {isTied && tiePhase !== "applying" && (
         <div className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <h3 className="text-lg font-bold text-[#1E3A5F]">
-            It&apos;s a tie
-          </h3>
-          <p className="mt-1 text-sm font-semibold text-[#1E3A5F]">
-            {tiedOptions.length} options are tied for the lead.
-            {isHost ? (
-              <> As the host, pick one to move the group forward.</>
-            ) : (
-              <> Waiting for the host to break the tie…</>
-            )}
-          </p>
+          <h3 className="text-lg font-bold text-[#1E3A5F]">⚖️ It&apos;s a tie</h3>
 
-          {isHost && (
-            <div className="mt-4 flex flex-col gap-2">
-              {tiedOptions.map((opt) => (
+          {/* Step 1 — generate options (host only) */}
+          {tiePhase === "idle" && (
+            <>
+              <p className="mt-2 text-sm font-semibold text-[#1E3A5F]">
+                The vote ended with{" "}
+                <strong>{tiedOptions.join(" and ")}</strong> tied. Let the AI
+                explain the trade-offs and suggest a way forward.
+              </p>
+              {isHost ? (
                 <button
-                  key={opt}
                   type="button"
-                  onClick={() => void resolveTie(opt)}
-                  disabled={resolvingTie}
-                  className="border-4 border-[#1E3A5F] bg-[#FB923C] px-3 py-2 text-left text-sm font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => void handleGenerateTiebreak()}
+                  className="mt-4 border-4 border-[#1E3A5F] bg-[#A855F7] px-4 py-2 font-bold text-white shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#9333ea] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
                 >
-                  Go with &ldquo;{opt}&rdquo;
+                  Ask the AI to help decide
                 </button>
-              ))}
-              {tieError && (
-                <p className="text-sm font-semibold text-red-600">{tieError}</p>
+              ) : (
+                <p className="mt-2 text-sm text-[#1E3A5F] opacity-70">
+                  Waiting for the host to start the resolution…
+                </p>
+              )}
+            </>
+          )}
+
+          {/* Step 2 — generating */}
+          {tiePhase === "generating" && (
+            <p className="mt-2 text-sm font-semibold text-[#1E3A5F]">
+              ⏳ Generating resolution options… (usually a few seconds)
+            </p>
+          )}
+
+          {/* Step 3 — voting on options */}
+          {tiePhase === "voting" && tieSummary && (
+            <div className="mt-3 flex flex-col gap-4">
+              {/* AI conflict summary */}
+              <p className="text-sm font-semibold text-[#1E3A5F]">
+                {tieSummary}
+              </p>
+
+              {/* Resolution option cards */}
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+                  Resolution options — pick one:
+                </p>
+                {tieOptions.map((opt) => {
+                  const isSelected = selectedTieOption === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleSelectTieOption(opt.id)}
+                      className={[
+                        "flex flex-col gap-1 border-4 p-4 text-left shadow-[4px_4px_0px_#1E3A5F]",
+                        isSelected
+                          ? "border-[#4ADE80] bg-[#f0fdf4]"
+                          : "border-[#1E3A5F] bg-[#FEF3C7] hover:bg-[#fde68a]",
+                      ].join(" ")}
+                      aria-pressed={isSelected}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isSelected && (
+                          <span className="text-[#4ADE80] font-bold">✓</span>
+                        )}
+                        <span className="font-bold text-[#1E3A5F]">
+                          {opt.description}
+                        </span>
+                      </div>
+                      {opt.tradeoffs && (
+                        <p className="text-xs text-[#1E3A5F] opacity-70 leading-relaxed">
+                          {opt.tradeoffs}
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Apply button (host only) */}
+              {isHost && (
+                <div className="flex flex-col gap-2 pt-1 border-t-2 border-dashed border-[#1E3A5F]">
+                  <button
+                    type="button"
+                    onClick={() => void handleApplyTiebreak()}
+                    disabled={!selectedTieOption || applyingTie}
+                    className="self-start border-4 border-[#1E3A5F] bg-[#4ADE80] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {applyingTie ? "Applying…" : "Apply resolution"}
+                  </button>
+                  {!selectedTieOption && (
+                    <p className="text-xs text-[#1E3A5F] opacity-60">
+                      Select an option above to apply it.
+                    </p>
+                  )}
+                  {/* Manual fallback — always available */}
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs text-[#1E3A5F] opacity-50 hover:opacity-80">
+                      Or pick manually…
+                    </summary>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {tiedOptions.map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => void handleManualTiebreak(opt)}
+                          disabled={applyingTie}
+                          className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#fde68a] disabled:opacity-50"
+                        >
+                          Go with &ldquo;{opt}&rdquo;
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+              )}
+
+              {!isHost && (
+                <p className="text-sm text-[#1E3A5F] opacity-70">
+                  Waiting for the host to apply a resolution…
+                </p>
               )}
             </div>
+          )}
+
+          {tieError && (
+            <p className="mt-3 text-sm font-semibold text-red-600">{tieError}</p>
           )}
         </div>
       )}

@@ -195,11 +195,11 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
   return (
     <article
-      className={`overflow-hidden border-4 ${categoryColors[option.value]} shadow-[4px_4px_0px_#1E3A5F]`}
+      className={`w-full max-w-full overflow-hidden border-4 ${categoryColors[option.value]} shadow-[4px_4px_0px_#1E3A5F]`}
     >
-      {/* Card header */}
-      <header className="flex items-start justify-between gap-4 border-b-4 border-inherit px-6 py-4">
-        <h3 className={`text-xl font-bold ${labelColors[option.value]}`}>
+      {/* Card header: stacked on mobile, row on sm+ */}
+      <header className="flex flex-col gap-3 border-b-4 border-inherit px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-6">
+        <h3 className={`min-w-0 break-words text-xl font-bold ${labelColors[option.value]}`}>
           {option.label}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
@@ -209,13 +209,13 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
         </div>
       </header>
 
-      <div className="flex flex-col gap-4 px-6 py-5">
+      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5">
         {/* What this category means */}
-        <p className="text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+        <p className="break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
           {option.explanation}
         </p>
 
-        {/* Itinerary impact — amber callout so it stands out */}
+        {/* Itinerary impact — amber callout */}
         <section
           aria-label="Itinerary impact"
           className="border-l-4 border-[#FB923C] bg-amber-50 px-4 py-3"
@@ -223,7 +223,7 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
           <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
             How this affects your itinerary
           </p>
-          <p className="mt-1 text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+          <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
             {option.itineraryImpact}
           </p>
         </section>
@@ -234,11 +234,11 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2.5 py-1 text-center shadow-[2px_2px_0px_#1E3A5F]">
-      <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-1 text-center shadow-[2px_2px_0px_#1E3A5F]">
+      <span className="whitespace-nowrap text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
         {label}
       </span>
-      <span className="text-sm font-bold text-[#1E3A5F]">{value}</span>
+      <span className="whitespace-nowrap text-sm font-bold text-[#1E3A5F]">{value}</span>
     </span>
   );
 }

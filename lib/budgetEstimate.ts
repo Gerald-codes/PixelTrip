@@ -94,6 +94,7 @@ export function computeBudgetEstimate(
     tripLengthDays *
     DAILY_COSTS[budgetLevel];
   const totalPerPerson = flightCost + dailyCost;
+  const budgetLimitPerPerson = BUDGET_THRESHOLDS[budgetLevel];
   const status = classifyBudgetStatus(totalPerPerson, budgetLevel);
 
   // Determine which component is the larger cost driver.
@@ -108,6 +109,7 @@ export function computeBudgetEstimate(
     flightCost,
     dailyCost,
     totalPerPerson,
+    budgetLimitPerPerson,
     status,
     costDriverLine,
     tripLengthDays,

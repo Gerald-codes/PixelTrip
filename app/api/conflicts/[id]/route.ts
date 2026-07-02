@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
 import { getServiceSupabase } from "@/lib/supabase";
-import type { ConflictResolution, ConflictOption } from "@/lib/types";
+import type { ConflictOption, ConflictResolution } from "@/lib/types";
 
-// Always serve fresh data — never cache this route.
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-/** Shape of a `conflict_resolutions` row as returned by Supabase. */
+const NO_ROWS = "PGRST116";
+
 interface ConflictResolutionRow {
   id: string;
   room_id: string;
@@ -17,43 +17,39 @@ interface ConflictResolutionRow {
   proposed_options: ConflictOption[];
   selected_resolution: string | null;
   status: "open" | "voting" | "resolved";
-  created_at: string;
 }
 
-/** Map a snake_case DB row to the camelCase {@link ConflictResolution} shape. */
 function mapConflictRow(row: ConflictResolutionRow): ConflictResolution {
   return {
     id: row.id,
     roomId: row.room_id,
     itineraryId: row.itinerary_id,
     conflictSummary: row.conflict_summary,
-    affectedUsers: row.affected_users as string[],
-    proposedOptions: row.proposed_options as ConflictOption[],
+    affectedUsers: row.affected_users,
+    proposedOptions: row.proposed_options,
     selectedResolution: row.selected_resolution,
-    status: row.status as "open" | "voting" | "resolved",
+    status: row.status,
   };
 }
 
 interface PatchBody {
   selectedResolution?: unknown;
+  status?: unknown;
 }
 
 /**
  * PATCH /api/conflicts/[id]
  *
- * Body: { selectedResolution: string }
- *
- * Marks the conflict as resolved by setting `selected_resolution` and
- * flipping `status` to `'resolved'`. Returns 200 with the updated
- * {@link ConflictResolution}, or 404 if no matching record exists.
+ * Updates a conflict_resolutions row.
+ * Accepts: { selectedResolution?: string, status?: "open"|"voting"|"resolved" }
+ * Returns the updated ConflictResolution.
  */
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } },
 ) {
-  const { id } = params;
-
-  if (!id || id.trim() === "") {
+  const id = params.id?.trim();
+  if (!id) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
 
@@ -64,11 +60,34 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { selectedResolution } = body;
+  const update: Record<string, unknown> = {};
 
-  if (typeof selectedResolution !== "string" || selectedResolution.trim() === "") {
+  if (body.selectedResolution !== undefined) {
+    if (
+      typeof body.selectedResolution !== "string" ||
+      body.selectedResolution.trim() === ""
+    ) {
+      return NextResponse.json(
+        { error: "selectedResolution must be a non-empty string" },
+        { status: 400 },
+      );
+    }
+    update.selected_resolution = body.selectedResolution.trim();
+  }
+
+  if (body.status !== undefined) {
+    if (!["open", "voting", "resolved"].includes(body.status as string)) {
+      return NextResponse.json(
+        { error: "status must be one of: open, voting, resolved" },
+        { status: 400 },
+      );
+    }
+    update.status = body.status;
+  }
+
+  if (Object.keys(update).length === 0) {
     return NextResponse.json(
-      { error: "selectedResolution is required" },
+      { error: "At least one field (selectedResolution or status) is required" },
       { status: 400 },
     );
   }
@@ -77,36 +96,24 @@ export async function PATCH(
 
   const { data, error } = await supabase
     .from("conflict_resolutions")
-    .update({
-      selected_resolution: selectedResolution.trim(),
-      status: "resolved",
-    })
-    .eq("id", id.trim())
+    .update(update)
+    .eq("id", id)
     .select()
     .single();
 
   if (error) {
-    // PGRST116 = no rows matched — treat as 404
-    if (error.code === "PGRST116") {
+    if (error.code === NO_ROWS) {
       return NextResponse.json(
         { error: "Conflict resolution not found" },
         { status: 404 },
       );
     }
+    console.log(`[conflicts/${id}] failed to update:`, error.message);
     return NextResponse.json(
       { error: "Failed to update conflict resolution" },
       { status: 500 },
     );
   }
 
-  if (!data) {
-    return NextResponse.json(
-      { error: "Conflict resolution not found" },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json(mapConflictRow(data as ConflictResolutionRow), {
-    status: 200,
-  });
+  return NextResponse.json(mapConflictRow(data as ConflictResolutionRow));
 }

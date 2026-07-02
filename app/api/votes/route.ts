@@ -7,9 +7,6 @@ import type { Vote } from "@/lib/types";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-/** Postgres unique-violation error code, raised by the votes_room_user_type_unique constraint. */
-const UNIQUE_VIOLATION = "23505";
-
 /** Allowed vote rounds, mirroring {@link Vote.voteType}. */
 const VALID_VOTE_TYPES = [
   "destination",
@@ -57,13 +54,12 @@ interface PostBody {
 /**
  * POST /api/votes
  *
- * Records a single vote in a destination, flight, or conflict-resolution round.
+ * Records or updates a single vote in a destination, flight, or conflict-resolution round.
  *
- * The unique constraint `votes_room_user_type_unique` on
- * (room_id, user_id, vote_type) blocks duplicates at the DB level. A duplicate
- * surfaces here as Postgres error code 23505 and is mapped to a 409 with a
- * clear "already voted" message so the client can render the existing vote
- * rather than retry blindly.
+ * Uses upsert on the unique constraint `votes_room_user_type_unique`
+ * (room_id, user_id, vote_type). If the user has already voted in this round,
+ * the existing row is updated with the new `selected_option`; no duplicate is
+ * ever created. This lets users change their vote before the round resolves.
  *
  * Request body:
  *   {
@@ -73,7 +69,7 @@ interface PostBody {
  *     selectedOption: string
  *   }
  *
- * Returns 201 with the inserted {@link Vote} in camelCase.
+ * Returns 200 with the upserted {@link Vote} in camelCase.
  */
 export async function POST(request: Request) {
   let body: PostBody;
@@ -106,30 +102,51 @@ export async function POST(request: Request) {
     );
   }
 
+  // Manual upsert: check for an existing vote, then update or insert.
+  // This avoids the PostgREST onConflict limitation entirely and works
+  // regardless of how the unique constraint is named or exposed.
   const supabase = getServiceSupabase();
 
-  const { data, error } = await supabase
+  // Check for an existing vote for this user in this round.
+  const { data: existing } = await supabase
     .from("votes")
-    .insert({
-      room_id: roomId,
-      user_id: userId,
-      vote_type: voteType,
-      selected_option: selectedOption,
-    })
-    .select()
-    .single();
+    .select("id")
+    .eq("room_id", roomId)
+    .eq("user_id", userId)
+    .eq("vote_type", voteType)
+    .maybeSingle();
+
+  let data: VoteRow | null = null;
+  let error: { message: string } | null = null;
+
+  if (existing) {
+    // Update the existing vote row with the new selection.
+    const result = await supabase
+      .from("votes")
+      .update({ selected_option: selectedOption })
+      .eq("id", existing.id)
+      .select()
+      .single();
+    data = result.data as VoteRow | null;
+    error = result.error;
+  } else {
+    // Insert a fresh vote row.
+    const result = await supabase
+      .from("votes")
+      .insert({
+        room_id: roomId,
+        user_id: userId,
+        vote_type: voteType,
+        selected_option: selectedOption,
+      })
+      .select()
+      .single();
+    data = result.data as VoteRow | null;
+    error = result.error;
+  }
 
   if (error) {
-    if (error.code === UNIQUE_VIOLATION) {
-      return NextResponse.json(
-        {
-          error: `User has already voted in this ${voteType} round`,
-          retryable: false,
-        },
-        { status: 409 },
-      );
-    }
-    console.log("[votes] failed to insert vote:", error.message);
+    console.log("[votes] failed to upsert vote:", error.message);
     return NextResponse.json(
       { error: "Failed to record vote" },
       { status: 500 },
@@ -138,11 +155,9 @@ export async function POST(request: Request) {
 
   const vote = mapVoteRow(data as VoteRow);
 
-  // Server-side trace for demo visibility. Truncate the userId for readability;
-  // the room is logged by id (the route doesn't have the room code on hand).
   console.log(
     `[votes] room ${vote.roomId} userId ${vote.userId.slice(0, 8)} voted ${vote.voteType}:${vote.selectedOption}`,
   );
 
-  return NextResponse.json(vote, { status: 201 });
+  return NextResponse.json(vote, { status: 200 });
 }

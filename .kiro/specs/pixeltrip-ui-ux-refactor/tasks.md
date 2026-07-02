@@ -362,6 +362,88 @@ This plan converts PixelTrip from a plain black-and-white SaaS aesthetic to an 8
 - [x] 14. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
+- [ ] 15. Budget estimate and status badge
+  - [ ] 15.1 Create `lib/budget.ts` with the pure estimate function
+    - Export `BudgetStatus`, `BudgetEstimate`, and `computeBudgetEstimate(...)` per the design addendum
+    - Implement `BUDGET_CAPS`, `FLIGHT_COST`, `PRICE_LEVEL_PER_DAY` constants; limit = caps of the lowest budget level present; `pending` when priceLevel/flightOption/tripDays is null
+    - Thresholds: within ≤ 85, near ≤ 100, over > 100
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.8, 10.9, 10.10_
+
+  - [ ] 15.2 Create `app/components/BudgetStatusBadge.tsx` and `app/components/BudgetBar.tsx`
+    - Badge: three states + pending, palette colours, deep-navy text for WCAG AA
+    - Bar: pixel-bordered track, fill clamped to 100% width, true % as text, "$estimate / $limit per person", over-budget threshold warning
+    - _Requirements: 10.4, 10.5, 10.6, 10.7, 10.9_
+
+  - [ ]* 15.3 Property test for budget arithmetic + thresholds
+    - **Property 20** and **Property 21**
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.7, 10.8, 10.9_
+
+- [ ] 16. Persistent Trip Info panel
+  - [ ] 16.1 Create `app/components/TripInfoPanel.tsx`
+    - Show budget bar, travel window, destination, flight option (human label), member count + compact avatars, current-decision label from `STAGE_DECISION_LABEL`
+    - Pending/placeholder text for unset fields; collapse to compact row below `md`
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.9_
+
+  - [ ] 16.2 Mount `TripInfoPanel` in `RoomShell`
+    - Render below header, above `{children}`; derive `priceLevel` from the selected destination suggestion, `travelWindow` from availability overlap
+    - Re-render changed fields via React state, no full reload
+    - _Requirements: 11.1, 11.8_
+
+- [ ] 17. Vote change before lock
+  - [ ] 17.1 Update `VotePanel` to support a `locked` prop
+    - Only lock when `locked` is true; before lock, allow selecting another option; add change/lock copy
+    - _Requirements: 12.2, 12.6_
+
+  - [ ] 17.2 Update `VotingStage` to compute and pass `locked`
+    - `locked = roundClosed || hostLocked`; on change before lock, re-POST `/api/votes` (upsert updates the row), re-fetch tally, broadcast `votes-updated`
+    - Confirm no duplicate rows created; idempotent same-option resubmit
+    - _Requirements: 12.1, 12.3, 12.4, 12.5_
+
+  - [ ]* 17.3 Property tests for vote change/lock
+    - **Property 22** and **Property 23**
+    - _Requirements: 12.1, 12.2, 12.3, 12.5_
+
+- [ ] 18. Tie detection and agent-mediated resolution
+  - [ ] 18.1 Create `lib/voteTally.ts` with `detectTie(tally)`
+    - Returns all options tied for the max (≥ 2), else empty array; shared by all vote types
+    - _Requirements: 13.1, 13.2_
+
+  - [ ] 18.2 Create `app/api/agents/tiebreak/route.ts` (additive, JSON-only)
+    - Accept `{ roomId, voteType, tiedOptions, context }`, return `{ conflictSummary, proposedOptions: ConflictOption[] }`
+    - Persist a `conflict_resolutions` row (`status: 'voting'`); follow the agent contract in ai-agent-rules.md
+    - _Requirements: 13.3, 13.7_
+
+  - [ ] 18.3 Wire tie flow in destination and flight vote stages
+    - On tie: host "Ask the AI to help decide" → call tiebreak → render options via `VotingStage` (`voteType="conflict_resolution"`) → on winner apply decision via existing routes and advance
+    - Repeat-tie fallback: host manual picker over tied options (never-stuck guarantee)
+    - _Requirements: 13.4, 13.5, 13.6, 13.8_
+
+  - [ ]* 18.4 Property tests for tie handling
+    - **Property 24** and **Property 25**
+    - _Requirements: 13.1, 13.2, 13.5, 13.6, 13.8_
+
+- [ ] 19. Responsive layout and text overflow
+  - [ ] 19.1 Apply responsive layout across shell and stages
+    - `md`/`lg` breakpoints; `CharacterCreator` two-column at `md+`; `MemberStrip` `overflow-x-auto flex-nowrap`; `StageProgress` condenses on mobile; CTA rows stack below `sm`
+    - _Requirements: 14.1, 14.2, 14.3, 14.7, 14.8_
+
+  - [ ] 19.2 Fix text overflow on all cards
+    - Add `break-words` / `truncate` + `min-w-0` on flex children; truncate display names (10 + ellipsis) with full name in `title`/`aria-label`
+    - Verify no horizontal page scroll at 320px
+    - _Requirements: 14.4, 14.5, 14.6_
+
+  - [ ]* 19.3 Property test for no page-level horizontal overflow
+    - **Property 26**
+    - _Requirements: 14.4, 14.6_
+
+- [ ] 20. HCI principles pass
+  - [ ] 20.1 Audit and apply Nielsen heuristics across the app
+    - Status visibility, real-world labels (`STAGE_DECISION_LABEL`, hide `vibe:`), user control (previous stage, vote change, editable submissions), consistency (palette/buttons/cards), error prevention (disabled CTAs), recognition (cards/chips/hydration), minimalist stage-scoped content, inline error recovery with state retention
+    - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8_
+
+- [ ] 21. Final checkpoint (budget, trip info, voting, tie, responsive, HCI)
+  - Ensure all tests pass, ask the user if questions arise.
+
 ## Notes
 
 - Tasks marked with `*` are optional and can be skipped for faster MVP

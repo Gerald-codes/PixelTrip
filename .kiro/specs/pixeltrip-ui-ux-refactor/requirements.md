@@ -202,3 +202,106 @@ This refactor upgrades the entire UI/UX to match PixelTrip's core identity as an
 6. THE App SHALL provide a `GET /api/character-profile?roomId={roomId}` route that returns a JSON array of all `CharacterProfile` rows for the given room, ordered by `created_at` ascending; if `roomId` is absent or empty the route SHALL return `{ error: "roomId is required" }` with status 400.
 7. IF a `character_profiles` row does not exist for a given user when any stage component fetches character profiles, THEN THE App SHALL return `null` for that user's profile, render a neutral placeholder silhouette avatar for that member in `MemberAvatar`, and SHALL NOT throw an unhandled error or display an error boundary.
 8. THE `character_profiles` table creation SQL SHALL be placed in a new file `supabase/schema-character-profiles.sql` using `CREATE TABLE IF NOT EXISTS` with no `DROP TABLE` or `DROP COLUMN` statements, so the migration is safe to run against a database that already has the existing tables from `schema.sql`.
+
+---
+
+### Requirement 10: Budget Estimate and Budget Status Badge
+
+**User Story:** As a trip member, I want to see the estimated cost per person against our group budget limit, so that we know at a glance whether the current plan is affordable for everyone — especially the most budget-sensitive traveller.
+
+#### Acceptance Criteria
+
+1. THE App SHALL compute an `estimatedTotalPerPerson` value (in a single display currency, USD for MVP) by summing the estimated cost contributions of the selected flight option and the destination's `priceLevel`, plus a per-day activity allowance, using seeded/estimated values (no live pricing API).
+2. THE App SHALL derive a `budgetLimitPerPerson` from the group's most budget-sensitive traveller — the lowest `budgetLevel` across all members' `CharacterProfile` rows — mapping `low`, `medium`, `high` to fixed per-person caps (e.g. low = 800, medium = 1500, high = 3000 USD).
+3. THE App SHALL compute `percentageUsed = round((estimatedTotalPerPerson / budgetLimitPerPerson) * 100)` and clamp the rendered bar fill to a maximum of 100% width while still displaying the true percentage as text when it exceeds 100%.
+4. THE `BudgetStatusBadge` SHALL render one of exactly three states: `within` (percentageUsed ≤ 85), `near` (85 < percentageUsed ≤ 100), and `over` (percentageUsed > 100).
+5. THE `BudgetStatusBadge` SHALL colour each state distinctly using the palette: `within` = grass-green (`#4ADE80`), `near` = sunset-orange (`#FB923C`), `over` = a high-contrast warning treatment (deep-navy text on sunset-orange with a warning icon).
+6. THE App SHALL render a budget progress bar with a pixel-style border showing the `percentageUsed` fill, the `estimatedTotalPerPerson` and `budgetLimitPerPerson` as text (e.g. "$1,240 / $1,500 per person"), and the `BudgetStatusBadge`.
+7. WHEN the budget state is `over`, THE App SHALL display a plain-language threshold warning naming the constraint (e.g. "Over budget for your most budget-conscious traveller") without blocking progression.
+8. THE budget computation SHALL be a pure function in `lib/budget.ts` that accepts destination, flight option, trip length in days, and members' budget levels, and returns `{ estimatedTotalPerPerson, budgetLimitPerPerson, percentageUsed, status }`, so it is unit-testable without rendering.
+9. WHILE the destination or selected flight option is not yet chosen, THE App SHALL render the budget estimate in a neutral "pending" state rather than showing a misleading zero or 100%.
+10. THE budget feature SHALL be additive and SHALL NOT modify any existing API route, Supabase column, or the `TripRoom`/`CharacterProfile` shapes; it derives entirely from data already available on the client.
+
+---
+
+### Requirement 11: Persistent Trip Info Panel
+
+**User Story:** As a trip member, I want a persistent panel that always shows our budget, travel dates, destination, selected flight option, members, and the current decision, so that I never lose track of the trip's key facts as stages change.
+
+#### Acceptance Criteria
+
+1. THE App SHALL render a `TripInfoPanel` component inside `RoomShell` that remains visible across all stages without unmounting or triggering navigation.
+2. THE `TripInfoPanel` SHALL display the budget summary (estimate per person + `BudgetStatusBadge` from Requirement 10) at all times, using the pending state when inputs are incomplete.
+3. THE `TripInfoPanel` SHALL display the group's travel window (overlapping `startDate → endDate`) when available, or "Dates not set yet" when no overlap has been computed.
+4. THE `TripInfoPanel` SHALL display `TripRoom.selectedDestination` when set, or "Destination not chosen yet" when null.
+5. THE `TripInfoPanel` SHALL display `TripRoom.selectedFlightOption` as a human-readable label ("Budget", "Comfort", "Best Value") when set, or "Flight not chosen yet" when null.
+6. THE `TripInfoPanel` SHALL display the member count and reuse `MemberStrip` (or a compact avatar row) so members are always visible.
+7. THE `TripInfoPanel` SHALL display the current decision derived from `TripRoom.currentStage` as a plain-language label (e.g. `DESTINATION_VOTE` → "Voting on destination", `FLIGHT_VOTE` → "Voting on flight", `GROUP_PROFILE` → "Reviewing group profile").
+8. WHEN any of `currentStage`, `selectedDestination`, `selectedFlightOption`, the travel window, or the member list changes via React state, THE `TripInfoPanel` SHALL re-render the changed field within one render cycle without a full page reload.
+9. THE `TripInfoPanel` SHALL collapse into a compact summary row on viewports narrower than the `md` breakpoint (see Requirement 14) so it does not dominate small screens.
+
+---
+
+### Requirement 12: Vote Change Before Lock
+
+**User Story:** As a trip member, I want to change my vote before the round is locked, so that I can update my choice after discussion without being permanently committed to my first click.
+
+#### Acceptance Criteria
+
+1. THE App SHALL enforce exactly one active vote per `(roomId, userId, voteType)` at all times, preserving the existing database uniqueness constraint on `votes (room_id, user_id, vote_type)`.
+2. WHILE a vote round is not locked, THE App SHALL allow a user to change their selection; submitting a new selection SHALL update the existing vote row for that `(roomId, userId, voteType)` rather than inserting a duplicate.
+3. THE App SHALL define a round as locked when `totalVotes >= totalVoters` (every member has voted) OR the host has explicitly locked/advanced the round; WHILE locked, THE App SHALL reject further vote changes for that round.
+4. WHEN a user changes their vote before lock, THE App SHALL broadcast `votes-updated` so all clients reflect the updated tally without a full page reload.
+5. THE App SHALL never create more than one row per `(roomId, userId, voteType)`; a change is an update, and a duplicate submission with the same option is idempotent (no error surfaced to the user).
+6. THE `VotePanel` SHALL visually indicate that a vote is changeable before lock (e.g. "Tap another option to change your vote") and indicate when it becomes locked.
+
+---
+
+### Requirement 13: Tie Detection and Agent-Mediated Resolution
+
+**User Story:** As a group, when a vote ends in a tie, I want the AI to help us resolve it with concrete options we can vote on, so that the workflow never gets stuck on an undecided round.
+
+#### Acceptance Criteria
+
+1. WHEN a vote round closes (all members voted) with two or more options sharing the maximum tally, THE App SHALL classify the round as a tie and expose the tied option set.
+2. THE App SHALL support tie detection for `destination` and `flight` vote types, and SHALL structure the logic so future decision vote types reuse the same tie-detection path.
+3. WHEN a tie is detected, THE App SHALL allow the host to trigger the conflict/negotiation agent, passing the tied options and relevant context, to produce resolution options with plain-language trade-offs.
+4. THE App SHALL render the returned resolution options and allow the group to vote on them using the existing `VotingStage` with `voteType = "conflict_resolution"`.
+5. WHEN the resolution vote produces a single winner, THE App SHALL apply that winner as the round's decision (e.g. set `selectedDestination` or `selectedFlightOption`) and advance the workflow.
+6. IF a tie persists after a resolution round (a rare repeat tie), THEN THE App SHALL allow the host to make a final manual selection from the tied options so the workflow always progresses.
+7. THE tie-handling flow SHALL NOT modify existing agent route contracts destructively; it MAY add a new agent route or reuse the existing negotiation route, and any new route SHALL follow the JSON-only agent contract in `.kiro/steering/ai-agent-rules.md`.
+8. THE App SHALL never leave a room in a state where a tied vote blocks all forward progress; at minimum the host manual-selection fallback (Criterion 6) is always available.
+
+---
+
+### Requirement 14: Responsive Layout and Text Overflow
+
+**User Story:** As a user on a phone, tablet, or desktop, I want the interface to lay out correctly and never clip or overflow text, so that PixelTrip is usable on any device I plan from.
+
+#### Acceptance Criteria
+
+1. THE App SHALL support three responsive breakpoints via Tailwind: mobile (default, < 640px), tablet (`sm`/`md`, 640–1024px), and desktop (`lg`+, ≥ 1024px), across the landing page, `RoomShell`, `TripInfoPanel`, `CharacterCreator`, and all stage components.
+2. THE `CharacterCreator` SHALL render a two-column layout (avatar preview + selectors) at `md` and above, and a single stacked column below `md`.
+3. THE `MemberStrip` SHALL scroll horizontally (`overflow-x-auto`) when member avatars exceed the viewport width, without pushing stage content off-screen or wrapping into multiple tall rows.
+4. THE App SHALL prevent text overflow on all cards by applying wrapping/truncation: long destination names, persona summaries, tension-point text, and vote option labels SHALL wrap or truncate with an ellipsis rather than overflowing their container or forcing horizontal page scroll.
+5. THE App SHALL truncate member display names to a bounded length (e.g. 10 characters + ellipsis) in compact contexts like `MemberAvatar`, while showing the full name via `title`/`aria-label`.
+6. THE App SHALL ensure no fixed-width element causes horizontal scrolling of the whole page at a 320px viewport width.
+7. THE `StageProgress` SHALL remain legible on mobile by condensing (e.g. dots without labels, or a scrollable row) rather than overflowing the header.
+8. THE App SHALL keep all primary CTA buttons reachable without horizontal scrolling on mobile, stacking action rows vertically below `sm` where needed.
+
+---
+
+### Requirement 15: HCI Principles (Nielsen Heuristics)
+
+**User Story:** As a user, I want the interface to follow established usability principles, so that PixelTrip is clear, forgiving, and easy to learn.
+
+#### Acceptance Criteria
+
+1. **Visibility of system status** — THE App SHALL always show the current stage (`StageProgress`), the current decision (`TripInfoPanel`), in-progress states (saving, advancing, generating), and vote progress ("n/N voted"), so users always know what the system is doing.
+2. **Match between system and the real world** — THE App SHALL use plain, travel-oriented language for all user-facing labels (e.g. "Voting on destination", "Over budget", human-readable vibe and flight names) and SHALL never expose internal tokens such as enum values or the `vibe:` prefix in the UI.
+3. **User control and freedom** — THE App SHALL let the host move to the previous stage, let users change their vote before lock (Requirement 12), and let users edit their character and availability submissions, providing clear exits from any state.
+4. **Consistency and standards** — THE App SHALL apply the shared palette, pixel-border card style, and retro button style uniformly across every stage, and SHALL use consistent component patterns (selectors, chips, badges) so the same interaction behaves the same everywhere.
+5. **Error prevention** — THE App SHALL disable primary actions until prerequisites are met (e.g. "Confirm Character" until budget, style, and one interest are chosen; host "Advance" until stage prerequisites pass) and SHALL confirm or guard destructive/irreversible actions.
+6. **Recognition rather than recall** — THE App SHALL present choices as visible options (budget/style/interest cards, vibe mood-board, destination chips, resolution options) rather than requiring freetext recall, and SHALL pre-select prior submissions on hydration.
+7. **Aesthetic and minimalist design** — THE App SHALL show only the information relevant to the current stage in the main content area, keeping persistent chrome (`RoomShell`, `TripInfoPanel`) compact and free of redundant or low-value content.
+8. **Help users recognise, diagnose, and recover from errors** — THE App SHALL display inline, plain-language error messages that name the problem and the recovery action, and SHALL retain user input on failure so retries do not lose work.
