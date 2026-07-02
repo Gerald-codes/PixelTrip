@@ -520,7 +520,9 @@ export default function RoomShell({
 
         {/* ── Right column: TripContextPanel ──────────────────────────────── */}
         {/*
-         * Desktop: always visible, flex-[1] (~35% of the row).
+         * Desktop: sticky to viewport top, scrolls internally.
+         * The column is position:sticky + height:100vh so it stays in view
+         * while the left column (TripAgentChat) scrolls freely.
          * Mobile: full-height fixed overlay when isMobileContextOpen=true.
          * Requirements: 2.1, 2.2, 9.7
          */}
@@ -528,7 +530,18 @@ export default function RoomShell({
           className={
             isMobileContextOpen
               ? "fixed inset-0 z-50 flex flex-col"
-              : "hidden lg:flex lg:flex-[1] lg:flex-col lg:min-w-0 overflow-y-auto"
+              : "hidden lg:flex lg:flex-[1] lg:flex-col lg:min-w-0"
+          }
+          style={
+            !isMobileContextOpen
+              ? {
+                  position: "sticky",
+                  top: 0,
+                  height: "100vh",
+                  overflowY: "auto",
+                  flexShrink: 0,
+                }
+              : undefined
           }
         >
           {/* Close button inside the overlay — only rendered on mobile overlay */}

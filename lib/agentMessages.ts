@@ -10,26 +10,26 @@ import { RoomStage } from "@/lib/types";
 
 export const STAGE_INTRO_MESSAGES: Record<RoomStage, string> = {
   [RoomStage.LOBBY]:
-    "Let's build your travel character — your choices shape where we go and what we do.",
+    "Build your travel character. Your budget and interests shape where we go.",
   [RoomStage.PERSONA]:
-    "Time to choose your travel persona. Pick the character that fits you best.",
-  [RoomStage.AVAILABILITY]: "Nice. Now when are you free to travel?",
+    "Choose your travel persona — it sets the tone for the whole trip.",
+  [RoomStage.AVAILABILITY]: "When are you free? Enter your travel dates and pick your destination vibes.",
   [RoomStage.GROUP_PROFILE]:
-    "Putting your group's preferences together now — this takes just a moment.",
+    "Putting your group's preferences together — this takes a moment.",
   [RoomStage.DESTINATIONS]:
-    "Based on your group's characters, dates, and vibes — here are your best destination options.",
+    "Here are your best destination matches. Pick the ones that excite you most.",
   [RoomStage.DESTINATION_VOTE]:
-    "Time to vote. Which destination works best for your group?",
-  [RoomStage.FLIGHTS]: "Now let's pick a flight style for the group.",
-  [RoomStage.FLIGHT_VOTE]: "Now let's pick a flight style for the group.",
+    "Time to vote. Tap a destination to cast your vote.",
+  [RoomStage.FLIGHTS]: "Three flight styles to choose from. Review them, then the host moves to the vote.",
+  [RoomStage.FLIGHT_VOTE]: "Vote for your preferred flight style. One vote per person.",
   [RoomStage.ACTIVITIES]:
-    "Great choice! Now let's add your must-have activities and experiences.",
+    "Add must-have activities and places. Mark anything you'd hate as avoid.",
   [RoomStage.ITINERARY]:
-    "Your itinerary is ready. Check how well it fits everyone in the group.",
+    "Your day-by-day plan is ready. Check the fairness summary and give feedback.",
   [RoomStage.FEEDBACK]:
-    "How does the plan look? Score it and flag anything you'd like to change.",
+    "Score the itinerary and flag anything you'd change. Be honest — the AI reads every note.",
   [RoomStage.NEGOTIATION]:
-    "The agent found some trade-offs to resolve. Vote on the best compromise.",
+    "The AI found trade-offs to resolve. Select a resolution, then the host applies it.",
   [RoomStage.FINAL]:
-    "Your trip is locked in. Here's the final plan — export or share it below.",
+    "Trip locked in. Copy or share the final plan below.",
 };

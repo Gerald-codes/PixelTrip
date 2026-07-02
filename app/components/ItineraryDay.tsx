@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { ItineraryDay, ItineraryItem } from "@/lib/types";
 
 interface ItineraryDayProps {
   day: ItineraryDay;
   dayNumber: number;
+  /** When true the day starts expanded. Defaults to false. */
+  defaultOpen?: boolean;
 }
 
 // ── Colour palette ─────────────────────────────────────────────────────────
@@ -14,28 +17,24 @@ const SECTION_CONFIG = {
     emoji: "🌅",
     headerBg: "bg-[#38BDF8]",
     headerText: "text-[#1E3A5F]",
-    borderColor: "border-[#38BDF8]",
   },
   afternoon: {
     label: "Afternoon",
     emoji: "☀️",
     headerBg: "bg-[#FB923C]",
     headerText: "text-[#1E3A5F]",
-    borderColor: "border-[#FB923C]",
   },
   evening: {
     label: "Evening",
     emoji: "🌆",
     headerBg: "bg-[#A855F7]",
     headerText: "text-white",
-    borderColor: "border-[#A855F7]",
   },
   night: {
     label: "Night",
     emoji: "🌙",
     headerBg: "bg-[#1E3A5F]",
     headerText: "text-white",
-    borderColor: "border-[#1E3A5F]",
   },
 } as const;
 
@@ -44,11 +43,9 @@ type TimeSection = keyof typeof SECTION_CONFIG;
 // ── Date formatter ──────────────────────────────────────────────────────────
 function formatDate(dateStr: string): string {
   try {
-    // Parse as local date to avoid timezone shifts (e.g. "2025-07-20")
     const [year, month, day] = dateStr.split("-").map(Number);
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
-      weekday: undefined,
       month: "short",
       day: "2-digit",
       year: "numeric",
@@ -56,6 +53,16 @@ function formatDate(dateStr: string): string {
   } catch {
     return dateStr;
   }
+}
+
+// ── Item count helper ───────────────────────────────────────────────────────
+function countItems(day: ItineraryDay): number {
+  return (
+    (day.morning?.length ?? 0) +
+    (day.afternoon?.length ?? 0) +
+    (day.evening?.length ?? 0) +
+    (day.night?.length ?? 0)
+  );
 }
 
 // ── Item Card ───────────────────────────────────────────────────────────────
@@ -106,7 +113,7 @@ function ItemCard({ item }: { item: ItineraryItem }) {
 }
 
 // ── Time Section ────────────────────────────────────────────────────────────
-function TimeSection({
+function TimeSectionBlock({
   section,
   items,
 }: {
@@ -114,55 +121,126 @@ function TimeSection({
   items: ItineraryItem[];
 }) {
   const config = SECTION_CONFIG[section];
+  const [open, setOpen] = useState(true);
 
   return (
     <section aria-label={config.label}>
-      {/* Section header */}
-      <div
-        className={`flex items-center gap-2 border-2 border-[#1E3A5F] ${config.headerBg} px-4 py-2 shadow-[2px_2px_0px_#1E3A5F]`}
+      {/* Section header — acts as toggle */}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        aria-expanded={open}
+        className={[
+          "w-full flex items-center justify-between gap-2",
+          "border-2 border-[#1E3A5F]",
+          config.headerBg,
+          "px-4 py-2 shadow-[2px_2px_0px_#1E3A5F]",
+          "hover:opacity-90 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7] focus-visible:ring-offset-1",
+          "transition-opacity",
+        ].join(" ")}
       >
-        <span aria-hidden="true" className="text-lg">
-          {config.emoji}
+        <span className="flex items-center gap-2">
+          <span aria-hidden="true" className="text-lg">{config.emoji}</span>
+          <span className={`text-sm font-bold uppercase tracking-wide ${config.headerText}`}>
+            {config.label}
+          </span>
+          {!open && items.length > 0 && (
+            <span
+              className={`border border-current px-1.5 py-0 text-xs font-bold ${config.headerText} opacity-70`}
+            >
+              {items.length}
+            </span>
+          )}
         </span>
-        <span className={`text-sm font-bold uppercase tracking-wide ${config.headerText}`}>
-          {config.label}
+        <span
+          aria-hidden="true"
+          className={`text-xs font-bold ${config.headerText}`}
+          style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+        >
+          ▼
         </span>
-      </div>
+      </button>
 
-      {/* Items or empty placeholder */}
-      <div className="mt-3 flex flex-col gap-3">
-        {items.length === 0 ? (
-          <p className="border-2 border-dashed border-[#1E3A5F] px-4 py-3 text-sm text-[#1E3A5F] opacity-50 italic">
-            Nothing scheduled
-          </p>
-        ) : (
-          items.map((item, i) => <ItemCard key={i} item={item} />)
-        )}
-      </div>
+      {/* Items */}
+      {open && (
+        <div className="mt-3 flex flex-col gap-3">
+          {items.length === 0 ? (
+            <p className="border-2 border-dashed border-[#1E3A5F] px-4 py-3 text-sm text-[#1E3A5F] opacity-50 italic">
+              Nothing scheduled
+            </p>
+          ) : (
+            items.map((item, i) => <ItemCard key={i} item={item} />)
+          )}
+        </div>
+      )}
     </section>
   );
 }
 
 // ── ItineraryDay ────────────────────────────────────────────────────────────
-export default function ItineraryDay({ day, dayNumber }: ItineraryDayProps) {
+export default function ItineraryDay({ day, dayNumber, defaultOpen = false }: ItineraryDayProps) {
+  const [open, setOpen] = useState(defaultOpen);
   const hasNight = Array.isArray(day.night) && day.night.length > 0;
+  const total = countItems(day);
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Day header */}
-      <header className="border-4 border-[#1E3A5F] bg-[#38BDF8] shadow-[4px_4px_0px_#1E3A5F] p-4">
-        <h3 className="text-xl font-bold text-[#1E3A5F]">
-          Day {dayNumber}
-          <span className="mx-2 opacity-60">—</span>
-          {formatDate(day.date)}
-        </h3>
-      </header>
+    <div className="flex flex-col gap-0">
+      {/* ── Collapsible day header (button) ── */}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        aria-expanded={open}
+        aria-controls={`itinerary-day-${dayNumber}`}
+        className={[
+          "w-full flex items-center justify-between gap-3",
+          "border-4 border-[#1E3A5F] bg-[#38BDF8]",
+          "px-4 py-3 text-left",
+          "shadow-[4px_4px_0px_#1E3A5F]",
+          "hover:bg-[#0ea5e9] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7] focus-visible:ring-offset-1",
+          "transition-colors",
+        ].join(" ")}
+      >
+        {/* Left: Day label + date */}
+        <span className="flex items-baseline gap-2 min-w-0">
+          <span className="text-lg font-bold text-[#1E3A5F] whitespace-nowrap">
+            Day {dayNumber}
+          </span>
+          <span className="text-sm font-semibold text-[#1E3A5F] opacity-70 whitespace-nowrap">
+            {formatDate(day.date)}
+          </span>
+        </span>
 
-      {/* Time sections */}
-      <TimeSection section="morning" items={day.morning ?? []} />
-      <TimeSection section="afternoon" items={day.afternoon ?? []} />
-      <TimeSection section="evening" items={day.evening ?? []} />
-      {hasNight && <TimeSection section="night" items={day.night!} />}
+        {/* Right: item count chip + chevron */}
+        <span className="flex items-center gap-2 flex-shrink-0">
+          {!open && (
+            <span className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[1px_1px_0px_#1E3A5F] whitespace-nowrap">
+              {total} {total === 1 ? "activity" : "activities"}
+            </span>
+          )}
+          <span
+            aria-hidden="true"
+            className="text-sm font-bold text-[#1E3A5F]"
+            style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            ▼
+          </span>
+        </span>
+      </button>
+
+      {/* ── Collapsible content ── */}
+      {open && (
+        <div
+          id={`itinerary-day-${dayNumber}`}
+          className="flex flex-col gap-5 border-l-4 border-r-4 border-b-4 border-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] px-4 pt-4 pb-5"
+        >
+          <TimeSectionBlock section="morning" items={day.morning ?? []} />
+          <TimeSectionBlock section="afternoon" items={day.afternoon ?? []} />
+          <TimeSectionBlock section="evening" items={day.evening ?? []} />
+          {hasNight && <TimeSectionBlock section="night" items={day.night!} />}
+        </div>
+      )}
     </div>
   );
 }

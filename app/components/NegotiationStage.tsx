@@ -366,6 +366,7 @@ export default function NegotiationStage({
               key={day.date}
               day={day}
               dayNumber={idx + 1}
+              defaultOpen={idx === 0}
             />
           ))}
         </div>

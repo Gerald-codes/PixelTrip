@@ -354,15 +354,11 @@ export default function TripContextPanel({
       aria-label="Trip context — decisions and member status"
       className={mobileHiddenClass}
       style={{
-        position: "sticky",
-        top: 0,
-        minHeight: "100vh",
         width: "100%",
         backgroundColor: DEEP_NAVY,
         display: "flex",
         flexDirection: "column",
         gap: 0,
-        overflowY: "auto",
         fontFamily: "'Courier New', Courier, monospace",
       }}
     >
@@ -562,35 +558,30 @@ export default function TripContextPanel({
         {budgetEstimate !== null ? (
           <BudgetStatusBadge estimate={budgetEstimate} />
         ) : (
-          /* Always show the section — list what is missing */
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <p
               style={{
                 margin: 0,
                 fontFamily: "'Courier New', Courier, monospace",
-                fontSize: 12,
+                fontSize: 11,
                 color: `${SAND_CREAM}70`,
                 lineHeight: 1.5,
               }}
             >
-              Estimate not yet available.
+              Available after destination + flight are chosen.
             </p>
             <ul
               style={{
                 margin: 0,
-                padding: "0 0 0 16px",
+                padding: "0 0 0 14px",
                 fontFamily: "'Courier New', Courier, monospace",
                 fontSize: 11,
-                color: `${SAND_CREAM}60`,
+                color: `${SAND_CREAM}55`,
                 lineHeight: 1.6,
               }}
             >
-              {!budgetEstimate && (
-                <>
-                  <li>Destination with a price level (vote on a destination first)</li>
-                  <li>Selected flight option (complete the flight vote)</li>
-                </>
-              )}
+              <li>Vote on a destination</li>
+              <li>Complete the flight vote</li>
             </ul>
           </div>
         )}
@@ -621,27 +612,45 @@ export default function TripContextPanel({
         </p>
 
         {/* Budget level */}
-        <InfoRow label="Budget level" value={budgetLabel} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <SectionLabel>Budget level</SectionLabel>
+          <FieldValue
+            value={budgetLabel ?? "Set in character creation"}
+            notSet={!budgetLabel}
+          />
+        </div>
 
         <Divider />
 
         {/* Travel dates */}
-        <InfoRow label="Travel dates" value={travelDatesValue} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <SectionLabel>Travel dates</SectionLabel>
+          <FieldValue
+            value={travelDatesValue ?? "Submit availability to set"}
+            notSet={!travelDatesValue}
+          />
+        </div>
 
         <Divider />
 
         {/* Travel vibes */}
-        <InfoRow label="Travel vibes" value={travelVibesValue} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <SectionLabel>Travel vibes</SectionLabel>
+          <FieldValue
+            value={travelVibesValue ?? "Pick vibes in availability step"}
+            notSet={!travelVibesValue}
+          />
+        </div>
 
         <Divider />
 
         {/* Destination */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <SectionLabel>
-            {room.selectedDestination ? "Destination" : "Destination shortlist"}
+            {room.selectedDestination ? "Chosen destination" : "Destination shortlist"}
           </SectionLabel>
           <FieldValue
-            value={destinationValue ?? "Not set"}
+            value={destinationValue ?? "Vote on a destination first"}
             notSet={destinationValue === null}
           />
         </div>
@@ -649,7 +658,13 @@ export default function TripContextPanel({
         <Divider />
 
         {/* Flight option */}
-        <InfoRow label="Flight option" value={flightLabel} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <SectionLabel>Flight style</SectionLabel>
+          <FieldValue
+            value={flightLabel ?? "Vote on a flight style to set"}
+            notSet={!flightLabel}
+          />
+        </div>
       </div>
     </aside>
   );

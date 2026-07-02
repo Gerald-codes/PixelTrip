@@ -421,9 +421,9 @@ export default function ItineraryStage({
           />
 
           {/* Days */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-3">
             {viewingItinerary.days.map((day, i) => (
-              <ItineraryDay key={i} day={day} dayNumber={i + 1} />
+              <ItineraryDay key={i} day={day} dayNumber={i + 1} defaultOpen={i === 0} />
             ))}
           </div>
 

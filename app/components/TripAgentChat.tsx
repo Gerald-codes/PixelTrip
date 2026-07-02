@@ -53,6 +53,7 @@ import CharacterCreator from "@/app/components/CharacterCreator";
 import AvailabilityStage from "@/app/components/AvailabilityStage";
 import VoteableDestinationCard from "@/app/components/VoteableDestinationCard";
 import VoteableFlightCard from "@/app/components/VoteableFlightCard";
+import TiebreakPanel from "@/app/components/TiebreakPanel";
 import StageRouter, { type StageProps } from "@/app/components/StageRouter";
 import { MOCK_FLIGHT_OPTIONS } from "@/app/components/FlightStage";
 import { createAnonSupabase } from "@/lib/supabase";
@@ -1131,7 +1132,41 @@ export default function TripAgentChat({
     }
   }
 
-  // ── stageProps: passed unchanged to StageRouter and direct stage components ──
+  // Human-readable label for the advance button based on current stage
+  function advanceButtonLabel(): string {
+    if (advancingStage) return "▶ Advancing…";
+    const LABELS: Partial<Record<RoomStage, string>> = {
+      [RoomStage.LOBBY]: "▶ Start planning",
+      [RoomStage.AVAILABILITY]: "▶ Continue to group profile",
+      [RoomStage.GROUP_PROFILE]: "▶ See destination suggestions",
+      [RoomStage.DESTINATIONS]: "▶ Vote on a destination",
+      [RoomStage.DESTINATION_VOTE]: "▶ Review flight styles",
+      [RoomStage.FLIGHTS]: "▶ Vote on a flight style",
+      [RoomStage.FLIGHT_VOTE]: "▶ Add activities",
+      [RoomStage.ACTIVITIES]: "▶ Generate itinerary",
+      [RoomStage.ITINERARY]: "▶ Collect feedback",
+      [RoomStage.FEEDBACK]: "▶ Resolve trade-offs",
+      [RoomStage.NEGOTIATION]: "▶ Finalise trip",
+    };
+    return LABELS[room.currentStage] ?? "▶ Move to next step";
+  }
+
+  // Why the advance button is disabled — shown as inline hint
+  function advanceBlockedReason(): string | null {
+    if (canAdvanceStage()) return null;
+    switch (room.currentStage) {
+      case RoomStage.AVAILABILITY:
+        return `Waiting for ${members.length - submittedUserIds.length} more member${members.length - submittedUserIds.length === 1 ? "" : "s"} to submit.`;
+      case RoomStage.DESTINATIONS:
+        return "Destinations still generating.";
+      case RoomStage.DESTINATION_VOTE:
+        return "At least one vote required to continue.";
+      case RoomStage.FLIGHT_VOTE:
+        return `${members.length - flightVotes.length} member${members.length - flightVotes.length === 1 ? "" : "s"} haven't voted yet.`;
+      default:
+        return null;
+    }
+  }
 
   const stageProps: StageProps = {
     room,
@@ -1408,62 +1443,26 @@ export default function TripAgentChat({
             </div>
           )}
 
-          {/* ── Tiebreaker UI (host only, shown after tie is detected) ── */}
+          {/* ── Tiebreaker: destination tie → TiebreakPanel ── */}
           {tiedDestinationIds && tiedDestinationIds.length > 0 && (
-            <div style={{
-              border: `3px solid ${SUNSET_ORANGE}`,
-              boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
-              backgroundColor: "#FEF3C7",
-              padding: "16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              fontFamily: "'Courier New', Courier, monospace",
-            }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: DEEP_NAVY }}>
-                ⚖️ Tiebreaker needed
-              </p>
-              {isHost ? (
-                <>
-                  <p style={{ margin: 0, fontSize: 12, color: DEEP_NAVY, opacity: 0.8 }}>
-                    These destinations are tied. As host, pick the winner:
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {tiedDestinationIds.map((id) => {
-                      const dest = destinationSuggestions.find((s) => s.id === id);
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => void handleBreakTie(id)}
-                          disabled={breakingTie}
-                          style={{
-                            border: `3px solid ${DEEP_NAVY}`,
-                            borderRadius: 0,
-                            backgroundColor: breakingTie ? "#9CA3AF" : SUNSET_ORANGE,
-                            color: DEEP_NAVY,
-                            padding: "10px 16px",
-                            fontFamily: "'Courier New', Courier, monospace",
-                            fontWeight: 700,
-                            fontSize: 13,
-                            cursor: breakingTie ? "not-allowed" : "pointer",
-                            opacity: breakingTie ? 0.6 : 1,
-                            boxShadow: breakingTie ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
-                            textAlign: "left" as const,
-                          }}
-                        >
-                          {breakingTie ? "Selecting…" : `▶ Pick "${dest?.destinationName ?? id}"`}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <p style={{ margin: 0, fontSize: 12, color: DEEP_NAVY, opacity: 0.8 }}>
-                  Waiting for the host to break the tie…
-                </p>
+            <TiebreakPanel
+              roomId={room.id}
+              voteType="destination"
+              tiedOptions={tiedDestinationIds}
+              tally={Object.fromEntries(
+                tiedDestinationIds.map((id) => [
+                  id,
+                  destinationVotes.filter((v) => v.selectedOption === id).length,
+                ]),
               )}
-            </div>
+              isHost={isHost}
+              onApply={async (winnerId) => {
+                await handleBreakTie(winnerId);
+              }}
+              optionLabel={(id) =>
+                destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id
+              }
+            />
           )}
         </div>
       );
@@ -1520,57 +1519,23 @@ export default function TripAgentChat({
             );
           })}
 
-          {/* ── Flight tiebreaker UI (host only, shown after tie is detected) ── */}
+          {/* ── Flight tiebreaker: TiebreakPanel ── */}
           {tiedFlightOptions && tiedFlightOptions.length > 0 && (
-            <div style={{
-              border: `3px solid ${SUNSET_ORANGE}`,
-              boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
-              backgroundColor: "#FEF3C7",
-              padding: "16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              fontFamily: "'Courier New', Courier, monospace",
-            }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: DEEP_NAVY }}>
-                ⚖️ Flight vote tied — host must pick the winner
-              </p>
-              {isHost ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {tiedFlightOptions.map((opt) => {
-                    const LABELS: Record<string, string> = { budget: "Budget Flights", best_value: "Best Value", comfort: "Comfort" };
-                    return (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => void handleBreakFlightTie(opt)}
-                        disabled={breakingFlightTie}
-                        style={{
-                          border: `3px solid ${DEEP_NAVY}`,
-                          borderRadius: 0,
-                          backgroundColor: breakingFlightTie ? "#9CA3AF" : SUNSET_ORANGE,
-                          color: DEEP_NAVY,
-                          padding: "10px 16px",
-                          fontFamily: "'Courier New', Courier, monospace",
-                          fontWeight: 700,
-                          fontSize: 13,
-                          cursor: breakingFlightTie ? "not-allowed" : "pointer",
-                          opacity: breakingFlightTie ? 0.6 : 1,
-                          boxShadow: breakingFlightTie ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
-                          textAlign: "left" as const,
-                        }}
-                      >
-                        {breakingFlightTie ? "Selecting…" : `▶ Go with ${LABELS[opt] ?? opt}`}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p style={{ margin: 0, fontSize: 12, color: DEEP_NAVY, opacity: 0.8 }}>
-                  Waiting for the host to break the tie…
-                </p>
+            <TiebreakPanel
+              roomId={room.id}
+              voteType="flight"
+              tiedOptions={tiedFlightOptions}
+              tally={Object.fromEntries(
+                tiedFlightOptions.map((opt) => [
+                  opt,
+                  flightVotes.filter((v) => v.selectedOption === opt).length,
+                ]),
               )}
-            </div>
+              isHost={isHost}
+              onApply={async (winner) => {
+                await handleBreakFlightTie(winner);
+              }}
+            />
           )}
         </div>
       );
@@ -1636,7 +1601,21 @@ export default function TripAgentChat({
             fontFamily: "'Courier New', Courier, monospace",
           }}
         >
-          {room.currentStage}
+          {{
+            LOBBY: "Character creation",
+            PERSONA: "Persona selection",
+            AVAILABILITY: "Dates & vibes",
+            GROUP_PROFILE: "Group profile",
+            DESTINATIONS: "Destination ideas",
+            DESTINATION_VOTE: "Destination vote",
+            FLIGHTS: "Flight styles",
+            FLIGHT_VOTE: "Flight vote",
+            ACTIVITIES: "Activities",
+            ITINERARY: "Itinerary",
+            FEEDBACK: "Feedback",
+            NEGOTIATION: "Negotiation",
+            FINAL: "Final plan",
+          }[room.currentStage] ?? room.currentStage}
         </span>
       </div>
 
@@ -1779,53 +1758,68 @@ export default function TripAgentChat({
           )}
 
           {/* Advance stage button — all stages, host only (Req 13.1, 13.2, 13.3) */}
-          <button
-            type="button"
-            onClick={() => void advanceStage()}
-            disabled={!canAdvanceStage() || advancingStage}
-            aria-label="Move to next step"
-            aria-disabled={!canAdvanceStage() || advancingStage}
-            style={{
-              background:
-                !canAdvanceStage() || advancingStage
-                  ? DEEP_NAVY
-                  : SUNSET_ORANGE,
-              border:
-                !canAdvanceStage() || advancingStage
-                  ? `2px solid ${SAND_CREAM}`
-                  : `2px solid #C2410C`,
-              boxShadow:
-                !canAdvanceStage() || advancingStage
-                  ? "none"
-                  : `4px 4px 0 ${DEEP_NAVY}`,
-              color:
-                !canAdvanceStage() || advancingStage
-                  ? SAND_CREAM
-                  : DEEP_NAVY,
-              padding: "7px 14px",
-              fontSize: 12,
-              fontFamily: "'Courier New', Courier, monospace",
-              fontWeight: 700,
-              cursor:
-                !canAdvanceStage() || advancingStage
-                  ? "not-allowed"
-                  : "pointer",
-              opacity: !canAdvanceStage() || advancingStage ? 0.55 : 1,
-              borderRadius: 0,
-              outline: "none",
-              transition: "box-shadow 0.1s, opacity 0.1s",
-              marginLeft: "auto",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.outline = "3px solid #A855F7";
-              e.currentTarget.style.outlineOffset = "2px";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.outline = "none";
-            }}
-          >
-            {advancingStage ? "▶ Advancing…" : "▶ Move to next step"}
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+            {/* Inline reason when blocked — gives user a clear next action */}
+            {advanceBlockedReason() && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: SUNSET_ORANGE,
+                  fontWeight: 600,
+                }}
+              >
+                ⏳ {advanceBlockedReason()}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => void advanceStage()}
+              disabled={!canAdvanceStage() || advancingStage}
+              aria-label="Move to next planning step"
+              aria-disabled={!canAdvanceStage() || advancingStage}
+              aria-describedby={advanceBlockedReason() ? "advance-blocked-reason" : undefined}
+              style={{
+                background:
+                  !canAdvanceStage() || advancingStage
+                    ? DEEP_NAVY
+                    : SUNSET_ORANGE,
+                border:
+                  !canAdvanceStage() || advancingStage
+                    ? `2px solid ${SAND_CREAM}`
+                    : `2px solid #C2410C`,
+                boxShadow:
+                  !canAdvanceStage() || advancingStage
+                    ? "none"
+                    : `4px 4px 0 ${DEEP_NAVY}`,
+                color:
+                  !canAdvanceStage() || advancingStage
+                    ? SAND_CREAM
+                    : DEEP_NAVY,
+                padding: "7px 14px",
+                fontSize: 12,
+                fontFamily: "'Courier New', Courier, monospace",
+                fontWeight: 700,
+                cursor:
+                  !canAdvanceStage() || advancingStage
+                    ? "not-allowed"
+                    : "pointer",
+                opacity: !canAdvanceStage() || advancingStage ? 0.55 : 1,
+                borderRadius: 0,
+                outline: "none",
+                transition: "box-shadow 0.1s, opacity 0.1s",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.outline = "3px solid #A855F7";
+                e.currentTarget.style.outlineOffset = "2px";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.outline = "none";
+              }}
+            >
+              {advanceButtonLabel()}
+            </button>
+          </div>
         </div>
       )}
     </main>

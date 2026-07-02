@@ -371,33 +371,66 @@ export default function VoteableDestinationCard({
             </p>
           </section>
 
-          {/* ── Badge row: price, crowd, season ── */}
+        {/* ── Badge row: price, crowd, season ── */}
           <section
             aria-label="Destination badges"
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 8,
+              gap: 6,
               alignItems: "flex-start",
             }}
           >
-            {/* Price level badge */}
             <PixelBadge
               label={PRICE_LABELS[suggestion.priceLevel]}
               bg={PRICE_COLOURS[suggestion.priceLevel]}
             />
-
-            {/* Crowd level badge */}
             <PixelBadge
               label={CROWD_LABELS[suggestion.crowdLevel]}
               bg={CROWD_COLOURS[suggestion.crowdLevel]}
             />
-
-            {/* Season/weather badge */}
             {seasonBadge != null && (
               <PixelBadge label={seasonBadge} bg={SAND_CREAM} />
             )}
           </section>
+
+          {/* ── First trade-off always visible (collapsed) ── */}
+          {suggestion.downsides.length > 0 && !expanded && (
+            <div
+              style={{
+                borderLeft: `3px solid ${SUNSET_ORANGE}`,
+                paddingLeft: 8,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                  color: DEEP_NAVY,
+                  opacity: 0.6,
+                  marginBottom: 2,
+                  fontFamily: "'Courier New', Courier, monospace",
+                }}
+              >
+                Trade-off
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  color: DEEP_NAVY,
+                  lineHeight: 1.4,
+                  fontFamily: "'Courier New', Courier, monospace",
+                  wordBreak: "break-word",
+                }}
+              >
+                {suggestion.downsides[0]}
+              </p>
+            </div>
+          )}
 
           {/* ── Expanded details section (collapsed by default) ── */}
           {expanded && (

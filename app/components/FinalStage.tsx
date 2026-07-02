@@ -179,9 +179,9 @@ export default function FinalStage({ room, members }: StageProps) {
       <FairnessSummary summary={itinerary.fairnessSummary} members={members} />
 
       {/* ── Day-by-day itinerary ─────────────────────────────────────────── */}
-      <section aria-label="Day-by-day itinerary" className="flex flex-col gap-8">
+      <section aria-label="Day-by-day itinerary" className="flex flex-col gap-3">
         {itinerary.days.map((day, i) => (
-          <ItineraryDay key={i} day={day} dayNumber={i + 1} />
+          <ItineraryDay key={i} day={day} dayNumber={i + 1} defaultOpen={i === 0} />
         ))}
       </section>
 

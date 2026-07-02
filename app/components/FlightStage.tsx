@@ -175,70 +175,90 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
 // ── Presentational sub-components ────────────────────────────────────────────
 
 function FlightOptionCard({ option }: { option: FlightOption }) {
-  const categoryColors: Record<FlightOption["value"], string> = {
-    budget: "border-[#4ADE80] bg-[#FEF3C7]",
-    comfort: "border-[#A855F7] bg-[#FEF3C7]",
-    best_value: "border-[#38BDF8] bg-[#FEF3C7]",
+  const [expanded, setExpanded] = useState(false);
+
+  const accentBorder: Record<FlightOption["value"], string> = {
+    budget: "border-[#4ADE80]",
+    comfort: "border-[#A855F7]",
+    best_value: "border-[#38BDF8]",
   };
-  const labelColors: Record<FlightOption["value"], string> = {
-    budget: "text-[#1E3A5F]",
-    comfort: "text-[#1E3A5F]",
-    best_value: "text-[#1E3A5F]",
+  const accentHeader: Record<FlightOption["value"], string> = {
+    budget: "bg-[#4ADE80]",
+    comfort: "bg-[#A855F7]",
+    best_value: "bg-[#38BDF8]",
   };
 
   const stopsLabel =
-    option.stops === 0
-      ? "Non-stop"
-      : option.stops === 1
-        ? "1 stop"
-        : `${option.stops} stops`;
+    option.stops === 0 ? "Non-stop" : option.stops === 1 ? "1 stop" : `${option.stops} stops`;
 
   return (
     <article
-      className={`w-full max-w-full overflow-hidden border-4 ${categoryColors[option.value]} shadow-[4px_4px_0px_#1E3A5F]`}
+      className={`w-full max-w-full overflow-hidden border-4 ${accentBorder[option.value]} bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]`}
     >
-      {/* Card header: stacked on mobile, row on sm+ */}
-      <header className="flex flex-col gap-3 border-b-4 border-inherit px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-6">
-        <h3 className={`min-w-0 break-words text-xl font-bold ${labelColors[option.value]}`}>
-          {option.label}
+      {/* Header: name + chips stacked on mobile */}
+      <header
+        className={`flex flex-col gap-2 border-b-4 ${accentBorder[option.value]} px-4 py-3 sm:flex-row sm:items-center sm:justify-between`}
+      >
+        <h3 className="min-w-0 break-words text-base font-bold text-[#1E3A5F]">
+          ✈ {option.label}
         </h3>
-        <div className="flex flex-wrap items-center gap-2">
-          <StatPill label="Price" value={option.priceRange} />
-          <StatPill label="Duration" value={option.duration} />
-          <StatPill label="Stops" value={stopsLabel} />
+        <div className="flex flex-wrap gap-2">
+          <StatChip label="Price" value={option.priceRange} />
+          <StatChip label="Time" value={option.duration} />
+          <StatChip label="Stops" value={stopsLabel} />
         </div>
       </header>
 
-      <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5">
-        {/* What this category means */}
+      <div className="flex flex-col gap-3 px-4 py-3">
+        {/* One-liner explanation */}
         <p className="break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
           {option.explanation}
         </p>
 
-        {/* Itinerary impact — amber callout */}
-        <section
-          aria-label="Itinerary impact"
-          className="border-l-4 border-[#FB923C] bg-amber-50 px-4 py-3"
+        {/* Itinerary impact chip — always visible */}
+        <div className="border-l-4 border-[#FB923C] pl-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+            Day 1 impact
+          </p>
+          <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">
+            {/* First sentence of itineraryImpact only */}
+            {option.itineraryImpact.match(/[^.!?]+[.!?]+/)?.[0]?.trim() ?? option.itineraryImpact.slice(0, 80) + "…"}
+          </p>
+        </div>
+
+        {/* Expanded: full itinerary impact */}
+        {expanded && (
+          <div className="border-2 border-[#FB923C] bg-amber-50 px-3 py-2">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-70">
+              Full itinerary impact
+            </p>
+            <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">
+              {option.itineraryImpact}
+            </p>
+          </div>
+        )}
+
+        {/* Toggle */}
+        <button
+          type="button"
+          onClick={() => setExpanded((p) => !p)}
+          aria-expanded={expanded}
+          className="self-start border-2 border-[#1E3A5F] bg-[#38BDF8] px-3 py-1 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
         >
-          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
-            How this affects your itinerary
-          </p>
-          <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
-            {option.itineraryImpact}
-          </p>
-        </section>
+          {expanded ? "▲ Less" : "▼ More detail"}
+        </button>
       </div>
     </article>
   );
 }
 
-function StatPill({ label, value }: { label: string; value: string }) {
+function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-1 text-center shadow-[2px_2px_0px_#1E3A5F]">
-      <span className="whitespace-nowrap text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-0.5 text-center shadow-[1px_1px_0px_#1E3A5F]">
+      <span className="text-[9px] font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
         {label}
       </span>
-      <span className="whitespace-nowrap text-sm font-bold text-[#1E3A5F]">{value}</span>
+      <span className="whitespace-nowrap text-xs font-bold text-[#1E3A5F]">{value}</span>
     </span>
   );
 }
