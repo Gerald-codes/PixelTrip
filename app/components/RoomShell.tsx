@@ -77,9 +77,10 @@ interface RoomShellProps {
   destinationShortlist?: string[] | null;
   /**
    * Optional selected destination suggestion (used to derive budget estimate).
-   * Provides the priceLevel needed for computeBudgetEstimate.
+   * Only `priceLevel` is required by computeBudgetEstimate — callers may pass
+   * a partial object containing just that field.
    */
-  selectedDestinationSuggestion?: DestinationSuggestion | null;
+  selectedDestinationSuggestion?: Pick<DestinationSuggestion, "priceLevel"> | null;
   /**
    * Trip length in days (inclusive). Used for budget estimate computation.
    * Defaults to 7 when not provided.
