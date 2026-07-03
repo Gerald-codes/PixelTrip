@@ -554,6 +554,29 @@ export async function POST(request: Request) {
   const sorted = [...data].sort((a, b) => b.fitScore - a.fitScore);
 
   // 8. Replace any prior suggestions for this room (re-runs replace).
+  //
+  // Also clear any existing destination votes for this room BEFORE deleting
+  // the suggestions — vote rows store selected_option = destination_suggestions.id,
+  // so regenerating destinations without clearing votes leaves orphaned vote
+  // rows pointing at deleted IDs. Those orphans corrupt the tally (phantom
+  // "tied options" that don't correspond to any visible destination card).
+  const { error: clearVotesError } = await supabase
+    .from("votes")
+    .delete()
+    .eq("room_id", roomId)
+    .eq("vote_type", "destination");
+
+  if (clearVotesError) {
+    console.log(
+      `[agent/destinations] failed to clear previous votes for room ${room.room_code}:`,
+      clearVotesError.message,
+    );
+    return NextResponse.json(
+      { error: "Failed to clear previous votes" },
+      { status: 500 },
+    );
+  }
+
   const { error: deleteError } = await supabase
     .from("destination_suggestions")
     .delete()

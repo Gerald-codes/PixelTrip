@@ -227,12 +227,18 @@ export default function TripAgentChat({
   const [voteSubmitError, setVoteSubmitError] = useState<string | null>(null);
   // Tracks userIds who have submitted destination votes (polled separately).
   const [destVoteSubmittedUserIds, setDestVoteSubmittedUserIds] = useState<string[]>([]);
-  // Tiebreaker state — set when the server reports a tie
+  // Tiebreaker state — set when the server reports a tie (from either the
+  // /api/votes/submit response for the last submitter, or the polled
+  // /api/votes/[roomId]/[voteType] tiedOptions field for everyone else).
   const [tiedDestinationIds, setTiedDestinationIds] = useState<string[] | null>(null);
   const [breakingTie, setBreakingTie] = useState(false);
+  // Raw tiedOptions from the last GET /api/votes/[roomId]/destination poll —
+  // the single source of truth for whether a tie currently exists server-side.
+  const [destServerTiedOptions, setDestServerTiedOptions] = useState<string[]>([]);
   // Flight tie state — set when advance detects a tied flight vote
   const [tiedFlightOptions, setTiedFlightOptions] = useState<string[] | null>(null);
   const [breakingFlightTie, setBreakingFlightTie] = useState(false);
+  const [flightServerTiedOptions, setFlightServerTiedOptions] = useState<string[]>([]);
   // ── Flight votes state ─────────────────────────────────────────────────────
   const [flightVotes, setFlightVotes] = useState<Vote[]>([]);
 
@@ -663,12 +669,12 @@ export default function TripAgentChat({
     if (room.currentStage !== RoomStage.DESTINATIONS && room.currentStage !== RoomStage.DESTINATION_VOTE) {
       setSelectedDestinationIds([]);
       setTiedDestinationIds(null);
-      destTieResolvedRef.current = false;
+      setDestServerTiedOptions([]);
     }
     if (room.currentStage !== RoomStage.FLIGHTS && room.currentStage !== RoomStage.FLIGHT_VOTE) {
       setSelectedFlightCategory(null);
       setTiedFlightOptions(null);
-      flightTieResolvedRef.current = false;
+      setFlightServerTiedOptions([]);
     }
     appendIntroMessage(room.currentStage);
   }, [room.currentStage, appendIntroMessage]);
@@ -779,8 +785,16 @@ export default function TripAgentChat({
         { cache: "no-store" }
       );
       if (!res.ok) return;
-      const data = (await res.json()) as { votes: Vote[] };
+      // The server already computes the authoritative tally/winner/tiedOptions
+      // (see /api/votes/[roomId]/[voteType]) — capture them instead of
+      // re-tallying client-side, which previously duplicated this logic with
+      // bugs (e.g. counting orphaned vote rows from regenerated destinations).
+      const data = (await res.json()) as {
+        votes: Vote[];
+        tiedOptions?: string[];
+      };
       setDestinationVotes(data.votes ?? []);
+      setDestServerTiedOptions(data.tiedOptions ?? []);
     } catch {
       // Silent
     }
@@ -794,87 +808,64 @@ export default function TripAgentChat({
     setDestVoteSubmittedUserIds(ids);
   }, [destinationVotes]);
 
-  // ── Detect destination vote tie from polled data (for non-last-submitters) ──
+  // ── Mirror the server's tie state into tiedDestinationIds ───────────────────
   //
-  // The tie response from /api/votes/submit only reaches the LAST user who
-  // submits. Everyone else (including the host who likely submitted first)
-  // only sees the waiting state. This effect checks whether all members have
-  // voted AND there's a tie — if so, it sets tiedDestinationIds so the
-  // tiebreak panel appears for the host.
+  // The server (GET /api/votes/[roomId]/[voteType]) is the single source of
+  // truth for whether a tie exists — it computes the tally directly from the
+  // votes table, which is authoritative. Previously the client re-tallied
+  // votes itself, which double-counted orphaned vote rows left behind after
+  // destinations were regenerated (fixed server-side too — see
+  // /api/agents/destinations — but this removes the redundant, bug-prone
+  // client-side recomputation entirely).
   //
-  // destTieResolvedRef prevents re-detection after the host resolves the tie.
-  const destTieResolvedRef = useRef(false);
+  // destServerTiedOptions.length > 0 means the server currently sees a tie.
+  // Once it becomes empty again (host resolved it, or votes changed), the
+  // tiebreak panel is cleared for everyone on the next poll — no manual
+  // "resolved" ref bookkeeping needed.
   useEffect(() => {
-    // Only run in the vote stage and when we have poll data
     if (room.currentStage !== RoomStage.DESTINATION_VOTE && room.currentStage !== RoomStage.DESTINATIONS) return;
-    if (tiedDestinationIds) return; // already showing
-    if (destTieResolvedRef.current) return; // already resolved — don't re-detect
-    if (members.length === 0) return;
-
-    const voterIds = [...new Set(destinationVotes.map((v) => v.userId))];
-    if (voterIds.length < members.length) return; // not everyone has voted yet
-
-    // Tally votes
-    const tally: Record<string, number> = {};
-    for (const v of destinationVotes) {
-      tally[v.selectedOption] = (tally[v.selectedOption] ?? 0) + 1;
-    }
-    let maxCount = 0;
-    for (const count of Object.values(tally)) {
-      if (count > maxCount) maxCount = count;
-    }
-    const topOptions = Object.entries(tally)
-      .filter(([, count]) => count === maxCount)
-      .map(([opt]) => opt);
-
-    if (topOptions.length > 1) {
-      // Tie detected — show tiebreak panel
-      setTiedDestinationIds(topOptions);
-      const tiedNames = topOptions
-        .map((id) => destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id)
-        .join(", ");
-      appendSystemMessage(
-        `⚖️ It's a tie between: ${tiedNames}. ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
-        "system"
-      );
+    if (destServerTiedOptions.length > 1) {
+      setTiedDestinationIds((prev) => {
+        // Only append the system message the first time this exact tie appears.
+        if (prev && prev.length === destServerTiedOptions.length && prev.every((id) => destServerTiedOptions.includes(id))) {
+          return prev;
+        }
+        const tiedNames = destServerTiedOptions
+          .map((id) => destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id)
+          .join(", ");
+        appendSystemMessage(
+          `⚖️ It's a tie between: ${tiedNames}. ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+          "system"
+        );
+        return destServerTiedOptions;
+      });
+    } else {
+      setTiedDestinationIds(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destinationVotes, members.length, room.currentStage, tiedDestinationIds]);
+  }, [destServerTiedOptions, room.currentStage]);
 
-  // ── Detect flight vote tie from polled data (for non-last-submitters) ──────
-  const flightTieResolvedRef = useRef(false);
+  // ── Mirror the server's tie state into tiedFlightOptions ────────────────────
   useEffect(() => {
     if (room.currentStage !== RoomStage.FLIGHT_VOTE && room.currentStage !== RoomStage.FLIGHTS) return;
-    if (tiedFlightOptions) return; // already showing
-    if (flightTieResolvedRef.current) return; // already resolved — don't re-detect
-    if (members.length === 0) return;
-
-    const voterIds = [...new Set(flightVotes.map((v) => v.userId))];
-    if (voterIds.length < members.length) return; // not everyone has voted yet
-
-    const tally: Record<string, number> = {};
-    for (const v of flightVotes) {
-      tally[v.selectedOption] = (tally[v.selectedOption] ?? 0) + 1;
-    }
-    let maxCount = 0;
-    for (const count of Object.values(tally)) {
-      if (count > maxCount) maxCount = count;
-    }
-    const topOptions = Object.entries(tally)
-      .filter(([, count]) => count === maxCount)
-      .map(([opt]) => opt);
-
-    if (topOptions.length > 1) {
-      setTiedFlightOptions(topOptions);
-      const LABELS: Record<string, string> = { budget: "Budget", best_value: "Best Value", comfort: "Comfort" };
-      const tiedNames = topOptions.map((opt) => LABELS[opt] ?? opt).join(" and ");
-      appendSystemMessage(
-        `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
-        "system"
-      );
+    if (flightServerTiedOptions.length > 1) {
+      setTiedFlightOptions((prev) => {
+        if (prev && prev.length === flightServerTiedOptions.length && prev.every((opt) => flightServerTiedOptions.includes(opt))) {
+          return prev;
+        }
+        const LABELS: Record<string, string> = { budget: "Budget", best_value: "Best Value", comfort: "Comfort" };
+        const tiedNames = flightServerTiedOptions.map((opt) => LABELS[opt] ?? opt).join(" and ");
+        appendSystemMessage(
+          `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+          "system"
+        );
+        return flightServerTiedOptions;
+      });
+    } else {
+      setTiedFlightOptions(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flightVotes, members.length, room.currentStage, tiedFlightOptions]);
+  }, [flightServerTiedOptions, room.currentStage]);
 
   // ── Fetch flight votes ─────────────────────────────────────────────────────
 
@@ -885,8 +876,13 @@ export default function TripAgentChat({
         { cache: "no-store" }
       );
       if (!res.ok) return;
-      const data = (await res.json()) as { votes: Vote[] };
+      // Same rationale as fetchDestinationVotes — use the server's tally.
+      const data = (await res.json()) as {
+        votes: Vote[];
+        tiedOptions?: string[];
+      };
       setFlightVotes(data.votes ?? []);
+      setFlightServerTiedOptions(data.tiedOptions ?? []);
     } catch {
       // Silent
     }
@@ -1053,12 +1049,8 @@ export default function TripAgentChat({
         void broadcastStageChange();
         onRoomUpdated(data.updatedRoom);
       } else if (data.tied && data.tiedOptions && data.tiedOptions.length > 0) {
-        setTiedFlightOptions(data.tiedOptions);
-        const tiedNames = data.tiedOptions.map((opt) => LABELS[opt] ?? opt).join(" and ");
-        appendSystemMessage(
-          `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
-          "system"
-        );
+        // Sync the server mirror — see handleSubmitDestinationVotes for rationale.
+        setFlightServerTiedOptions(data.tiedOptions);
       } else if (data.allVoted) {
         appendSystemMessage("Everyone has voted! Tallying results…", "system");
       }
@@ -1120,15 +1112,11 @@ export default function TripAgentChat({
         void broadcastStageChange();
         onRoomUpdated(data.updatedRoom);
       } else if (data.tied && data.tiedOptions && data.tiedOptions.length > 0) {
-        // Tie — show tiebreaker UI; host must pick the winner
-        setTiedDestinationIds(data.tiedOptions);
-        const tiedNames = data.tiedOptions
-          .map((id) => destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id)
-          .join(", ");
-        appendSystemMessage(
-          `⚖️ It's a tie between: ${tiedNames}. ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
-          "system"
-        );
+        // Tie — sync the server mirror; the effect watching
+        // destServerTiedOptions will set tiedDestinationIds and append the
+        // system message consistently for every client (submit response here,
+        // polling for everyone else).
+        setDestServerTiedOptions(data.tiedOptions);
       } else if (data.allVoted) {
         appendSystemMessage("Everyone has voted! Tallying results…", "system");
       }
@@ -1177,7 +1165,7 @@ export default function TripAgentChat({
         "confirmation"
       );
       setTiedDestinationIds(null);
-      destTieResolvedRef.current = true;
+      setDestServerTiedOptions([]);
       void broadcastStageChange();
       onRoomUpdated(updatedRoom);
     } catch (err) {
@@ -1220,7 +1208,7 @@ export default function TripAgentChat({
       const updatedRoom = (await stageRes.json()) as TripRoom;
       appendSystemMessage(`✅ ${LABELS[winner] ?? winner} selected as the group's flight. Moving on…`, "confirmation");
       setTiedFlightOptions(null);
-      flightTieResolvedRef.current = true;
+      setFlightServerTiedOptions([]);
       void broadcastStageChange();
       onRoomUpdated(updatedRoom);
     } catch (err) {
