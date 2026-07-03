@@ -73,9 +73,9 @@ export default function DestinationSuggestionPicker({
                 borderRadius: 0,
                 // Selected: grass-green bg + deep-navy text + 2px sunset-orange border
                 // Unselected: sand-cream bg + deep-navy text + 2px deep-navy border
-                backgroundColor: isSelected ? "#4ADE80" : "#FEF3C7",
-                color: "#1E3A5F",
-                border: isSelected ? "2px solid #FB923C" : "2px solid #1E3A5F",
+                backgroundColor: isSelected ? "#4ADE80" : "var(--pt-bg-card)",
+                color: "var(--pt-text-primary, #E8ECF1)",
+                border: isSelected ? "2px solid #FB923C" : "2px solid rgba(232, 236, 241, 0.2)",
                 cursor: disabled ? "not-allowed" : "pointer",
                 padding: "6px 12px",
                 fontFamily: "monospace",
@@ -84,7 +84,7 @@ export default function DestinationSuggestionPicker({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
-                boxShadow: "2px 2px 0px #1E3A5F",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                 outline: "none",
                 transition: "background-color 0.1s, border-color 0.1s",
               }}

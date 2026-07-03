@@ -29,7 +29,7 @@ import type { RunningBudgetEstimate } from "@/lib/budgetEstimate";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
 const GRASS_GREEN = "#4ADE80";
-const SAND_CREAM = "#FEF3C7";
+const SAND_CREAM = "var(--pt-bg-card)";
 
 const STATUS_FILL: Record<RunningBudgetEstimate["status"], string> = {
   within: GRASS_GREEN,

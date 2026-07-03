@@ -263,14 +263,14 @@ export default function NegotiationStage({
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* Stage header */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">
           ⚖️ Conflict Negotiation
         </h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <p className="mt-2 text-pt-text-primary">
           Review each conflict, select a resolution option, and the host can
           revise the itinerary to reflect the group&apos;s decision.
         </p>
@@ -278,14 +278,14 @@ export default function NegotiationStage({
 
       {/* Load error */}
       {loadError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
           {loadError}
         </div>
       )}
 
       {/* Diff summary banner (dismissible amber) */}
       {diffSummary && (
-        <div className="border-2 border-[#FB923C] bg-amber-50 p-4 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-2 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-amber-900">
@@ -307,16 +307,16 @@ export default function NegotiationStage({
 
       {/* Revision error */}
       {revisionError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
           {revisionError}
         </div>
       )}
 
       {/* Revising loading state */}
       {revising && (
-        <div className="border-4 border-[#38BDF8] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="font-bold text-[#1E3A5F]">Revising itinerary…</p>
-          <p className="mt-1 text-sm text-[#1E3A5F]">
+        <div className="border-4 border-[#38BDF8] bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <p className="font-bold text-pt-text-primary">Revising itinerary…</p>
+          <p className="mt-1 text-sm text-pt-text-primary">
             Applying the chosen resolution and updating the plan. This takes
             about 15–30 seconds.
           </p>
@@ -325,8 +325,8 @@ export default function NegotiationStage({
 
       {/* Empty state */}
       {!loadError && conflicts.length === 0 && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">
             No conflicts to resolve — the host can advance back to the
             itinerary.
           </p>
@@ -352,11 +352,11 @@ export default function NegotiationStage({
       {/* Revised itinerary inline preview */}
       {itinerary && itinerary.days.length > 0 && diffSummary && (
         <div className="flex flex-col gap-4">
-          <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] px-4 py-3 shadow-[4px_4px_0px_#1E3A5F]">
-            <p className="font-bold text-[#1E3A5F]">
+          <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-4 py-3 shadow-pixel-card">
+            <p className="font-bold text-pt-text-primary">
               📅 Revised itinerary — {itinerary.destination}
             </p>
-            <p className="mt-0.5 text-xs text-[#1E3A5F] opacity-70">
+            <p className="mt-0.5 text-xs text-pt-text-primary opacity-70">
               {itinerary.startDate} → {itinerary.endDate} · Version{" "}
               {itinerary.versionNumber}
             </p>
@@ -374,13 +374,13 @@ export default function NegotiationStage({
 
       {/* Host nav buttons */}
       {isHost ? (
-        <div className="flex flex-wrap items-center gap-3 border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="flex flex-wrap items-center gap-3 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
           {isHost && (
             <button
               type="button"
               onClick={() => void handleBackToItinerary()}
               disabled={revising || advancing}
-              className="border-4 border-[#1E3A5F] bg-[#FEF3C7] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               ← Back to Itinerary
             </button>
@@ -389,7 +389,7 @@ export default function NegotiationStage({
             type="button"
             onClick={() => void handleAdvanceToFeedback()}
             disabled={revising || advancing}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "🔁 Another round of feedback"}
           </button>
@@ -400,8 +400,8 @@ export default function NegotiationStage({
           )}
         </div>
       ) : (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">
             Select a resolution option above. The host will apply the chosen
             resolution and revise the itinerary.
           </p>
@@ -435,20 +435,20 @@ function ConflictCard({
   const canRevise = isHost && selectedOptionId !== null && !revising;
 
   return (
-    <article className="flex flex-col gap-4 border-4 border-[#1E3A5F] bg-[#FEF3C7] p-5 shadow-[4px_4px_0px_#1E3A5F]">
+    <article className="flex flex-col gap-4 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-5 shadow-pixel-card">
       {/* Conflict summary */}
       <div>
         <div className="flex items-center gap-2">
-          <span className="border-2 border-[#1E3A5F] bg-[#A855F7] px-2 py-0.5 text-xs font-bold text-white shadow-[2px_2px_0px_#1E3A5F]">
+          <span className="border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-agent-atlas)] px-2 py-0.5 text-xs font-bold text-white shadow-pixel-sm">
             CONFLICT
           </span>
           {conflict.status === "resolved" && (
-            <span className="border-2 border-[#4ADE80] bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+            <span className="border-2 border-[#4ADE80] bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-sm">
               RESOLVED
             </span>
           )}
         </div>
-        <p className="mt-2 font-bold text-[#1E3A5F]">
+        <p className="mt-2 font-bold text-pt-text-primary">
           {conflict.conflictSummary}
         </p>
       </div>
@@ -456,13 +456,13 @@ function ConflictCard({
       {/* Affected members */}
       {conflict.affectedUsers.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+          <span className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
             Affects:
           </span>
           {conflict.affectedUsers.map((userId) => (
             <span
               key={userId}
-              className="border-2 border-[#1E3A5F] bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[1px_1px_0px_#1E3A5F]"
+              className="border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble"
             >
               {getMemberName(userId)}
             </span>
@@ -472,7 +472,7 @@ function ConflictCard({
 
       {/* Option cards */}
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Resolution options
         </p>
         {conflict.proposedOptions.map((option) => {
@@ -484,10 +484,10 @@ function ConflictCard({
               onClick={() => onSelectOption(option.id)}
               disabled={revising}
               className={[
-                "flex flex-col gap-1 border-4 p-4 text-left transition-colors shadow-[4px_4px_0px_#1E3A5F]",
+                "flex flex-col gap-1 border-4 p-4 text-left transition-colors shadow-pixel-card",
                 isSelected
-                  ? "border-[#4ADE80] bg-[#f0fdf4]"
-                  : "border-[#1E3A5F] bg-white hover:bg-[#f5fff0]",
+                  ? "border-[#4ADE80] bg-pt-card-hover"
+                  : "border-pt-text-primary border-opacity-20 bg-pt-card hover:bg-pt-card-hover",
                 revising ? "cursor-not-allowed opacity-60" : "cursor-pointer",
               ].join(" ")}
               aria-pressed={isSelected}
@@ -496,12 +496,12 @@ function ConflictCard({
                 {isSelected && (
                   <span className="text-[#4ADE80] font-bold">✓</span>
                 )}
-                <span className="font-bold text-[#1E3A5F]">
+                <span className="font-bold text-pt-text-primary">
                   {option.description}
                 </span>
               </div>
               {option.tradeoffs && (
-                <p className="mt-1 text-xs text-[#1E3A5F] opacity-70 leading-relaxed">
+                <p className="mt-1 text-xs text-pt-text-primary opacity-70 leading-relaxed">
                   Trade-offs: {option.tradeoffs}
                 </p>
               )}
@@ -512,17 +512,17 @@ function ConflictCard({
 
       {/* Host: apply resolution button */}
       {isHost && (
-        <div className="flex flex-col gap-2 pt-1 border-t-2 border-dashed border-[#1E3A5F]">
+        <div className="flex flex-col gap-2 pt-1 border-t-2 border-dashed border-pt-text-primary border-opacity-20">
           <button
             type="button"
             onClick={onRevise}
             disabled={!canRevise}
-            className="self-start border-4 border-[#1E3A5F] bg-[#4ADE80] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {revising ? "Revising itinerary…" : "Apply resolution & revise itinerary"}
           </button>
           {!selectedOptionId && (
-            <p className="text-xs font-semibold text-[#1E3A5F] opacity-70">
+            <p className="text-xs font-semibold text-pt-text-primary opacity-70">
               Select a resolution option above to enable this button.
             </p>
           )}

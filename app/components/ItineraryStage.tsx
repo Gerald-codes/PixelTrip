@@ -247,14 +247,14 @@ export default function ItineraryStage({
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* Stage header */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">
           Group Itinerary
         </h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <p className="mt-2 text-pt-text-primary">
           Your AI-crafted, persona-balanced day-by-day travel plan. Every
           activity is chosen with your group&apos;s travel styles in mind.
         </p>
@@ -263,14 +263,14 @@ export default function ItineraryStage({
       {/* Diff summary banner */}
       {diffSummary && (
         <div
-          className="flex items-start justify-between gap-4 border-2 border-[#FB923C] bg-amber-50 p-4 shadow-[4px_4px_0px_#1E3A5F]"
+          className="flex items-start justify-between gap-4 border-2 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card"
           role="alert"
         >
           <div>
-            <p className="font-bold text-[#1E3A5F] text-sm flex items-center gap-1">
+            <p className="font-bold text-pt-text-primary text-sm flex items-center gap-1">
               <span aria-hidden="true">🔄</span> What changed
             </p>
-            <p className="mt-1 text-sm text-[#1E3A5F]">{diffSummary}</p>
+            <p className="mt-1 text-sm text-pt-text-primary">{diffSummary}</p>
           </div>
           <button
             type="button"
@@ -285,33 +285,33 @@ export default function ItineraryStage({
 
       {/* Loading */}
       {loading && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 text-sm font-semibold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 text-sm font-semibold text-pt-text-primary shadow-pixel-card">
           Loading itinerary…
         </div>
       )}
 
       {/* Empty state */}
       {!loading && !itinerary && !generating && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
           {isHost ? (
             <>
-              <h3 className="text-lg font-bold text-[#1E3A5F]">
+              <h3 className="text-lg font-bold text-pt-text-primary">
                 No itinerary yet
               </h3>
-              <p className="mt-1 text-sm text-[#1E3A5F]">
+              <p className="mt-1 text-sm text-pt-text-primary">
                 Run the itinerary agent to craft a persona-balanced day-by-day
                 plan for your group. This usually takes 20–30 seconds.
               </p>
               <button
                 type="button"
                 onClick={() => void handleGenerate()}
-                className="mt-4 border-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+                className="mt-4 border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
               >
                 Generate itinerary
               </button>
             </>
           ) : (
-            <p className="text-sm font-semibold text-[#1E3A5F]">
+            <p className="text-sm font-semibold text-pt-text-primary">
               Waiting for the host to generate the group itinerary…
             </p>
           )}
@@ -320,14 +320,14 @@ export default function ItineraryStage({
 
       {/* Generating spinner */}
       {generating && (
-        <div className="border-4 border-[#38BDF8] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="font-bold text-[#1E3A5F] flex items-center gap-2">
+        <div className="border-4 border-[#38BDF8] bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <p className="font-bold text-pt-text-primary flex items-center gap-2">
             <span className="inline-block animate-bounce">✦</span>
             <span className="inline-block animate-bounce [animation-delay:0.15s]">✦</span>
             <span className="inline-block animate-bounce [animation-delay:0.3s]">✦</span>
             <span className="ml-1">Crafting your group itinerary…</span>
           </p>
-          <p className="mt-2 text-sm text-[#1E3A5F]">
+          <p className="mt-2 text-sm text-pt-text-primary">
             Balancing each member&apos;s persona, must-have activities, pace,
             and budget. This takes about 20–30 seconds.
           </p>
@@ -336,7 +336,7 @@ export default function ItineraryStage({
 
       {/* Generate error */}
       {generateError && !generating && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-4 shadow-pixel-card">
           <p className="text-sm font-bold text-red-800">
             Couldn&apos;t generate itinerary
           </p>
@@ -357,10 +357,10 @@ export default function ItineraryStage({
 
       {/* Version history dropdown */}
       {allVersions.length > 1 && (
-        <div className="flex items-center gap-3 border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="flex items-center gap-3 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
           <label
             htmlFor="version-select"
-            className="text-sm font-bold text-[#1E3A5F] whitespace-nowrap"
+            className="text-sm font-bold text-pt-text-primary whitespace-nowrap"
           >
             Version history
           </label>
@@ -370,7 +370,7 @@ export default function ItineraryStage({
             onChange={(e) =>
               setSelectedVersionId(e.target.value === "" ? null : e.target.value)
             }
-            className="flex-1 border-2 border-[#1E3A5F] bg-white px-3 py-1.5 text-sm font-semibold text-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+            className="flex-1 border-2 border-pt-text-primary border-opacity-20 bg-pt-card px-3 py-1.5 text-sm font-semibold text-pt-text-primary focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
           >
             <option value="">Latest (v{itinerary?.versionNumber ?? "?"})</option>
             {allVersions.map((v) => (
@@ -380,7 +380,7 @@ export default function ItineraryStage({
             ))}
           </select>
           {selectedVersionId && (
-            <span className="border-2 border-[#FB923C] bg-amber-50 px-2 py-0.5 text-xs font-bold text-[#1E3A5F]">
+            <span className="border-2 border-[#FB923C] bg-amber-50 px-2 py-0.5 text-xs font-bold text-pt-text-primary">
               Read-only
             </span>
           )}
@@ -391,32 +391,32 @@ export default function ItineraryStage({
       {!loading && viewingItinerary && (
         <div className="flex flex-col gap-6">
           {/* Header card */}
-          <div className="border-4 border-[#1E3A5F] bg-[#38BDF8] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+          <div className="border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] p-6 shadow-pixel-card">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h3 className="text-2xl font-bold text-[#1E3A5F]">
+                <h3 className="text-2xl font-bold text-pt-text-primary">
                   {viewingItinerary.destination}
                 </h3>
-                <p className="mt-1 text-sm font-semibold text-[#1E3A5F]">
+                <p className="mt-1 text-sm font-semibold text-pt-text-primary">
                   {formatDate(viewingItinerary.startDate)} —{" "}
                   {formatDate(viewingItinerary.endDate)}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1.5">
                 {/* Version badge */}
-                <span className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1 text-xs font-bold text-[#1E3A5F] uppercase tracking-wide shadow-[2px_2px_0px_#1E3A5F]">
+                <span className="border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-1 text-xs font-bold text-pt-text-primary uppercase tracking-wide shadow-pixel-sm">
                   v{viewingItinerary.versionNumber} · {viewingItinerary.status}
                 </span>
                 {/* Flight option badge */}
                 {room.selectedFlightOption && (
-                  <span className="border-2 border-[#1E3A5F] bg-[#4ADE80] px-3 py-1 text-xs font-bold text-[#1E3A5F] uppercase tracking-wide shadow-[2px_2px_0px_#1E3A5F]">
+                  <span className="border-2 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-3 py-1 text-xs font-bold text-pt-text-primary uppercase tracking-wide shadow-pixel-sm">
                     ✈ {room.selectedFlightOption.replace("_", " ")}
                   </span>
                 )}
                 {/* Average satisfaction score */}
                 {viewingItinerary.averageSatisfactionScore !== null && (
                   <span
-                    className={`border-2 border-[#1E3A5F] px-3 py-1 text-xs font-bold text-[#1E3A5F] uppercase tracking-wide shadow-[2px_2px_0px_#1E3A5F] ${
+                    className={`border-2 border-pt-text-primary border-opacity-20 px-3 py-1 text-xs font-bold text-pt-text-primary uppercase tracking-wide shadow-pixel-sm ${
                       viewingItinerary.averageSatisfactionScore >= 7
                         ? "bg-[#4ADE80]"
                         : viewingItinerary.averageSatisfactionScore >= 5
@@ -446,8 +446,8 @@ export default function ItineraryStage({
 
           {/* Host controls (only shown for the live/current view, not past versions) */}
           {isHost && !selectedVersionId && (
-            <div className="flex flex-col gap-3 border-4 border-[#1E3A5F] bg-[#FEF3C7] p-5 shadow-[4px_4px_0px_#1E3A5F]">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+            <div className="flex flex-col gap-3 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-5 shadow-pixel-card">
+              <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
                 Host controls
               </p>
               <div className="flex flex-wrap gap-3">
@@ -457,7 +457,7 @@ export default function ItineraryStage({
                     type="button"
                     onClick={() => void handleGenerate()}
                     disabled={generating}
-                    className="border-4 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1.5 text-sm font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                    className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-1.5 text-sm font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {generating ? "Regenerating…" : "↺ Regenerate"}
                   </button>
@@ -468,7 +468,7 @@ export default function ItineraryStage({
                   <button
                     type="button"
                     onClick={() => void handleAdvanceToFeedback()}
-                    className="border-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-1.5 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+                    className="border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-4 py-1.5 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
                   >
                     Advance to Feedback →
                   </button>
@@ -480,14 +480,14 @@ export default function ItineraryStage({
                     type="button"
                     onClick={() => void handleFinalise()}
                     disabled={finalising}
-                    className="border-4 border-[#1E3A5F] bg-[#4ADE80] px-4 py-1.5 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                    className="border-4 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-4 py-1.5 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {finalising ? "Finalising…" : "✓ Finalise & Go to Final"}
                   </button>
                 )}
 
                 {isFinalised && (
-                  <span className="border-2 border-[#4ADE80] bg-green-50 px-4 py-2 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+                  <span className="border-2 border-[#4ADE80] bg-green-50 px-4 py-2 text-sm font-bold text-pt-text-primary shadow-pixel-sm">
                     ✓ Itinerary finalised
                   </span>
                 )}
@@ -502,7 +502,7 @@ export default function ItineraryStage({
 
       {/* Non-host waiting state */}
       {!isHost && !loading && (
-        <p className="text-sm font-semibold text-[#1E3A5F]">
+        <p className="text-sm font-semibold text-pt-text-primary">
           {itinerary
             ? "Waiting for the host to advance to the next stage…"
             : "Waiting for the host to generate the itinerary…"}

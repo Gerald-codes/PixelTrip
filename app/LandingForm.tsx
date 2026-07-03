@@ -13,19 +13,11 @@ import type { TripRoom, User } from "@/lib/types";
 type Mode = "create" | "join";
 
 /**
- * Landing form (client component).
+ * Landing form — dark navy PixelTrip theme.
  *
- * Wrapped in a Suspense boundary by app/page.tsx because it uses
- * useSearchParams() to read ?join=CODE from invite links.
- *
- * Two flows, both gated on a display name:
- * - Create: POST /api/rooms (with the local hostUserId), then POST /api/users
- *   to join the new room as host. On success the room code and a shareable
- *   invite link are shown before navigating to /room/[code].
- * - Join: GET /api/rooms/[code] to resolve the room, then POST /api/users to
- *   join, then navigate to /room/[code].
- *
- * Identity (userId + displayName) comes from lib/identity.ts (localStorage).
+ * Two flows gated on a display name:
+ * - Create: POST /api/rooms → POST /api/users → navigate to /room/[code]
+ * - Join:   GET /api/rooms/[code] → POST /api/users → navigate to /room/[code]
  */
 export default function LandingForm() {
   const router = useRouter();
@@ -34,9 +26,7 @@ export default function LandingForm() {
   const inviteCode = searchParams.get("join")?.toUpperCase() ?? "";
 
   const [mode, setMode] = useState<Mode>(inviteCode ? "join" : "create");
-  const [displayName, setDisplayNameState] = useState<string>(() =>
-    getDisplayName(),
-  );
+  const [displayName, setDisplayNameState] = useState<string>(() => getDisplayName());
   const [joinCode, setJoinCode] = useState<string>(inviteCode);
 
   useEffect(() => {
@@ -46,8 +36,8 @@ export default function LandingForm() {
     }
   }, [inviteCode]);
 
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [createdRoom, setCreatedRoom] = useState<TripRoom | null>(null);
 
   const inviteLink = useMemo(() => {
@@ -63,9 +53,7 @@ export default function LandingForm() {
       body: JSON.stringify({ id: userId, displayName: name, roomId }),
     });
     if (!res.ok) {
-      const body = (await res.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const body = (await res.json().catch(() => null)) as { error?: string } | null;
       throw new Error(body?.error ?? "Failed to join room");
     }
     return (await res.json()) as User;
@@ -82,15 +70,11 @@ export default function LandingForm() {
       body: JSON.stringify({ hostUserId: userId }),
     });
     if (!createRes.ok) {
-      const body = (await createRes.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const body = (await createRes.json().catch(() => null)) as { error?: string } | null;
       throw new Error(body?.error ?? "Failed to create room");
     }
     const room = (await createRes.json()) as TripRoom;
-
     await joinRoom(room.id, userId, name);
-
     setCreatedRoom(room);
     router.push(`/room/${room.roomCode}?name=${encodeURIComponent(name)}`);
   }
@@ -103,15 +87,11 @@ export default function LandingForm() {
 
     const lookupRes = await fetch(`/api/rooms/${code}`);
     if (!lookupRes.ok) {
-      const body = (await lookupRes.json().catch(() => null)) as
-        | { error?: string }
-        | null;
+      const body = (await lookupRes.json().catch(() => null)) as { error?: string } | null;
       throw new Error(body?.error ?? "Room not found");
     }
     const room = (await lookupRes.json()) as TripRoom;
-
     await joinRoom(room.id, userId, name);
-
     router.push(`/room/${room.roomCode}?name=${encodeURIComponent(name)}`);
   }
 
@@ -136,132 +116,329 @@ export default function LandingForm() {
         await handleJoin();
       }
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Something went wrong",
-      );
+      setErrorMessage(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
     }
   }
 
-  return (
-    /* Hero section: two-stop gradient from deep navy → sky blue */
-    <main className="flex min-h-screen flex-col items-center justify-center gap-10 bg-gradient-to-br from-[#1E3A5F] to-[#38BDF8] p-8">
+  // ── Shared input style ──────────────────────────────────────────────────
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: 6,
+    padding: "10px 14px",
+    color: "#E8ECF1",
+    fontFamily: "var(--pt-font-body)",
+    fontSize: 14,
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color 0.15s",
+  };
 
-      {/* Title block */}
-      <div className="text-center">
-        <h1 className="text-5xl font-black tracking-tight text-[#FEF3C7] drop-shadow-[3px_3px_0px_#1E3A5F]">
-          🗺️ PixelTrip
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#0A1628",
+        backgroundImage: `
+          radial-gradient(ellipse at 20% 30%, rgba(79,209,197,0.06) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 70%, rgba(167,139,250,0.06) 0%, transparent 50%)
+        `,
+        padding: "32px 16px",
+        fontFamily: "var(--pt-font-body)",
+      }}
+    >
+      {/* ── Logo block ── */}
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        {/* Pixel compass icon made of rects */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true" style={{ imageRendering: "pixelated" }}>
+            {/* Outer ring */}
+            <rect x="14" y="4"  width="20" height="4"  fill="#4FD1C5" />
+            <rect x="14" y="40" width="20" height="4"  fill="#4FD1C5" />
+            <rect x="4"  y="14" width="4"  height="20" fill="#4FD1C5" />
+            <rect x="40" y="14" width="4"  height="20" fill="#4FD1C5" />
+            <rect x="8"  y="8"  width="8"  height="4"  fill="#4FD1C5" />
+            <rect x="32" y="8"  width="8"  height="4"  fill="#4FD1C5" />
+            <rect x="8"  y="36" width="8"  height="4"  fill="#4FD1C5" />
+            <rect x="32" y="36" width="8"  height="4"  fill="#4FD1C5" />
+            <rect x="8"  y="12" width="4"  height="8"  fill="#4FD1C5" />
+            <rect x="36" y="12" width="4"  height="8"  fill="#4FD1C5" />
+            <rect x="8"  y="28" width="4"  height="8"  fill="#4FD1C5" />
+            <rect x="36" y="28" width="4"  height="8"  fill="#4FD1C5" />
+            {/* Inner fill */}
+            <rect x="12" y="12" width="24" height="24" fill="#0F1B2E" />
+            {/* Compass needle — north orange */}
+            <rect x="22" y="14" width="4"  height="10" fill="#FB923C" />
+            {/* Compass needle — south teal */}
+            <rect x="22" y="24" width="4"  height="10" fill="#4FD1C5" />
+            {/* Centre dot */}
+            <rect x="22" y="22" width="4"  height="4"  fill="#E8ECF1" />
+          </svg>
+        </div>
+
+        <h1
+          style={{
+            fontFamily: "var(--pt-font-pixel)",
+            fontSize: 22,
+            color: "#E8ECF1",
+            letterSpacing: "0.06em",
+            margin: 0,
+            lineHeight: 1.2,
+          }}
+        >
+          PixelTrip
         </h1>
-        <p className="mt-3 text-lg font-semibold text-[#FEF3C7]">
+        <p
+          style={{
+            marginTop: 10,
+            fontSize: 14,
+            color: "rgba(232,236,241,0.55)",
+            fontFamily: "var(--pt-font-body)",
+            fontWeight: 400,
+          }}
+        >
           Collaborative AI travel planning with 8-bit personas.
         </p>
       </div>
 
-      {/* Card */}
+      {/* ── Card ── */}
       <div
-        className="w-full max-w-md border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]"
-        /* no border-radius — pixel card style */
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          backgroundColor: "#0F1B2E",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 12,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          padding: "28px 28px 32px",
+        }}
       >
         {/* Mode tabs */}
-        <div className="mb-6 flex gap-3" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "create"}
-            onClick={() => {
-              setMode("create");
-              setErrorMessage("");
-            }}
-            className={`flex-1 border-2 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
-              mode === "create"
-                ? "border-[#1E3A5F] bg-[#FB923C] text-[#1E3A5F]"
-                : "border-[#1E3A5F] bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#FB923C]/30"
-            }`}
-          >
-            ✈️ Create Room
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "join"}
-            onClick={() => {
-              setMode("join");
-              setErrorMessage("");
-            }}
-            className={`flex-1 border-2 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
-              mode === "join"
-                ? "border-[#1E3A5F] bg-[#38BDF8] text-[#1E3A5F]"
-                : "border-[#1E3A5F] bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#38BDF8]/30"
-            }`}
-          >
-            🚪 Join Room
-          </button>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 24,
+            background: "rgba(255,255,255,0.05)",
+            borderRadius: 8,
+            padding: 4,
+          }}
+          role="tablist"
+        >
+          {(["create", "join"] as Mode[]).map((m) => {
+            const isActive = mode === m;
+            return (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => { setMode(m); setErrorMessage(""); }}
+                style={{
+                  flex: 1,
+                  padding: "8px 0",
+                  borderRadius: 6,
+                  border: "none",
+                  background: isActive ? "#4FD1C5" : "transparent",
+                  color: isActive ? "#0F1B2E" : "rgba(232,236,241,0.55)",
+                  fontFamily: "var(--pt-font-pixel)",
+                  fontSize: 8,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  letterSpacing: "0.04em",
+                  transition: "all 0.15s",
+                }}
+              >
+                {m === "create" ? "Create Room" : "Join Room"}
+              </button>
+            );
+          })}
         </div>
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-bold text-[#1E3A5F]">Display name</span>
+        <form
+          style={{ display: "flex", flexDirection: "column", gap: 16 }}
+          onSubmit={handleSubmit}
+        >
+          {/* Display name */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label
+              htmlFor="displayName"
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "rgba(232,236,241,0.6)",
+                fontFamily: "var(--pt-font-body)",
+                letterSpacing: "0.03em",
+              }}
+            >
+              Display name
+            </label>
             <input
+              id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayNameState(e.target.value)}
               placeholder="e.g. Alex"
-              className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2 font-medium text-[#1E3A5F] placeholder-[#1E3A5F]/40 shadow-[2px_2px_0px_#1E3A5F] outline-none focus:bg-white"
               maxLength={40}
+              style={inputStyle}
+              onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = "rgba(79,209,197,0.6)"; }}
+              onBlur={(e)  => { (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.15)"; }}
             />
-          </label>
+          </div>
 
+          {/* Room code (join mode) */}
           {mode === "join" && (
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-bold text-[#1E3A5F]">Room code</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label
+                htmlFor="roomCode"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "rgba(232,236,241,0.6)",
+                  fontFamily: "var(--pt-font-body)",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                Room code
+              </label>
               <input
+                id="roomCode"
                 type="text"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="e.g. AB12CD"
-                className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2 font-mono font-bold uppercase tracking-widest text-[#1E3A5F] placeholder-[#1E3A5F]/40 shadow-[2px_2px_0px_#1E3A5F] outline-none focus:bg-white"
                 maxLength={6}
+                style={{
+                  ...inputStyle,
+                  fontFamily: "var(--pt-font-pixel)",
+                  fontSize: 12,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
+                onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = "rgba(79,209,197,0.6)"; }}
+                onBlur={(e)  => { (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.15)"; }}
               />
-            </label>
+            </div>
           )}
 
+          {/* Error */}
           {errorMessage && (
-            <p className="border-2 border-red-600 bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 shadow-[2px_2px_0px_#991b1b]">
-              ⚠️ {errorMessage}
-            </p>
+            <div
+              style={{
+                background: "rgba(248,113,113,0.1)",
+                border: "1px solid rgba(248,113,113,0.35)",
+                borderRadius: 6,
+                padding: "8px 12px",
+                fontSize: 13,
+                color: "#FCA5A5",
+                fontFamily: "var(--pt-font-body)",
+              }}
+            >
+              ⚠ {errorMessage}
+            </div>
           )}
 
-          {/* CTA button — sunset orange, retro 8-bit style */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={submitting}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-3 font-black text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] transition-all hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              marginTop: 4,
+              padding: "12px 24px",
+              borderRadius: 8,
+              border: "none",
+              background: submitting ? "rgba(255,255,255,0.08)" : "#FB923C",
+              color: submitting ? "rgba(232,236,241,0.35)" : "#0F1B2E",
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: submitting ? "not-allowed" : "pointer",
+              letterSpacing: "0.04em",
+              opacity: submitting ? 0.6 : 1,
+              transition: "all 0.15s",
+            }}
           >
             {submitting
-              ? "⏳ Please wait…"
+              ? "Please wait…"
               : mode === "create"
-                ? "🚀 Create room"
-                : "🎮 Join room"}
+                ? "Create room"
+                : "Join room"}
           </button>
         </form>
 
-        {/* Room created success panel */}
+        {/* Room created success */}
         {createdRoom && (
-          <div className="mt-6 border-4 border-[#4ADE80] bg-[#FEF3C7] p-4 text-sm shadow-[4px_4px_0px_#1E3A5F]">
-            <p className="font-black text-[#1E3A5F]">🎉 Room created!</p>
-            <p className="mt-2 text-[#1E3A5F]">
-              Code:{" "}
-              <span className="font-mono font-black tracking-widest text-[#A855F7]">
+          <div
+            style={{
+              marginTop: 20,
+              background: "rgba(74,222,128,0.08)",
+              border: "1px solid rgba(74,222,128,0.3)",
+              borderRadius: 8,
+              padding: "14px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--pt-font-pixel)",
+                fontSize: 9,
+                color: "#4ADE80",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Room created!
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, color: "rgba(232,236,241,0.55)", fontFamily: "var(--pt-font-body)" }}>
+                Code:
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--pt-font-pixel)",
+                  fontSize: 13,
+                  color: "#A78BFA",
+                  letterSpacing: "0.12em",
+                }}
+              >
                 {createdRoom.roomCode}
               </span>
-            </p>
-            <p className="mt-2 break-all font-medium text-[#1E3A5F]">
-              Share this link:{" "}
-              <span className="font-mono text-xs text-[#1E3A5F]/70">{inviteLink}</span>
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                color: "rgba(232,236,241,0.45)",
+                fontFamily: "var(--pt-font-body)",
+                wordBreak: "break-all",
+              }}
+            >
+              {inviteLink}
             </p>
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <p
+        style={{
+          marginTop: 32,
+          fontSize: 11,
+          color: "rgba(232,236,241,0.2)",
+          fontFamily: "var(--pt-font-body)",
+          textAlign: "center",
+        }}
+      >
+        No account needed · Share a room code to travel together
+      </p>
     </main>
   );
 }

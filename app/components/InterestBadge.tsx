@@ -16,11 +16,11 @@ const INTEREST_MAP: Record<TripInterest, InterestMeta> = {
   food:        { icon: "🍜", color: "#FB923C", label: "Food" },
   scenery:     { icon: "📷", color: "#38BDF8", label: "Scenery" },
   adventure:   { icon: "🏔", color: "#4ADE80", label: "Adventure" },
-  shopping:    { icon: "🛍", color: "#A855F7", label: "Shopping" },
-  nightlife:   { icon: "🌙", color: "#1E3A5F", label: "Nightlife" },
-  culture:     { icon: "🏛", color: "#FEF3C7", label: "Culture" },
+  shopping:    { icon: "🛍", color: "var(--pt-agent-atlas)", label: "Shopping" },
+  nightlife:   { icon: "🌙", color: "var(--pt-text-primary, #E8ECF1)", label: "Nightlife" },
+  culture:     { icon: "🏛", color: "var(--pt-text-primary, #E8ECF1)", label: "Culture" },
   relaxation:  { icon: "🎧", color: "#4ADE80", label: "Relaxation" },
-  hidden_gems: { icon: "💎", color: "#A855F7", label: "Hidden Gems" },
+  hidden_gems: { icon: "💎", color: "var(--pt-agent-atlas)", label: "Hidden Gems" },
   flexible:    { icon: "🗺", color: "#38BDF8", label: "Flexible" },
 };
 
@@ -53,7 +53,7 @@ export default function InterestBadge({ interest }: InterestBadgeProps) {
         width: "16px",
         height: "16px",
         backgroundColor: meta.color,
-        border: "2px solid #1E3A5F",
+        border: "1px solid rgba(255,255,255,0.12)",
         borderRadius: "0",          // 8-bit square — no rounding
         fontSize: "9px",
         lineHeight: 1,

@@ -39,11 +39,11 @@
  *
  * Visual rules (pixel-art, Req 12.5):
  *   - Zero border-radius
- *   - 4px solid deep-navy (#1E3A5F) border on card; 2px on badges
- *   - 4px 4px 0 #1E3A5F box-shadow on card, 2px 2px 0 #1E3A5F on badges
+ *   - 4px solid deep-navy (var(--pt-bg-card)) border on card; 2px on badges
+ *   - 4px 4px 0 var(--pt-bg-card) box-shadow on card, 2px 2px 0 var(--pt-bg-card) on badges
  *   - Monospace font throughout
  *   - No white (#ffffff) backgrounds — palette colours only
- *   - focus-visible: outline 3px solid #A855F7, offset 2px (via className)
+ *   - focus-visible: outline 3px solid var(--pt-agent-atlas), offset 2px (via className)
  *
  * Badge colours per Req 12.2:
  *   Price level:  budget=green, moderate=amber, premium=red
@@ -51,13 +51,13 @@
  *   Fit score:    ≥80=green, ≥60=sky-blue, ≥40=amber, <40=red
  *
  * Palette:
- *   Deep navy     #1E3A5F  — borders, text, box-shadow
- *   Sand cream    #FEF3C7  — card background
+ *   Deep navy     var(--pt-bg-card)  — borders, text, box-shadow
+ *   Sand cream    var(--pt-bg-card)  — card background
  *   Sky blue      #38BDF8  — card header accent, fit score (mid)
  *   Grass green   #4ADE80  — good/low/budget badge
  *   Sunset orange #FB923C  — moderate/near badge (amber)
  *   Red           #EF4444  — premium/high/over badge
- *   Neon purple   #A855F7  — focus ring, vote count badge accent
+ *   Neon purple   var(--pt-agent-atlas)  — focus ring, vote count badge accent
  *
  * Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 12.3, 12.4, 12.5, 12.7
  */
@@ -67,13 +67,13 @@ import type { DestinationSuggestion } from "@/lib/types";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
-const SAND_CREAM = "#FEF3C7";
+const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
+const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
 const SKY_BLUE = "#38BDF8";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
-const NEON_PURPLE = "#A855F7";
+const NEON_PURPLE = "var(--pt-agent-atlas)";
 
 // ─── Badge colour maps ────────────────────────────────────────────────────────
 
@@ -173,7 +173,7 @@ function PixelBadge({ label, bg, textColor = DEEP_NAVY }: BadgeProps) {
         alignItems: "center",
         backgroundColor: bg,
         border: `2px solid ${DEEP_NAVY}`,
-        borderRadius: 0,
+        borderRadius: 8,
         boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
         padding: "3px 10px",
         fontSize: 12,
@@ -239,7 +239,7 @@ export default function VoteableDestinationCard({
           fontFamily: "'Courier New', Courier, monospace",
           backgroundColor: SAND_CREAM,
           border: `4px solid ${DEEP_NAVY}`,
-          borderRadius: 0,
+          borderRadius: 8,
           boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
           overflow: "hidden",
           display: "flex",
@@ -281,7 +281,7 @@ export default function VoteableDestinationCard({
               gap: 4,
               backgroundColor: fitBg,
               border: `2px solid ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
               padding: "3px 10px",
               fontSize: 13,
@@ -637,7 +637,7 @@ export default function VoteableDestinationCard({
                 color: isSelected ? DEEP_NAVY : isDisabled ? SAND_CREAM : DEEP_NAVY,
                 backgroundColor: isSelected ? GRASS_GREEN : isDisabled ? DEEP_NAVY : SUNSET_ORANGE,
                 border: `3px solid ${DEEP_NAVY}`,
-                borderRadius: 0,
+                borderRadius: 8,
                 boxShadow: isDisabled && !isSelected ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
                 cursor: isDisabled ? "not-allowed" : "pointer",
                 opacity: isDisabled && !isSelected ? 0.65 : 1,
@@ -667,7 +667,7 @@ export default function VoteableDestinationCard({
               color: DEEP_NAVY,
               backgroundColor: SKY_BLUE,
               border: `2px solid ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
               cursor: "pointer",
               outline: "none",

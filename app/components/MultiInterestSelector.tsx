@@ -51,12 +51,12 @@ export default function MultiInterestSelector({
             aria-label={`${label} ${emoji}`}
             style={{
               // No border-radius — 8-bit square
-              borderRadius: 0,
+              borderRadius: 8,
               // Selected: grass-green bg + deep-navy text + 2px sunset-orange border
-              // Unselected: sand-cream bg + deep-navy text + 2px deep-navy border
-              backgroundColor: isSelected ? "#4ADE80" : "#FEF3C7",
-              color: "#1E3A5F",
-              border: isSelected ? "2px solid #FB923C" : "2px solid #1E3A5F",
+              // Unselected: card bg + primary text + 2px border
+              backgroundColor: isSelected ? "#4ADE80" : "var(--pt-bg-card)",
+              color: isSelected ? "#081A33" : "var(--pt-text-primary, #F4F8FF)",
+              border: isSelected ? "2px solid #FB923C" : "2px solid var(--pt-border, #335F91)",
               cursor: disabled ? "not-allowed" : "pointer",
               padding: "6px 12px",
               fontFamily: "monospace",
@@ -67,8 +67,8 @@ export default function MultiInterestSelector({
               gap: "4px",
               // Subtle box-shadow for 8-bit feel
               boxShadow: isSelected
-                ? "2px 2px 0px #1E3A5F"
-                : "2px 2px 0px #1E3A5F",
+                ? "2px 2px 0px #FB923C"
+                : "none",
               outline: "none",
               transition: "background-color 0.1s, border-color 0.1s",
             }}

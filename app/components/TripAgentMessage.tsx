@@ -1,59 +1,59 @@
 "use client";
 
 /**
- * TripAgentMessage — a single message bubble in the Trip Agent conversation thread.
+ * TripAgentMessage — a single message in the conversation thread.
  *
- * Rendered as <article> so it works correctly inside an aria-live="polite"
- * region (parent responsibility). Each new message in the thread is
- * automatically announced to screen readers via the live region.
+ * Renders as either:
+ *   - Agent turn (default): left-aligned bubble with Milo avatar + name
+ *   - System turn (isSystem=true): centred muted pill
+ *   - User turn (isUser=true): right-aligned compact bubble
  *
- * Normal messages use sand cream background (#FEF3C7) with deep-navy text.
- * System messages (isSystem=true) flip to deep-navy background (#1E3A5F)
- * with sand cream text — used for "everyone's ready" confirmations and
- * inline error notifications.
- *
- * An optional `children` prop renders an InteractiveSlot below the bubble text,
- * giving each message its own interactive content area (chips, cards, etc.).
- *
- * Visual rules (pixel-art style, Req 12.5):
- *   - Zero border-radius — no rounded corners
- *   - 4px solid deep-navy (#1E3A5F) border
- *   - 4px 4px 0 #1E3A5F box-shadow
- *   - Monospace font throughout
- *   - No white backgrounds — surfaces use palette colours only
- *
- * Focus-visible accessibility (Req 16.x):
- *   - outline: 3px solid #A855F7; outline-offset: 2px on focus-visible
- *
- * Palette:
- *   Sand cream  #FEF3C7  — normal message background
- *   Deep navy   #1E3A5F  — border, shadow, system message background, normal text
- *   Sand cream  #FEF3C7  — system message text
+ * Visual rules:
+ *   - Dark card background with rounded corners (8px)
+ *   - Agent-coloured left border
+ *   - Clean, readable Inter font body
+ *   - Soft shadows — no hard pixel-art edges
+ *   - Max-width ~700px conversation column centring
  */
 
 import React from "react";
 
-// ─── Palette constants ────────────────────────────────────────────────────────
+// ─── Palette ──────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
-const SAND_CREAM = "#FEF3C7";
+const MILO_COLOR = "#FFB869";
+const BG_CARD = "var(--pt-bg-card, #162032)";
+const TEXT_PRIMARY = "var(--pt-text-primary, #E8ECF1)";
+const TEXT_MUTED = "var(--pt-text-muted, rgba(232,236,241,0.55))";
+
+// ─── Milo sprite SVG (inline, 24×24) ──────────────────────────────────────────
+
+function MiloSprite() {
+  const c = "#FFB869";
+  const dark = "#C47E2A";
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true" style={{ imageRendering: "pixelated" }}>
+      <rect x="7" y="1" width="10" height="10" fill={c} />
+      <rect x="7" y="1" width="10" height="2" fill={dark} />
+      <rect x="9" y="5" width="2" height="2" fill={dark} />
+      <rect x="13" y="5" width="2" height="2" fill={dark} />
+      <rect x="9" y="8" width="6" height="1" fill={dark} />
+      <rect x="6" y="12" width="12" height="8" fill={c} />
+      <rect x="6" y="14" width="12" height="2" fill={dark} />
+      <rect x="3" y="12" width="3" height="6" fill={c} />
+      <rect x="18" y="12" width="3" height="6" fill={c} />
+    </svg>
+  );
+}
 
 // ─── Prop types ───────────────────────────────────────────────────────────────
 
 interface TripAgentMessageProps {
-  /** The agent message text to display inside the bubble. ≤40 words, ≤2 sentences. */
   text: string;
-  /**
-   * When true, renders as a system-level message (e.g. "everyone's ready",
-   * inline errors) using deep-navy background and sand cream text.
-   * Defaults to false (normal sand cream bubble).
-   */
   isSystem?: boolean;
-  /**
-   * Optional interactive content rendered directly below the message text,
-   * inside the same article boundary. Typically an <InteractiveSlot> containing
-   * chips, cards, or vote elements for the current stage.
-   */
+  isUser?: boolean;
+  senderName?: string;
+  timestamp?: number;
   children?: React.ReactNode;
 }
 
@@ -62,53 +62,152 @@ interface TripAgentMessageProps {
 export default function TripAgentMessage({
   text,
   isSystem = false,
+  isUser = false,
+  senderName,
+  timestamp,
   children,
 }: TripAgentMessageProps) {
-  const backgroundColor = isSystem ? DEEP_NAVY : SAND_CREAM;
-  const textColor = isSystem ? SAND_CREAM : DEEP_NAVY;
+  const timeStr = timestamp
+    ? new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
 
-  return (
-    <article
-      style={{
-        backgroundColor,
-        border: `4px solid ${DEEP_NAVY}`,
-        borderRadius: 0,
-        boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
-        fontFamily: "'Courier New', Courier, monospace",
-        padding: "12px 16px",
-        marginBottom: 16,
-        // Ensure no white bleeds through from nested elements
-        color: textColor,
-      }}
-    >
-      {/* Message bubble text */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: 14,
-          lineHeight: 1.6,
-          color: textColor,
-          fontFamily: "'Courier New', Courier, monospace",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-        }}
-      >
-        {text}
-      </p>
-
-      {/* InteractiveSlot rendered below the text when provided */}
-      {children != null && (
+  // ── System message: centred pill ─────────────────────────────────────────
+  if (isSystem) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
         <div
           style={{
-            marginTop: 16,
-            // Visually separate slot from bubble text with a subtle divider
-            borderTop: `2px solid ${isSystem ? SAND_CREAM : DEEP_NAVY}`,
-            paddingTop: 14,
+            backgroundColor: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 20,
+            padding: "6px 16px",
+            fontSize: 12,
+            color: TEXT_MUTED,
+            fontFamily: "var(--pt-font-body)",
+            textAlign: "center",
+            maxWidth: "80%",
           }}
         >
-          {children}
+          {text}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // ── User message: right-aligned bubble ───────────────────────────────────
+  if (isUser) {
+    return (
+      <div style={{ display: "flex", justifyContent: "flex-end", padding: "4px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, maxWidth: "70%" }}>
+          <div
+            style={{
+              backgroundColor: "rgba(79,209,197,0.12)",
+              border: "1px solid rgba(79,209,197,0.25)",
+              borderRadius: 12,
+              borderBottomRightRadius: 4,
+              padding: "10px 14px",
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: TEXT_PRIMARY,
+              fontFamily: "var(--pt-font-body)",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {text}
+          </div>
+          {timeStr && (
+            <span style={{ fontSize: 10, color: TEXT_MUTED, fontFamily: "var(--pt-font-body)" }}>
+              {timeStr}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Agent message (Milo): left-aligned with avatar ───────────────────────
+  return (
+    <article style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
+      {/* Avatar */}
+      <div
+        style={{
+          flexShrink: 0,
+          width: 36,
+          height: 36,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: `${MILO_COLOR}20`,
+          border: `2px solid ${MILO_COLOR}`,
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
+        <MiloSprite />
+      </div>
+
+      {/* Name + bubble */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0, maxWidth: 560 }}>
+        {/* Agent name */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span
+            style={{
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 9,
+              color: MILO_COLOR,
+              letterSpacing: "0.04em",
+              lineHeight: 1,
+              textTransform: "uppercase",
+            }}
+          >
+            Milo
+          </span>
+          {timeStr && (
+            <span style={{ fontSize: 10, color: TEXT_MUTED, fontFamily: "var(--pt-font-body)" }}>
+              {timeStr}
+            </span>
+          )}
+        </div>
+
+        {/* Bubble */}
+        <div
+          style={{
+            backgroundColor: BG_CARD,
+            borderLeft: `3px solid ${MILO_COLOR}`,
+            borderRadius: 8,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+            padding: "12px 16px",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: TEXT_PRIMARY,
+              fontFamily: "var(--pt-font-body)",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {text}
+          </p>
+
+          {/* Interactive widget slot below text */}
+          {children != null && (
+            <div
+              style={{
+                marginTop: 14,
+                paddingTop: 12,
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              {children}
+            </div>
+          )}
+        </div>
+      </div>
     </article>
   );
 }

@@ -11,8 +11,8 @@
  *
  * Visual rules (pixel-art):
  *   - Zero border-radius (no rounded corners)
- *   - 2px solid deep-navy (#1E3A5F) border
- *   - 4px 4px 0 #1E3A5F box-shadow (blocky offset shadow)
+ *   - 2px solid deep-navy (var(--pt-bg-card)) border
+ *   - 4px 4px 0 var(--pt-bg-card) box-shadow (blocky offset shadow)
  *   - Monospace font throughout
  *   - No white backgrounds
  *
@@ -22,7 +22,7 @@
  * Palette:
  *   Grass green   #4ADE80  — submitted background
  *   Sunset orange #FB923C  — pending background
- *   Deep navy     #1E3A5F  — border, shadow, text
+ *   Deep navy     var(--pt-bg-card)  — border, shadow, text
  */
 
 import React from "react";
@@ -38,7 +38,7 @@ interface ReadyBadgeProps {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
+const DEEP_NAVY = "var(--pt-bg-card)";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 

@@ -24,7 +24,7 @@
  *   - All other stages → <StageRouter {...stageProps} />
  *
  * Visual rules (pixel-art style, Req 12.5):
- *   - Deep navy (#1E3A5F) background for the chat area
+ *   - Deep navy (var(--pt-bg-card)) background for the chat area
  *   - Zero border-radius throughout
  *   - Monospace font
  *   - No white surfaces — palette colours only
@@ -61,8 +61,8 @@ import WaitingState from "@/app/components/WaitingState";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
-const SAND_CREAM = "#FEF3C7";
+const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
+const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
 const SUNSET_ORANGE = "#FB923C";
 const SKY_BLUE = "#38BDF8";
 
@@ -1506,7 +1506,7 @@ export default function TripAgentChat({
                   fontWeight: 700,
                   border: `2px solid #FB923C`,
                   padding: "6px 10px",
-                  backgroundColor: "#FEF3C7",
+                  backgroundColor: "var(--pt-bg-card, #162032)",
                 }}>
                   ⚠ {voteSubmitError}
                 </p>
@@ -1523,7 +1523,7 @@ export default function TripAgentChat({
                   gap: 4,
                   fontSize: 13,
                   fontFamily: "'Courier New', Courier, monospace",
-                  color: "#FEF3C7",
+                  color: "var(--pt-text-primary, #E8ECF1)",
                 }}>
                   <span style={{ opacity: 0.7 }}>You voted for:</span>
                   {selectedDestinationIds.map((id) => {
@@ -1666,7 +1666,7 @@ export default function TripAgentChat({
                   fontWeight: 700,
                   border: `2px solid #FB923C`,
                   padding: "6px 10px",
-                  backgroundColor: "#FEF3C7",
+                  backgroundColor: "var(--pt-bg-card, #162032)",
                 }}>
                   ⚠ {flightVoteSubmitError}
                 </p>
@@ -1683,7 +1683,7 @@ export default function TripAgentChat({
                   gap: 4,
                   fontSize: 13,
                   fontFamily: "'Courier New', Courier, monospace",
-                  color: "#FEF3C7",
+                  color: "var(--pt-text-primary, #E8ECF1)",
                 }}>
                   <span style={{ opacity: 0.7 }}>You voted for:</span>
                   <span style={{ fontWeight: 700 }}>
@@ -1734,87 +1734,26 @@ export default function TripAgentChat({
         flexDirection: "column",
         flex: 1,
         minHeight: 0,
-        backgroundColor: DEEP_NAVY,
-        fontFamily: "'Courier New', Courier, monospace",
+        backgroundColor: "var(--pt-bg-deep)",
+        fontFamily: "var(--pt-font-body)",
         overflow: "hidden",
       }}
     >
-      {/* ── Agent label bar ─────────────────────────────────────────────────── */}
-      <div
-        style={{
-          backgroundColor: DEEP_NAVY,
-          borderBottom: `3px solid ${SAND_CREAM}`,
-          padding: "10px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 22,
-            imageRendering: "pixelated",
-          }}
-          aria-hidden="true"
-        >
-          🤖
-        </span>
-        <span
-          style={{
-            color: SAND_CREAM,
-            fontSize: 13,
-            fontFamily: "'Courier New', Courier, monospace",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-            fontWeight: "bold",
-          }}
-        >
-          Trip Agent
-        </span>
-        <span
-          style={{
-            marginLeft: "auto",
-            color: SAND_CREAM,
-            fontSize: 11,
-            opacity: 0.6,
-            fontFamily: "'Courier New', Courier, monospace",
-          }}
-        >
-          {{
-            LOBBY: "Character creation",
-            PERSONA: "Persona selection",
-            AVAILABILITY: "Dates & vibes",
-            GROUP_PROFILE: "Group profile",
-            DESTINATIONS: "Destination ideas",
-            DESTINATION_VOTE: "Destination vote",
-            FLIGHTS: "Flight styles",
-            FLIGHT_VOTE: "Flight vote",
-            ACTIVITIES: "Activities",
-            ITINERARY: "Itinerary",
-            FEEDBACK: "Feedback",
-            NEGOTIATION: "Negotiation",
-            FINAL: "Final plan",
-          }[room.currentStage] ?? room.currentStage}
-        </span>
-      </div>
-
       {/* ── Vertically scrollable message thread ────────────────────────────── */}
-      {/*
-        aria-live="polite" satisfies Req 14.1 — screen readers announce each
-        new message as it is appended without interrupting the user.
-      */}
       <div
         aria-live="polite"
         aria-label="Trip Agent conversation"
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "20px 16px 12px",
+          padding: "24px 24px 12px",
           display: "flex",
           flexDirection: "column",
           gap: 0,
-          scrollbarColor: `${SAND_CREAM} ${DEEP_NAVY}`,
+          maxWidth: 700,
+          width: "100%",
+          marginLeft: "auto",
+          marginRight: "auto",
         }}
       >
         {/* Render each message as a TripAgentMessage article */}
@@ -1826,6 +1765,8 @@ export default function TripAgentChat({
               key={msg.id}
               text={msg.text}
               isSystem={msg.type === "system" || msg.type === "error"}
+              isUser={msg.type === "confirmation"}
+              timestamp={msg.timestamp}
             >
               {/*
                 For the LAST message only:
@@ -1901,13 +1842,17 @@ export default function TripAgentChat({
         <div
           style={{
             flexShrink: 0,
-            padding: "12px 16px",
-            borderTop: `2px solid ${SAND_CREAM}`,
-            backgroundColor: DEEP_NAVY,
+            padding: "12px 24px",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            backgroundColor: "var(--pt-bg-deep)",
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
             gap: 10,
+            maxWidth: 700,
+            width: "100%",
+            marginLeft: "auto",
+            marginRight: "auto",
           }}
         >
           {/* Regenerate destinations button — DESTINATIONS stage only (Req 13.4, 13.5) */}
@@ -1933,7 +1878,7 @@ export default function TripAgentChat({
                 transition: "box-shadow 0.1s, opacity 0.1s",
               }}
               onFocus={(e) => {
-                e.currentTarget.style.outline = "3px solid #A855F7";
+                e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                 e.currentTarget.style.outlineOffset = "2px";
               }}
               onBlur={(e) => {
@@ -1960,9 +1905,9 @@ export default function TripAgentChat({
               <span
                 style={{
                   fontSize: 11,
-                  fontFamily: "'Courier New', Courier, monospace",
-                  color: SUNSET_ORANGE,
-                  fontWeight: 600,
+                  fontFamily: "var(--pt-font-body)",
+                  color: "var(--pt-warn)",
+                  fontWeight: 500,
                 }}
               >
                 ⏳ {advanceBlockedReason()}
@@ -1978,35 +1923,27 @@ export default function TripAgentChat({
               style={{
                 background:
                   !canAdvanceStage() || advancingStage
-                    ? DEEP_NAVY
-                    : SUNSET_ORANGE,
-                border:
-                  !canAdvanceStage() || advancingStage
-                    ? `2px solid ${SAND_CREAM}`
-                    : `2px solid #C2410C`,
-                boxShadow:
-                  !canAdvanceStage() || advancingStage
-                    ? "none"
-                    : `4px 4px 0 ${DEEP_NAVY}`,
+                    ? "rgba(255,255,255,0.06)"
+                    : "var(--pt-agent-harmony)",
+                border: "none",
+                borderRadius: 6,
                 color:
                   !canAdvanceStage() || advancingStage
-                    ? SAND_CREAM
-                    : DEEP_NAVY,
-                padding: "7px 14px",
+                    ? "var(--pt-text-muted)"
+                    : "#0F1B2E",
+                padding: "8px 16px",
                 fontSize: 12,
-                fontFamily: "'Courier New', Courier, monospace",
-                fontWeight: 700,
+                fontFamily: "var(--pt-font-body)",
+                fontWeight: 600,
                 cursor:
                   !canAdvanceStage() || advancingStage
                     ? "not-allowed"
                     : "pointer",
                 opacity: !canAdvanceStage() || advancingStage ? 0.55 : 1,
-                borderRadius: 0,
-                outline: "none",
-                transition: "box-shadow 0.1s, opacity 0.1s",
+                transition: "opacity 0.15s",
               }}
               onFocus={(e) => {
-                e.currentTarget.style.outline = "3px solid #A855F7";
+                e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                 e.currentTarget.style.outlineOffset = "2px";
               }}
               onBlur={(e) => {

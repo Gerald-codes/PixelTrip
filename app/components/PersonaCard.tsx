@@ -39,8 +39,8 @@ export default function PersonaCard({
   const baseClasses =
     "flex w-full flex-col gap-3 rounded-lg border-2 p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-400";
   const stateClasses = selected
-    ? "border-blue-600 bg-blue-50 shadow-sm"
-    : "border-gray-200 bg-white hover:border-gray-300";
+    ? "border-pt-info bg-pt-card-hover shadow-sm"
+    : "border-pt-text-primary border-opacity-10 bg-pt-card hover:border-pt-text-primary border-opacity-20";
   const disabledClasses = disabled
     ? "cursor-not-allowed opacity-60"
     : "cursor-pointer";
@@ -72,9 +72,9 @@ export default function PersonaCard({
         )}
       </div>
 
-      <p className="text-sm text-gray-700">{persona.description}</p>
+      <p className="text-sm text-pt-text-primary">{persona.description}</p>
 
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600">
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-pt-text-muted">
         <div className="flex justify-between">
           <dt className="font-medium text-gray-500">Budget</dt>
           <dd className="capitalize">{persona.budgetLevel}</dd>
@@ -98,7 +98,7 @@ export default function PersonaCard({
           {persona.interests.map((interest) => (
             <li
               key={interest}
-              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-pt-text-primary"
             >
               {interest}
             </li>

@@ -64,8 +64,9 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
   }
 
   // ─── Palette constants ────────────────────────────────────────────────────────
-  const DEEP_NAVY = "#1E3A5F";
-  const SAND_CREAM = "#FEF3C7";
+  const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
+  const TEXT_PRIMARY = "var(--pt-text-primary, #E8ECF1)";
+  const BG_CARD = "var(--pt-bg-card, #162032)";
   const SUNSET_ORANGE = "#FB923C";
   const GRASS_GREEN = "#4ADE80";
   const SKY_BLUE = "#38BDF8";
@@ -78,9 +79,9 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
       {/* ── Stage header ──────────────────────────────────────────────────────── */}
       <div
         style={{
-          border: `3px solid ${DEEP_NAVY}`,
-          boxShadow: `4px 4px 0px ${DEEP_NAVY}`,
-          backgroundColor: SKY_BLUE,
+          border: `2px solid rgba(255,255,255,0.15)`,
+          boxShadow: `0 2px 8px rgba(0,0,0,0.35)`,
+          backgroundColor: BG_CARD,
           padding: "20px 24px",
         }}
       >
@@ -89,7 +90,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
             fontSize: "11px",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            color: DEEP_NAVY,
+            color: TEXT_PRIMARY,
             opacity: 0.75,
           }}
         >
@@ -99,7 +100,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
           style={{
             fontSize: "22px",
             fontWeight: 700,
-            color: DEEP_NAVY,
+            color: TEXT_PRIMARY,
             marginTop: "4px",
             letterSpacing: "0.05em",
           }}
@@ -109,7 +110,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
         <p
           style={{
             marginTop: "8px",
-            color: DEEP_NAVY,
+            color: TEXT_PRIMARY,
             fontSize: "13px",
             lineHeight: 1.5,
           }}
@@ -122,9 +123,9 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
       {/* ── Character Creator ──────────────────────────────────────────────────── */}
       <div
         style={{
-          border: `3px solid ${DEEP_NAVY}`,
-          boxShadow: `4px 4px 0px ${DEEP_NAVY}`,
-          backgroundColor: SAND_CREAM,
+          border: `2px solid rgba(255,255,255,0.15)`,
+          boxShadow: `0 2px 8px rgba(0,0,0,0.35)`,
+          backgroundColor: BG_CARD,
           padding: "24px",
         }}
       >
@@ -142,7 +143,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: DEEP_NAVY,
+              color: TEXT_PRIMARY,
             }}
           >
             Build Your Character
@@ -151,9 +152,9 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
             <span
               style={{
                 fontSize: "11px",
-                color: "#166534",
+                color: DEEP_NAVY,
                 backgroundColor: GRASS_GREEN,
-                border: `2px solid ${DEEP_NAVY}`,
+                border: `2px solid ${GRASS_GREEN}`,
                 padding: "2px 8px",
                 fontWeight: 700,
                 letterSpacing: "0.05em",
@@ -174,9 +175,9 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
       {/* ── Members list ──────────────────────────────────────────────────────── */}
       <div
         style={{
-          border: `3px solid ${DEEP_NAVY}`,
-          boxShadow: `4px 4px 0px ${DEEP_NAVY}`,
-          backgroundColor: SAND_CREAM,
+          border: `2px solid rgba(255,255,255,0.15)`,
+          boxShadow: `0 2px 8px rgba(0,0,0,0.35)`,
+          backgroundColor: BG_CARD,
           padding: "24px",
         }}
       >
@@ -194,7 +195,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: DEEP_NAVY,
+              color: TEXT_PRIMARY,
             }}
           >
             Party Members
@@ -204,7 +205,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
               fontSize: "12px",
               color: DEEP_NAVY,
               backgroundColor: SKY_BLUE,
-              border: `2px solid ${DEEP_NAVY}`,
+              border: `2px solid ${SKY_BLUE}`,
               padding: "2px 8px",
             }}
           >
@@ -213,7 +214,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
         </div>
 
         {members.length === 0 ? (
-          <p style={{ fontSize: "13px", color: DEEP_NAVY, opacity: 0.6 }}>
+          <p style={{ fontSize: "13px", color: TEXT_PRIMARY, opacity: 0.6 }}>
             No members yet…
           </p>
         ) : (
@@ -228,8 +229,8 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    backgroundColor: isSelf ? "#EFF6FF" : "#FFFBEB",
-                    border: `2px solid ${DEEP_NAVY}`,
+                    backgroundColor: isSelf ? "rgba(79, 209, 197, 0.15)" : "rgba(255,255,255,0.05)",
+                    border: `1px solid rgba(255,255,255,0.15)`,
                     padding: "8px 12px",
                   }}
                 >
@@ -242,11 +243,11 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
                         width: "10px",
                         height: "10px",
                         backgroundColor: GRASS_GREEN,
-                        border: `2px solid ${DEEP_NAVY}`,
+                        border: `2px solid ${GRASS_GREEN}`,
                         flexShrink: 0,
                       }}
                     />
-                    <span style={{ fontWeight: 700, fontSize: "13px", color: DEEP_NAVY }}>
+                    <span style={{ fontWeight: 700, fontSize: "13px", color: TEXT_PRIMARY }}>
                       {member.displayName || "Traveller"}
                       {isSelf && (
                         <span style={{ marginLeft: "6px", opacity: 0.5, fontWeight: 400 }}>
@@ -263,7 +264,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
                           letterSpacing: "0.05em",
                           backgroundColor: SUNSET_ORANGE,
                           color: DEEP_NAVY,
-                          border: `2px solid ${DEEP_NAVY}`,
+                          border: `2px solid ${SUNSET_ORANGE}`,
                           padding: "1px 6px",
                         }}
                       >
@@ -287,8 +288,8 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
             disabled={advancing}
             aria-disabled={advancing}
             style={{
-              border: `3px solid ${DEEP_NAVY}`,
-              boxShadow: advancing ? "none" : `4px 4px 0px ${DEEP_NAVY}`,
+              border: `2px solid ${SUNSET_ORANGE}`,
+              boxShadow: advancing ? "none" : `4px 4px 0px ${SUNSET_ORANGE}`,
               backgroundColor: advancing ? "#9CA3AF" : SUNSET_ORANGE,
               color: DEEP_NAVY,
               padding: "12px 24px",
@@ -309,8 +310,8 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
               role="alert"
               style={{
                 fontSize: "12px",
-                color: DEEP_NAVY,
-                backgroundColor: "#FFF7ED",
+                color: TEXT_PRIMARY,
+                backgroundColor: BG_CARD,
                 border: `2px solid ${SUNSET_ORANGE}`,
                 padding: "8px 12px",
               }}
@@ -323,7 +324,7 @@ export default function LobbyStage({ room, identity, members, onRoomUpdated }: S
         <p
           style={{
             fontSize: "13px",
-            color: DEEP_NAVY,
+            color: TEXT_PRIMARY,
             opacity: 0.65,
             fontStyle: "italic",
           }}

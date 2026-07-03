@@ -317,9 +317,12 @@ export interface Identity {
 export interface AgentMessage {
   id: string;          // nanoid or crypto.randomUUID()
   stage: RoomStage;    // stage that produced this message
-  text: string;        // ≤40 words, ≤2 sentences
+  text: string;        // message content
   timestamp: number;   // Date.now() when appended
-  type: "intro" | "confirmation" | "waiting" | "error" | "system";
+  type: "intro" | "confirmation" | "waiting" | "error" | "system" | "agent" | "user" | "skipped" | "celebration" | "negotiation";
+  agentId?: AgentId;   // present when type === "agent"
+  senderName?: string; // present when type === "user"
+  skippedStage?: string; // present when type === "skipped"
 }
 
 /**
@@ -347,3 +350,138 @@ export interface BudgetEstimate {
  * users who have completed the current stage and those who have not yet submitted.
  */
 export type StageSubmissionStatus = "submitted" | "pending";
+
+// ─── Named Agent types (additive — do not modify above) ─────────────────────
+
+/**
+ * The five documented agent IDs.
+ * Each maps to a unique named agent personality (see lib/agentPersonality.ts).
+ */
+export type AgentId =
+  | "guide"
+  | "destination"
+  | "itinerary"
+  | "mediator"
+  | "feedback";
+
+/**
+ * Speaking agent IDs used in the conversation thread.
+ * These are the user-facing agent "handles" displayed in bubbles.
+ */
+export type SpeakingAgentId =
+  | "milo"
+  | "compass"
+  | "atlas"
+  | "harmony"
+  | "echo";
+
+/** Possible CSS animation hints for agent avatars. */
+export type AgentAnimation =
+  | "wave"
+  | "bounce"
+  | "organize"
+  | "nod"
+  | "think";
+
+/** Visual activity state for an agent tile/avatar. */
+export type AgentActivityState =
+  | "idle"
+  | "thinking"
+  | "working"
+  | "completed";
+
+/**
+ * Full personality definition for a named agent character.
+ * Populated by resolvePersonality() in lib/agentPersonality.ts.
+ */
+export interface AgentPersonality {
+  id: AgentId;
+  name: string;
+  role: string;
+  personality: string;
+  colorHex: string;
+  avatarIcon: string;
+  speakingStyle: string;
+  animation: AgentAnimation;
+}
+
+/** Activity state record for a single agent. */
+export interface AgentActivity {
+  agentId: SpeakingAgentId;
+  state: AgentActivityState;
+  progressPercent?: number;
+  lastUpdated: number;
+}
+
+/**
+ * Widget kind identifies which interactive UI element should be rendered
+ * inside an agent's message bubble.
+ */
+export type WidgetKind =
+  | "character_creator"
+  | "availability"
+  | "destination_cards"
+  | "flight_cards"
+  | "activities"
+  | "itinerary"
+  | "feedback"
+  | "negotiation"
+  | "vote_panel"
+  | "tiebreak"
+  | "none";
+
+/**
+ * Personal stage identifiers for the personal-phase flow.
+ * Each user goes through these stages individually (character creation
+ * and availability) before the group phases begin.
+ */
+export type PersonalStage =
+  | "character_creation"
+  | "availability"
+  | "complete";
+
+/**
+ * A single agent turn in the conversation thread.
+ * Contains the agent's message text plus an optional embedded widget.
+ */
+export interface AgentTurn {
+  id: string;
+  kind: "agent";
+  agentId: SpeakingAgentId;
+  text: string;
+  widget: WidgetKind;
+  widgetDone?: boolean;
+  timestamp: number;
+  status: "thinking" | "done";
+}
+
+/**
+ * A user turn in the conversation thread.
+ * Represents a user action/message displayed as a confirmation bubble.
+ */
+export interface UserTurn {
+  id: string;
+  kind: "user";
+  userId: string;
+  displayName: string;
+  text: string;
+  timestamp: number;
+}
+
+/**
+ * A system turn in the conversation thread.
+ * Used for stage transitions, celebrations, skip notes, etc.
+ */
+export interface SystemTurn {
+  id: string;
+  kind: "system";
+  text: string;
+  subtype: "transition" | "celebration" | "skip" | "error" | "info";
+  timestamp: number;
+}
+
+/**
+ * Union of all turn types in the conversation thread.
+ * The thread is append-only and ordered by timestamp.
+ */
+export type ConversationTurn = AgentTurn | UserTurn | SystemTurn;

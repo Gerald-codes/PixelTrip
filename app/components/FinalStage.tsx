@@ -85,7 +85,7 @@ export default function FinalStage({ room, members }: StageProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16">
         <span className="text-4xl animate-bounce" aria-hidden="true">🎉</span>
-        <p className="font-bold text-[#1E3A5F] text-lg tracking-wide">
+        <p className="font-bold text-pt-text-primary text-lg tracking-wide">
           Loading your final trip plan…
         </p>
       </div>
@@ -96,12 +96,12 @@ export default function FinalStage({ room, members }: StageProps) {
   if (error || !itinerary) {
     return (
       <div className="mx-auto max-w-2xl">
-        <div className="border-4 border-[#FB923C] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F] p-6 flex flex-col gap-3">
-          <p className="text-lg font-bold text-[#1E3A5F] flex items-center gap-2">
+        <div className="border-4 border-[#FB923C] bg-[var(--pt-bg-card)] shadow-pixel-card p-6 flex flex-col gap-3">
+          <p className="text-lg font-bold text-pt-text-primary flex items-center gap-2">
             <span aria-hidden="true">⚠️</span>
             {error ?? "No final itinerary found — ask the host to finalise"}
           </p>
-          <p className="text-sm text-[#1E3A5F] opacity-70">
+          <p className="text-sm text-pt-text-primary opacity-70">
             Once the host has reviewed and finalised the itinerary, it will appear here for everyone.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function FinalStage({ room, members }: StageProps) {
     <div className="flex flex-col gap-6">
 
       {/* ── Hero header ─────────────────────────────────────────────────── */}
-      <header className="border-4 border-[#4ADE80] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F] p-6">
+      <header className="border-4 border-[#4ADE80] bg-[var(--pt-bg-card)] shadow-pixel-card p-6">
         <div className="flex flex-col gap-3">
           {/* Celebration headline */}
           <div className="flex items-center gap-3 flex-wrap">
@@ -127,37 +127,37 @@ export default function FinalStage({ room, members }: StageProps) {
           {/* Trip details row */}
           <div className="flex flex-wrap gap-3 mt-1">
             {/* Destination */}
-            <span className="inline-flex items-center gap-1.5 border-2 border-[#1E3A5F] bg-[#38BDF8] px-3 py-1 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+            <span className="inline-flex items-center gap-1.5 border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-3 py-1 text-sm font-bold text-pt-text-primary shadow-pixel-sm">
               📍 {itinerary.destination}
             </span>
 
             {/* Dates */}
-            <span className="inline-flex items-center gap-1.5 border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+            <span className="inline-flex items-center gap-1.5 border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-1 text-sm font-bold text-pt-text-primary shadow-pixel-sm">
               📅 {formatDate(itinerary.startDate)} – {formatDate(itinerary.endDate)}
             </span>
 
             {/* Flight option */}
             {room.selectedFlightOption && (
-              <span className="inline-flex items-center gap-1.5 border-2 border-[#1E3A5F] bg-[#A855F7] px-3 py-1 text-sm font-bold text-white shadow-[2px_2px_0px_#1E3A5F]">
+              <span className="inline-flex items-center gap-1.5 border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-agent-atlas)] px-3 py-1 text-sm font-bold text-white shadow-pixel-sm">
                 {flightLabel(room.selectedFlightOption)}
               </span>
             )}
 
             {/* Version badge */}
-            <span className="inline-flex items-center gap-1.5 border-2 border-[#1E3A5F] bg-[#4ADE80] px-3 py-1 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+            <span className="inline-flex items-center gap-1.5 border-2 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-3 py-1 text-xs font-bold text-pt-text-primary shadow-pixel-sm">
               v{itinerary.versionNumber}
             </span>
           </div>
 
-          <p className="text-sm text-[#1E3A5F] opacity-80 leading-relaxed mt-1">
+          <p className="text-sm text-pt-text-primary opacity-80 leading-relaxed mt-1">
             The group has agreed on this itinerary. Everyone can copy it below and start packing!
           </p>
         </div>
       </header>
 
       {/* ── Export bar ──────────────────────────────────────────────────── */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F] p-4">
-        <p className="text-sm font-bold text-[#1E3A5F] mb-3 flex items-center gap-2">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] shadow-pixel-card p-4">
+        <p className="text-sm font-bold text-pt-text-primary mb-3 flex items-center gap-2">
           <span aria-hidden="true">📋</span>
           Export your itinerary
         </p>
@@ -186,8 +186,8 @@ export default function FinalStage({ room, members }: StageProps) {
       </section>
 
       {/* ── Bottom export bar (repeat for convenience) ───────────────────── */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F] p-4">
-        <p className="text-sm font-bold text-[#1E3A5F] mb-3 flex items-center gap-2">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] shadow-pixel-card p-4">
+        <p className="text-sm font-bold text-pt-text-primary mb-3 flex items-center gap-2">
           <span aria-hidden="true">📋</span>
           Copy your trip plan
         </p>

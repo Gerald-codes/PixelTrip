@@ -1,40 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global overflow guard ───────────────────────────────────────────────────
-   Prevents any element from forcing horizontal page scroll.
-   All text wraps; long unbreakable strings (URLs, codes) break at container
-   boundary. Required at 320–390px viewports.
-────────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* ── Core backgrounds ─────────────────────────────────────────────────── */
+  --pt-bg-deep: #081A33;
+  --pt-bg-surface: #0D2342;
+  --pt-bg-card: #122A4D;
+  --pt-bg-card-hover: #1B3964;
+  --pt-bg-elevated: #1B3964;
 
-*,
-*::before,
-*::after {
+  /* ── Borders ──────────────────────────────────────────────────────────── */
+  --pt-border: #2F5E93;
+  --pt-border-subtle: rgba(47,94,147,0.4);
+  --pt-border-glow: rgba(61,183,255,0.3);
+
+  /* ── Text ─────────────────────────────────────────────────────────────── */
+  --pt-text-primary: #EAF2FF;
+  --pt-text-secondary: #AFC5E6;
+  --pt-text-muted: rgba(175,197,230,0.6);
+  --pt-text-dim: rgba(175,197,230,0.35);
+
+  /* ── Accent colors ────────────────────────────────────────────────────── */
+  --pt-accent: #3DB7FF;
+  --pt-accent-glow: rgba(61,183,255,0.25);
+  --pt-accent-hover: #5DC8FF;
+  --pt-accent-purple: #A78BFA;
+  --pt-accent-cyan: #67E8F9;
+  --pt-accent-teal: #4FD1C5;
+
+  /* ── Agent colors ─────────────────────────────────────────────────────── */
+  --pt-agent-milo: #FFB869;
+  --pt-agent-compass: #4FD1C5;
+  --pt-agent-atlas: #A78BFA;
+  --pt-agent-harmony: #FB923C;
+  --pt-agent-echo: #67E8F9;
+
+  /* ── Status ───────────────────────────────────────────────────────────── */
+  --pt-success: #4ADE80;
+  --pt-info: #3DB7FF;
+  --pt-warn: #FBBF24;
+  --pt-error: #F87171;
+
+  /* ── Shadows ──────────────────────────────────────────────────────────── */
+  --pt-shadow-card: 0 2px 12px rgba(0,0,0,0.4);
+  --pt-shadow-bubble: 0 1px 6px rgba(0,0,0,0.3);
+  --pt-shadow-glow: 0 0 12px rgba(61,183,255,0.15);
+
+  /* ── Radii ────────────────────────────────────────────────────────────── */
+  --pt-radius: 8px;
+  --pt-radius-sm: 6px;
+  --pt-radius-lg: 12px;
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --pt-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --pt-font-pixel: 'Press Start 2P', monospace;
+}
+
+* {
   box-sizing: border-box;
 }
 
 body {
-  overflow-x: hidden;
+  background-color: var(--pt-bg-deep);
+  color: var(--pt-text-primary);
+  font-family: var(--pt-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Force all flex/grid children to respect their container width */
-.min-w-0-auto > * {
-  min-width: 0;
-}
+/* ── Scrollbar styling ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(61,183,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(61,183,255,0.35); }
 
-/* ── Pixel-art focus-visible ring ────────────────────────────────────────────
-   Applied to interactive elements in VoteableFlightCard, VoteableDestinationCard,
-   and other new chatbot-first components.
-   Requirement: 12.5 — outline: 3px solid #A855F7; outline-offset: 2px
-────────────────────────────────────────────────────────────────────────────── */
-
-.voteable-flight-card__vote-btn:focus-visible {
-  outline: 3px solid #A855F7;
+/* ── Focus ring ────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--pt-accent);
   outline-offset: 2px;
 }
 
+/* ── Pixel buttons ─────────────────────────────────────────────────────────── */
+.pt-btn {
+  font-family: var(--pt-font-pixel);
+  font-size: 9px;
+  padding: 8px 16px;
+  border: 2px solid var(--pt-border);
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-bg-card);
+  color: var(--pt-text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pt-btn:hover {
+  border-color: var(--pt-accent);
+  background: var(--pt-bg-card-hover);
+  box-shadow: var(--pt-shadow-glow);
+}
+
+.pt-btn-primary {
+  background: var(--pt-accent);
+  border-color: var(--pt-accent);
+  color: #081A33;
+}
+
+.pt-btn-primary:hover {
+  background: var(--pt-accent-hover);
+  border-color: var(--pt-accent-hover);
+  box-shadow: 0 0 16px rgba(61,183,255,0.3);
+}
+
+/* ── Card utility ──────────────────────────────────────────────────────────── */
+.pt-card {
+  background: var(--pt-bg-card);
+  border: 1px solid var(--pt-border-subtle);
+  border-radius: var(--pt-radius);
+  box-shadow: var(--pt-shadow-card);
+}
+
+.pt-card:hover {
+  border-color: var(--pt-border);
+  background: var(--pt-bg-card-hover);
+}
+
+.pt-card-selected {
+  border-color: var(--pt-accent);
+  box-shadow: var(--pt-shadow-glow), 0 0 0 1px var(--pt-accent);
+}
+
+/* ── Chip utility ──────────────────────────────────────────────────────────── */
+.pt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--pt-border-subtle);
+  background: var(--pt-bg-card);
+  color: var(--pt-text-secondary);
+  font-size: 12px;
+  font-family: var(--pt-font-body);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pt-chip:hover {
+  border-color: var(--pt-accent);
+  background: rgba(61,183,255,0.08);
+  color: var(--pt-text-primary);
+}
+
+.pt-chip-selected {
+  border-color: var(--pt-accent);
+  background: rgba(61,183,255,0.15);
+  color: var(--pt-accent);
+  box-shadow: 0 0 8px rgba(61,183,255,0.15);
+}
+
+/* ── Glow effects ──────────────────────────────────────────────────────────── */
+.pt-glow {
+  box-shadow: 0 0 12px rgba(61,183,255,0.2);
+}
+
+.pt-glow-success {
+  box-shadow: 0 0 12px rgba(74,222,128,0.2);
+}
+
+/* ── Date inputs (dark theme) ──────────────────────────────────────────────── */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* ── Pixel heading utility ─────────────────────────────────────────────────── */
+.pt-heading {
+  font-family: var(--pt-font-pixel);
+  letter-spacing: 0.02em;
+}
+
+/* ── Vote buttons ──────────────────────────────────────────────────────────── */
+.voteable-flight-card__vote-btn:focus-visible,
 .voteable-destination-card__vote-btn:focus-visible {
-  outline: 3px solid #A855F7;
+  outline: 2px solid var(--pt-accent);
   outline-offset: 2px;
 }

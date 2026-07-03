@@ -47,7 +47,7 @@ export default function FlightVoteStage({
       </span>
     ),
     description: (
-      <div className="flex flex-col gap-1 text-sm text-gray-700">
+      <div className="flex flex-col gap-1 text-sm text-pt-text-primary">
         <p>{f.explanation}</p>
         <p className="text-xs text-amber-800">
           <span className="font-semibold">Itinerary impact:</span>{" "}
@@ -136,7 +136,7 @@ export default function FlightVoteStage({
 
 function PricePill({ price }: { price: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-2 py-0.5 text-xs font-semibold text-gray-700">
+    <span className="inline-flex items-center gap-1 rounded-full border border-pt-text-primary border-opacity-20 bg-pt-card px-2 py-0.5 text-xs font-semibold text-pt-text-primary">
       <span className="opacity-60">✈</span>
       <span>{price}</span>
     </span>

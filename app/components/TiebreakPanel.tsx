@@ -28,11 +28,11 @@ import React, { useEffect, useRef, useState } from "react";
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const NAVY = "#1E3A5F";
-const CREAM = "#FEF3C7";
+const NAVY = "var(--pt-bg-card)";
+const CREAM = "var(--pt-bg-card)";
 const ORANGE = "#FB923C";
 const GREEN = "#4ADE80";
-const PURPLE = "#A855F7";
+const PURPLE = "var(--pt-agent-atlas)";
 const SKY = "#38BDF8";
 const RED = "#EF4444";
 
@@ -246,9 +246,9 @@ export default function TiebreakPanel({
   return (
     <div
       style={{
-        border: `4px solid ${ORANGE}`,
-        backgroundColor: "#FFFBEB",
-        boxShadow: `4px 4px 0 ${NAVY}`,
+        border: `2px solid ${ORANGE}`,
+        backgroundColor: "var(--pt-bg-card)",
+        boxShadow: `0 2px 8px rgba(0,0,0,0.35)`,
         fontFamily: "monospace",
         overflow: "hidden",
       }}
@@ -257,7 +257,7 @@ export default function TiebreakPanel({
       <div
         style={{
           backgroundColor: ORANGE,
-          borderBottom: `4px solid ${NAVY}`,
+          borderBottom: `2px solid ${ORANGE}`,
           padding: "12px 16px",
           display: "flex",
           alignItems: "center",
@@ -296,7 +296,7 @@ export default function TiebreakPanel({
           <div
             style={{
               border: `2px solid ${SKY}`,
-              backgroundColor: "#EFF6FF",
+              backgroundColor: "var(--pt-bg-deep)",
               padding: "12px 14px",
               display: "flex",
               alignItems: "center",
@@ -305,10 +305,10 @@ export default function TiebreakPanel({
           >
             <span style={{ fontSize: 18, animation: "spin 1s linear infinite" }}>🔄</span>
             <div>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: NAVY }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--pt-text-primary)" }}>
                 The AI is reviewing your group&apos;s situation…
               </p>
-              <p style={{ margin: "3px 0 0", fontSize: 11, color: NAVY, opacity: 0.65 }}>
+              <p style={{ margin: "3px 0 0", fontSize: 11, color: "var(--pt-text-primary)", opacity: 0.65 }}>
                 It will explain the trade-offs and suggest a fair path forward.
               </p>
             </div>
@@ -317,7 +317,7 @@ export default function TiebreakPanel({
 
         {/* ── Phase: applying ── */}
         {phase === "applying" && (
-          <p style={{ margin: 0, fontSize: 13, color: NAVY, fontWeight: 600 }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--pt-text-primary)", fontWeight: 600 }}>
             ⏳ Applying resolution…
           </p>
         )}
@@ -522,7 +522,7 @@ export default function TiebreakPanel({
                     style={{
                       marginTop: 8,
                       border: `2px solid ${ORANGE}`,
-                      backgroundColor: "#FFF7ED",
+                      backgroundColor: "var(--pt-bg-card)",
                       padding: "10px 12px",
                       display: "flex",
                       flexDirection: "column",

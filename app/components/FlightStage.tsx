@@ -124,17 +124,17 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* Stage header */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Flight options</h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">Flight options</h2>
+        <p className="mt-2 text-pt-text-primary">
           Review the three flight categories below. When you&apos;re ready,
           the host will move to a vote so the group can pick which approach
           fits best.
           {room.selectedDestination && (
-            <span className="ml-1 font-bold text-[#1E3A5F]">
+            <span className="ml-1 font-bold text-pt-text-primary">
               Destination: {room.selectedDestination}.
             </span>
           )}
@@ -155,7 +155,7 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance to flight vote"}
           </button>
@@ -164,7 +164,7 @@ export default function FlightStage({ room, identity, members: _members, onRoomU
           )}
         </div>
       ) : (
-        <p className="text-sm font-semibold text-[#1E3A5F]">
+        <p className="text-sm font-semibold text-pt-text-primary">
           Waiting for the host to advance to the flight vote…
         </p>
       )}
@@ -179,12 +179,12 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
   const accentBorder: Record<FlightOption["value"], string> = {
     budget: "border-[#4ADE80]",
-    comfort: "border-[#A855F7]",
+    comfort: "border-[var(--pt-agent-atlas)]",
     best_value: "border-[#38BDF8]",
   };
   const accentHeader: Record<FlightOption["value"], string> = {
     budget: "bg-[#4ADE80]",
-    comfort: "bg-[#A855F7]",
+    comfort: "bg-[var(--pt-agent-atlas)]",
     best_value: "bg-[#38BDF8]",
   };
 
@@ -193,13 +193,13 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
   return (
     <article
-      className={`w-full max-w-full overflow-hidden border-4 ${accentBorder[option.value]} bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]`}
+      className={`w-full max-w-full overflow-hidden border-4 ${accentBorder[option.value]} bg-[var(--pt-bg-card)] shadow-pixel-card`}
     >
       {/* Header: name + chips stacked on mobile */}
       <header
         className={`flex flex-col gap-2 border-b-4 ${accentBorder[option.value]} px-4 py-3 sm:flex-row sm:items-center sm:justify-between`}
       >
-        <h3 className="min-w-0 break-words text-base font-bold text-[#1E3A5F]">
+        <h3 className="min-w-0 break-words text-base font-bold text-pt-text-primary">
           ✈ {option.label}
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -211,16 +211,16 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
       <div className="flex flex-col gap-3 px-4 py-3">
         {/* One-liner explanation */}
-        <p className="break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+        <p className="break-words text-sm font-semibold leading-relaxed text-pt-text-primary">
           {option.explanation}
         </p>
 
         {/* Itinerary impact chip — always visible */}
         <div className="border-l-4 border-[#FB923C] pl-2">
-          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+          <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
             Day 1 impact
           </p>
-          <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">
+          <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">
             {/* First sentence of itineraryImpact only */}
             {option.itineraryImpact.match(/[^.!?]+[.!?]+/)?.[0]?.trim() ?? option.itineraryImpact.slice(0, 80) + "…"}
           </p>
@@ -229,10 +229,10 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
         {/* Expanded: full itinerary impact */}
         {expanded && (
           <div className="border-2 border-[#FB923C] bg-amber-50 px-3 py-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-70">
+            <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-70">
               Full itinerary impact
             </p>
-            <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">
+            <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">
               {option.itineraryImpact}
             </p>
           </div>
@@ -243,7 +243,7 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
           type="button"
           onClick={() => setExpanded((p) => !p)}
           aria-expanded={expanded}
-          className="self-start border-2 border-[#1E3A5F] bg-[#38BDF8] px-3 py-1 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="self-start border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-3 py-1 text-xs font-bold text-pt-text-primary shadow-pixel-sm hover:bg-[#0ea5e9] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
         >
           {expanded ? "▲ Less" : "▼ More detail"}
         </button>
@@ -254,11 +254,11 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex flex-col items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-0.5 text-center shadow-[1px_1px_0px_#1E3A5F]">
-      <span className="text-[9px] font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+    <span className="inline-flex flex-col items-center border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-2 py-0.5 text-center shadow-pixel-bubble">
+      <span className="text-[9px] font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
         {label}
       </span>
-      <span className="whitespace-nowrap text-xs font-bold text-[#1E3A5F]">{value}</span>
+      <span className="whitespace-nowrap text-xs font-bold text-pt-text-primary">{value}</span>
     </span>
   );
 }

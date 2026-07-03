@@ -12,10 +12,10 @@
  * Palette:
  *   Sky blue    #38BDF8
  *   Sunset orange #FB923C
- *   Sand cream  #FEF3C7
+ *   Sand cream  var(--pt-bg-card)
  *   Grass green #4ADE80
- *   Deep navy   #1E3A5F
- *   Neon purple #A855F7
+ *   Deep navy   var(--pt-bg-card)
+ *   Neon purple var(--pt-agent-atlas)
  */
 
 import React from "react";
@@ -78,14 +78,14 @@ function BaseBodyDefault() {
   return (
     <>
       {/* Head */}
-      <rect x="11" y="2" width="10" height="10" fill="#FEF3C7" />
+      <rect x="11" y="2" width="10" height="10" fill="var(--pt-bg-card)" />
       {/* Eyes */}
-      <rect x="13" y="5" width="2" height="2" fill="#1E3A5F" />
-      <rect x="17" y="5" width="2" height="2" fill="#1E3A5F" />
+      <rect x="13" y="5" width="2" height="2" fill="var(--pt-bg-card)" />
+      <rect x="17" y="5" width="2" height="2" fill="var(--pt-bg-card)" />
       {/* Mouth */}
       <rect x="14" y="9" width="4" height="1" fill="#FB923C" />
       {/* Neck */}
-      <rect x="14" y="12" width="4" height="3" fill="#FEF3C7" />
+      <rect x="14" y="12" width="4" height="3" fill="var(--pt-bg-card)" />
       {/* Torso */}
       <rect x="9" y="15" width="14" height="12" fill="#38BDF8" />
       {/* Left arm */}
@@ -93,17 +93,17 @@ function BaseBodyDefault() {
       {/* Right arm */}
       <rect x="23" y="15" width="4" height="10" fill="#38BDF8" />
       {/* Left hand */}
-      <rect x="5" y="25" width="4" height="3" fill="#FEF3C7" />
+      <rect x="5" y="25" width="4" height="3" fill="var(--pt-bg-card)" />
       {/* Right hand */}
-      <rect x="23" y="25" width="4" height="3" fill="#FEF3C7" />
+      <rect x="23" y="25" width="4" height="3" fill="var(--pt-bg-card)" />
       {/* Left leg */}
-      <rect x="9" y="27" width="6" height="11" fill="#1E3A5F" />
+      <rect x="9" y="27" width="6" height="11" fill="var(--pt-bg-card)" />
       {/* Right leg */}
-      <rect x="17" y="27" width="6" height="11" fill="#1E3A5F" />
+      <rect x="17" y="27" width="6" height="11" fill="var(--pt-bg-card)" />
       {/* Left shoe */}
-      <rect x="8" y="38" width="8" height="4" fill="#1E3A5F" />
+      <rect x="8" y="38" width="8" height="4" fill="var(--pt-bg-card)" />
       {/* Right shoe */}
-      <rect x="16" y="38" width="8" height="4" fill="#1E3A5F" />
+      <rect x="16" y="38" width="8" height="4" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -117,7 +117,7 @@ function OutfitBackpacker() {
       {/* Shirt over torso */}
       <rect x="9" y="15" width="14" height="12" fill="#4ADE80" />
       {/* Shirt collar */}
-      <rect x="13" y="15" width="6" height="2" fill="#FEF3C7" />
+      <rect x="13" y="15" width="6" height="2" fill="var(--pt-bg-card)" />
       {/* Left sleeve */}
       <rect x="5" y="15" width="4" height="8" fill="#4ADE80" />
       {/* Right sleeve */}
@@ -127,7 +127,7 @@ function OutfitBackpacker() {
       {/* Backpack strap left */}
       <rect x="19" y="13" width="2" height="3" fill="#FB923C" />
       {/* Backpack pocket */}
-      <rect x="20" y="17" width="4" height="3" fill="#FEF3C7" />
+      <rect x="20" y="17" width="4" height="3" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -137,24 +137,24 @@ function OutfitCasual() {
   return (
     <>
       {/* Hoodie body */}
-      <rect x="9" y="15" width="14" height="12" fill="#1E3A5F" />
+      <rect x="9" y="15" width="14" height="12" fill="var(--pt-bg-card)" />
       {/* Hoodie pocket */}
       <rect x="12" y="22" width="8" height="4" fill="#38BDF8" />
       {/* Hood flap */}
-      <rect x="11" y="13" width="10" height="4" fill="#1E3A5F" />
+      <rect x="11" y="13" width="10" height="4" fill="var(--pt-bg-card)" />
       {/* Hoodie strings */}
-      <rect x="14" y="15" width="1" height="4" fill="#FEF3C7" />
-      <rect x="17" y="15" width="1" height="4" fill="#FEF3C7" />
+      <rect x="14" y="15" width="1" height="4" fill="var(--pt-bg-card)" />
+      <rect x="17" y="15" width="1" height="4" fill="var(--pt-bg-card)" />
       {/* Left sleeve */}
-      <rect x="5" y="15" width="4" height="10" fill="#1E3A5F" />
+      <rect x="5" y="15" width="4" height="10" fill="var(--pt-bg-card)" />
       {/* Right sleeve */}
-      <rect x="23" y="15" width="4" height="10" fill="#1E3A5F" />
+      <rect x="23" y="15" width="4" height="10" fill="var(--pt-bg-card)" />
       {/* Travel bag */}
       <rect x="1" y="19" width="5" height="7" fill="#FB923C" />
       {/* Bag handle */}
       <rect x="2" y="17" width="3" height="3" fill="#FB923C" />
       {/* Bag strap */}
-      <rect x="5" y="20" width="3" height="2" fill="#FEF3C7" />
+      <rect x="5" y="20" width="3" height="2" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -164,25 +164,25 @@ function OutfitLuxury() {
   return (
     <>
       {/* Jacket body */}
-      <rect x="9" y="15" width="14" height="12" fill="#A855F7" />
+      <rect x="9" y="15" width="14" height="12" fill="var(--pt-agent-atlas)" />
       {/* Jacket lapels */}
-      <polygon points="16,15 13,21 16,21" fill="#FEF3C7" />
-      <polygon points="16,15 19,21 16,21" fill="#FEF3C7" />
+      <polygon points="16,15 13,21 16,21" fill="var(--pt-bg-card)" />
+      <polygon points="16,15 19,21 16,21" fill="var(--pt-bg-card)" />
       {/* Jacket buttons */}
-      <rect x="15" y="22" width="2" height="2" fill="#1E3A5F" />
+      <rect x="15" y="22" width="2" height="2" fill="var(--pt-bg-card)" />
       {/* Left sleeve */}
-      <rect x="5" y="15" width="4" height="10" fill="#A855F7" />
+      <rect x="5" y="15" width="4" height="10" fill="var(--pt-agent-atlas)" />
       {/* Right sleeve */}
-      <rect x="23" y="15" width="4" height="10" fill="#A855F7" />
+      <rect x="23" y="15" width="4" height="10" fill="var(--pt-agent-atlas)" />
       {/* Cufflinks */}
-      <rect x="23" y="23" width="4" height="1" fill="#FEF3C7" />
-      <rect x="5" y="23" width="4" height="1" fill="#FEF3C7" />
+      <rect x="23" y="23" width="4" height="1" fill="var(--pt-bg-card)" />
+      <rect x="5" y="23" width="4" height="1" fill="var(--pt-bg-card)" />
       {/* Suitcase body */}
-      <rect x="26" y="20" width="6" height="8" rx="1" fill="#FEF3C7" />
+      <rect x="26" y="20" width="6" height="8" rx="1" fill="var(--pt-bg-card)" />
       {/* Suitcase handle */}
-      <rect x="27" y="18" width="4" height="3" fill="#1E3A5F" />
-      <rect x="27" y="18" width="1" height="3" fill="#1E3A5F" />
-      <rect x="30" y="18" width="1" height="3" fill="#1E3A5F" />
+      <rect x="27" y="18" width="4" height="3" fill="var(--pt-bg-card)" />
+      <rect x="27" y="18" width="1" height="3" fill="var(--pt-bg-card)" />
+      <rect x="30" y="18" width="1" height="3" fill="var(--pt-bg-card)" />
       {/* Suitcase latch */}
       <rect x="28" y="24" width="2" height="1" fill="#FB923C" />
     </>
@@ -196,14 +196,14 @@ function HeadwearCaptainHat() {
   return (
     <>
       {/* Brim */}
-      <rect x="8" y="5" width="16" height="2" fill="#1E3A5F" />
+      <rect x="8" y="5" width="16" height="2" fill="var(--pt-bg-card)" />
       {/* Crown */}
-      <rect x="11" y="0" width="10" height="6" fill="#1E3A5F" />
+      <rect x="11" y="0" width="10" height="6" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="11" y="4" width="10" height="2" fill="#FB923C" />
       {/* Anchor badge */}
-      <rect x="15" y="1" width="2" height="3" fill="#FEF3C7" />
-      <rect x="14" y="3" width="4" height="1" fill="#FEF3C7" />
+      <rect x="15" y="1" width="2" height="3" fill="var(--pt-bg-card)" />
+      <rect x="14" y="3" width="4" height="1" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -217,16 +217,16 @@ function HeadwearCapGlasses() {
       {/* Cap dome */}
       <rect x="11" y="1" width="10" height="6" fill="#38BDF8" />
       {/* Cap button top */}
-      <rect x="15" y="0" width="2" height="2" fill="#1E3A5F" />
+      <rect x="15" y="0" width="2" height="2" fill="var(--pt-bg-card)" />
       {/* Glasses frames */}
-      <rect x="11" y="8" width="4" height="3" fill="none" stroke="#1E3A5F" strokeWidth="1" />
-      <rect x="17" y="8" width="4" height="3" fill="none" stroke="#1E3A5F" strokeWidth="1" />
+      <rect x="11" y="8" width="4" height="3" fill="none" stroke="var(--pt-bg-card)" strokeWidth="1" />
+      <rect x="17" y="8" width="4" height="3" fill="none" stroke="var(--pt-bg-card)" strokeWidth="1" />
       {/* Glasses bridge */}
-      <rect x="15" y="9" width="2" height="1" fill="#1E3A5F" />
+      <rect x="15" y="9" width="2" height="1" fill="var(--pt-bg-card)" />
       {/* Left temple */}
-      <rect x="10" y="9" width="1" height="1" fill="#1E3A5F" />
+      <rect x="10" y="9" width="1" height="1" fill="var(--pt-bg-card)" />
       {/* Right temple */}
-      <rect x="21" y="9" width="1" height="1" fill="#1E3A5F" />
+      <rect x="21" y="9" width="1" height="1" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -238,7 +238,7 @@ function HeadwearVillagerHat() {
       {/* Wide brim */}
       <rect x="7" y="5" width="18" height="2" fill="#FB923C" />
       {/* Hat top dome */}
-      <rect x="11" y="1" width="10" height="5" fill="#FEF3C7" />
+      <rect x="11" y="1" width="10" height="5" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="11" y="4" width="10" height="2" fill="#4ADE80" />
     </>
@@ -250,16 +250,16 @@ function HeadwearBeanie() {
   return (
     <>
       {/* Beanie body */}
-      <rect x="11" y="1" width="10" height="7" fill="#A855F7" />
+      <rect x="11" y="1" width="10" height="7" fill="var(--pt-agent-atlas)" />
       {/* Beanie ribbing lines */}
-      <rect x="11" y="5" width="10" height="1" fill="#1E3A5F" />
-      <rect x="11" y="7" width="10" height="1" fill="#1E3A5F" />
+      <rect x="11" y="5" width="10" height="1" fill="var(--pt-bg-card)" />
+      <rect x="11" y="7" width="10" height="1" fill="var(--pt-bg-card)" />
       {/* Pom-pom */}
-      <rect x="14" y="0" width="4" height="2" fill="#FEF3C7" />
+      <rect x="14" y="0" width="4" height="2" fill="var(--pt-bg-card)" />
       {/* Headphone arc */}
-      <rect x="9" y="3" width="2" height="5" fill="#1E3A5F" />
-      <rect x="21" y="3" width="2" height="5" fill="#1E3A5F" />
-      <rect x="9" y="3" width="14" height="2" fill="#1E3A5F" />
+      <rect x="9" y="3" width="2" height="5" fill="var(--pt-bg-card)" />
+      <rect x="21" y="3" width="2" height="5" fill="var(--pt-bg-card)" />
+      <rect x="9" y="3" width="14" height="2" fill="var(--pt-bg-card)" />
       {/* Ear cups */}
       <rect x="8" y="6" width="3" height="4" fill="#38BDF8" />
       <rect x="21" y="6" width="3" height="4" fill="#38BDF8" />
@@ -276,10 +276,10 @@ function HeadwearExplorerHat() {
       {/* Crown */}
       <rect x="11" y="1" width="10" height="5" fill="#FB923C" />
       {/* Hat indent crease */}
-      <rect x="13" y="1" width="6" height="1" fill="#FEF3C7" />
+      <rect x="13" y="1" width="6" height="1" fill="var(--pt-bg-card)" />
       {/* Chin strap */}
-      <rect x="11" y="8" width="2" height="3" fill="#FEF3C7" />
-      <rect x="19" y="8" width="2" height="3" fill="#FEF3C7" />
+      <rect x="11" y="8" width="2" height="3" fill="var(--pt-bg-card)" />
+      <rect x="19" y="8" width="2" height="3" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="11" y="4" width="10" height="2" fill="#4ADE80" />
     </>
@@ -293,14 +293,14 @@ function HandheldBubbleTea() {
   return (
     <>
       {/* Cup body */}
-      <rect x="24" y="22" width="5" height="8" fill="#FEF3C7" />
+      <rect x="24" y="22" width="5" height="8" fill="var(--pt-bg-card)" />
       {/* Cup tapered bottom */}
-      <rect x="25" y="29" width="3" height="2" fill="#FEF3C7" />
+      <rect x="25" y="29" width="3" height="2" fill="var(--pt-bg-card)" />
       {/* Liquid */}
       <rect x="24" y="24" width="5" height="5" fill="#FB923C" />
       {/* Bubbles */}
-      <rect x="25" y="26" width="1" height="1" fill="#1E3A5F" />
-      <rect x="27" y="27" width="1" height="1" fill="#1E3A5F" />
+      <rect x="25" y="26" width="1" height="1" fill="var(--pt-bg-card)" />
+      <rect x="27" y="27" width="1" height="1" fill="var(--pt-bg-card)" />
       {/* Straw */}
       <rect x="27" y="18" width="2" height="7" fill="#4ADE80" />
       {/* Lid */}
@@ -314,14 +314,14 @@ function HandheldCamera() {
   return (
     <>
       {/* Camera body */}
-      <rect x="23" y="21" width="8" height="6" fill="#1E3A5F" />
+      <rect x="23" y="21" width="8" height="6" fill="var(--pt-bg-card)" />
       {/* Lens */}
       <rect x="25" y="22" width="4" height="4" fill="#38BDF8" />
-      <rect x="26" y="23" width="2" height="2" fill="#FEF3C7" />
+      <rect x="26" y="23" width="2" height="2" fill="var(--pt-bg-card)" />
       {/* Flash */}
-      <rect x="23" y="20" width="3" height="2" fill="#FEF3C7" />
+      <rect x="23" y="20" width="3" height="2" fill="var(--pt-bg-card)" />
       {/* Viewfinder bump */}
-      <rect x="27" y="20" width="3" height="2" fill="#1E3A5F" />
+      <rect x="27" y="20" width="3" height="2" fill="var(--pt-bg-card)" />
       {/* Shutter button */}
       <rect x="28" y="19" width="2" height="2" fill="#FB923C" />
       {/* Strap */}
@@ -337,9 +337,9 @@ function HandheldHikingStick() {
       {/* Stick shaft */}
       <rect x="28" y="14" width="2" height="28" fill="#FB923C" />
       {/* Handle top */}
-      <rect x="26" y="14" width="6" height="2" fill="#1E3A5F" />
+      <rect x="26" y="14" width="6" height="2" fill="var(--pt-bg-card)" />
       {/* Tip point */}
-      <rect x="28" y="42" width="2" height="3" fill="#1E3A5F" />
+      <rect x="28" y="42" width="2" height="3" fill="var(--pt-bg-card)" />
       {/* Mid grip band */}
       <rect x="27" y="24" width="4" height="2" fill="#4ADE80" />
     </>
@@ -351,15 +351,15 @@ function HandheldShoppingBag() {
   return (
     <>
       {/* Bag body */}
-      <rect x="23" y="24" width="8" height="10" fill="#A855F7" />
+      <rect x="23" y="24" width="8" height="10" fill="var(--pt-agent-atlas)" />
       {/* Handles */}
-      <rect x="25" y="21" width="2" height="4" fill="#1E3A5F" />
-      <rect x="29" y="21" width="2" height="4" fill="#1E3A5F" />
+      <rect x="25" y="21" width="2" height="4" fill="var(--pt-bg-card)" />
+      <rect x="29" y="21" width="2" height="4" fill="var(--pt-bg-card)" />
       {/* Bag fold top */}
-      <rect x="23" y="24" width="8" height="2" fill="#1E3A5F" />
+      <rect x="23" y="24" width="8" height="2" fill="var(--pt-bg-card)" />
       {/* Logo star */}
-      <rect x="26" y="27" width="1" height="3" fill="#FEF3C7" />
-      <rect x="25" y="28" width="3" height="1" fill="#FEF3C7" />
+      <rect x="26" y="27" width="1" height="3" fill="var(--pt-bg-card)" />
+      <rect x="25" y="28" width="3" height="1" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -369,17 +369,17 @@ function HandheldNeonCup() {
   return (
     <>
       {/* Glow halo */}
-      <rect x="22" y="20" width="10" height="12" fill="#A855F7" opacity={0.25} />
+      <rect x="22" y="20" width="10" height="12" fill="var(--pt-agent-atlas)" opacity={0.25} />
       {/* Cup body */}
-      <rect x="24" y="22" width="6" height="9" fill="#1E3A5F" />
+      <rect x="24" y="22" width="6" height="9" fill="var(--pt-bg-card)" />
       {/* Neon liquid */}
-      <rect x="24" y="24" width="6" height="6" fill="#A855F7" />
+      <rect x="24" y="24" width="6" height="6" fill="var(--pt-agent-atlas)" />
       {/* Rim */}
       <rect x="24" y="22" width="6" height="2" fill="#FB923C" />
       {/* Straw */}
       <rect x="28" y="18" width="2" height="6" fill="#38BDF8" />
       {/* Neon shine line */}
-      <rect x="25" y="25" width="1" height="4" fill="#FEF3C7" opacity={0.6} />
+      <rect x="25" y="25" width="1" height="4" fill="var(--pt-bg-card)" opacity={0.6} />
     </>
   );
 }
@@ -389,19 +389,19 @@ function HandheldGuidebook() {
   return (
     <>
       {/* Left page */}
-      <rect x="22" y="22" width="5" height="8" fill="#FEF3C7" />
+      <rect x="22" y="22" width="5" height="8" fill="var(--pt-bg-card)" />
       {/* Right page */}
-      <rect x="27" y="22" width="5" height="8" fill="#FEF3C7" />
+      <rect x="27" y="22" width="5" height="8" fill="var(--pt-bg-card)" />
       {/* Spine */}
       <rect x="26" y="22" width="2" height="8" fill="#FB923C" />
       {/* Left text lines */}
-      <rect x="23" y="24" width="3" height="1" fill="#1E3A5F" />
-      <rect x="23" y="26" width="3" height="1" fill="#1E3A5F" />
-      <rect x="23" y="28" width="3" height="1" fill="#1E3A5F" />
+      <rect x="23" y="24" width="3" height="1" fill="var(--pt-bg-card)" />
+      <rect x="23" y="26" width="3" height="1" fill="var(--pt-bg-card)" />
+      <rect x="23" y="28" width="3" height="1" fill="var(--pt-bg-card)" />
       {/* Right text lines */}
-      <rect x="28" y="24" width="3" height="1" fill="#1E3A5F" />
-      <rect x="28" y="26" width="3" height="1" fill="#1E3A5F" />
-      <rect x="28" y="28" width="3" height="1" fill="#1E3A5F" />
+      <rect x="28" y="24" width="3" height="1" fill="var(--pt-bg-card)" />
+      <rect x="28" y="26" width="3" height="1" fill="var(--pt-bg-card)" />
+      <rect x="28" y="28" width="3" height="1" fill="var(--pt-bg-card)" />
       {/* Cover top */}
       <rect x="22" y="20" width="10" height="2" fill="#38BDF8" />
     </>
@@ -413,18 +413,18 @@ function HandheldHeadphones() {
   return (
     <>
       {/* Arc */}
-      <rect x="24" y="20" width="8" height="2" fill="#1E3A5F" />
+      <rect x="24" y="20" width="8" height="2" fill="var(--pt-bg-card)" />
       {/* Left cup */}
       <rect x="23" y="21" width="3" height="5" fill="#38BDF8" />
       {/* Right cup */}
       <rect x="30" y="21" width="3" height="5" fill="#38BDF8" />
       {/* Left stem */}
-      <rect x="24" y="22" width="1" height="3" fill="#1E3A5F" />
+      <rect x="24" y="22" width="1" height="3" fill="var(--pt-bg-card)" />
       {/* Right stem */}
-      <rect x="31" y="22" width="1" height="3" fill="#1E3A5F" />
+      <rect x="31" y="22" width="1" height="3" fill="var(--pt-bg-card)" />
       {/* Cushion highlights */}
-      <rect x="24" y="22" width="2" height="3" fill="#A855F7" />
-      <rect x="30" y="22" width="2" height="3" fill="#A855F7" />
+      <rect x="24" y="22" width="2" height="3" fill="var(--pt-agent-atlas)" />
+      <rect x="30" y="22" width="2" height="3" fill="var(--pt-agent-atlas)" />
     </>
   );
 }
@@ -434,17 +434,17 @@ function HandheldCompass() {
   return (
     <>
       {/* Outer ring */}
-      <rect x="23" y="20" width="10" height="10" fill="#FEF3C7" />
+      <rect x="23" y="20" width="10" height="10" fill="var(--pt-bg-card)" />
       {/* Inner face */}
-      <rect x="24" y="21" width="8" height="8" fill="#1E3A5F" />
+      <rect x="24" y="21" width="8" height="8" fill="var(--pt-bg-card)" />
       {/* N needle */}
       <polygon points="28,22 27,27 29,27" fill="#FB923C" />
       {/* S needle */}
-      <polygon points="28,30 27,27 29,27" fill="#FEF3C7" />
+      <polygon points="28,30 27,27 29,27" fill="var(--pt-bg-card)" />
       {/* Center dot */}
       <rect x="27" y="27" width="2" height="2" fill="#38BDF8" />
       {/* Cardinal labels */}
-      <rect x="27" y="21" width="2" height="1" fill="#FEF3C7" />
+      <rect x="27" y="21" width="2" height="1" fill="var(--pt-bg-card)" />
     </>
   );
 }
@@ -454,7 +454,7 @@ function HandheldMap() {
   return (
     <>
       {/* Map body */}
-      <rect x="22" y="21" width="10" height="8" fill="#FEF3C7" />
+      <rect x="22" y="21" width="10" height="8" fill="var(--pt-bg-card)" />
       {/* Fold crease vertical */}
       <rect x="27" y="21" width="1" height="8" fill="#FB923C" />
       {/* Fold crease horizontal */}
@@ -464,11 +464,11 @@ function HandheldMap() {
       <rect x="25" y="22" width="1" height="2" fill="#38BDF8" />
       <rect x="25" y="23" width="2" height="1" fill="#38BDF8" />
       {/* Location pin */}
-      <rect x="28" y="26" width="2" height="2" fill="#A855F7" />
-      <rect x="27" y="27" width="4" height="1" fill="#A855F7" />
+      <rect x="28" y="26" width="2" height="2" fill="var(--pt-agent-atlas)" />
+      <rect x="27" y="27" width="4" height="1" fill="var(--pt-agent-atlas)" />
       {/* Map border */}
-      <rect x="22" y="21" width="10" height="1" fill="#1E3A5F" />
-      <rect x="22" y="28" width="10" height="1" fill="#1E3A5F" />
+      <rect x="22" y="21" width="10" height="1" fill="var(--pt-bg-card)" />
+      <rect x="22" y="28" width="10" height="1" fill="var(--pt-bg-card)" />
     </>
   );
 }

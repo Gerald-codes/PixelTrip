@@ -10,11 +10,11 @@
  *
  * Palette:
  *   Sunset orange  #FB923C  — selected border
- *   Deep navy      #1E3A5F  — unselected border, shadow
- *   Sand cream     #FEF3C7  — unselected background
+ *   Deep navy      var(--pt-bg-card)  — unselected border, shadow
+ *   Sand cream     var(--pt-bg-card)  — unselected background
  *   Grass green    #4ADE80
  *   Sky blue       #38BDF8
- *   Neon purple    #A855F7
+ *   Neon purple    var(--pt-agent-atlas)
  */
 
 import React from "react";
@@ -41,26 +41,26 @@ function BackpackIcon() {
       aria-hidden="true"
     >
       {/* Shoulder straps (top loop) */}
-      <rect x="10" y="2" width="8" height="3" fill="#1E3A5F" />
+      <rect x="10" y="2" width="8" height="3" fill="var(--pt-bg-card)" />
       {/* Strap left */}
-      <rect x="8" y="3" width="3" height="7" fill="#1E3A5F" />
+      <rect x="8" y="3" width="3" height="7" fill="var(--pt-bg-card)" />
       {/* Strap right */}
-      <rect x="17" y="3" width="3" height="7" fill="#1E3A5F" />
+      <rect x="17" y="3" width="3" height="7" fill="var(--pt-bg-card)" />
       {/* Main body */}
       <rect x="6" y="8" width="16" height="16" fill="#4ADE80" />
       {/* Body outline top */}
-      <rect x="6" y="8" width="16" height="2" fill="#1E3A5F" />
+      <rect x="6" y="8" width="16" height="2" fill="var(--pt-bg-card)" />
       {/* Front pocket */}
-      <rect x="9" y="15" width="10" height="7" fill="#FEF3C7" />
+      <rect x="9" y="15" width="10" height="7" fill="var(--pt-bg-card)" />
       {/* Pocket border top */}
-      <rect x="9" y="15" width="10" height="2" fill="#1E3A5F" />
+      <rect x="9" y="15" width="10" height="2" fill="var(--pt-bg-card)" />
       {/* Pocket zipper pull */}
       <rect x="13" y="13" width="2" height="3" fill="#FB923C" />
       {/* Side accents */}
       <rect x="6" y="10" width="2" height="12" fill="#38BDF8" />
       <rect x="20" y="10" width="2" height="12" fill="#38BDF8" />
       {/* Bottom */}
-      <rect x="6" y="22" width="16" height="2" fill="#1E3A5F" />
+      <rect x="6" y="22" width="16" height="2" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -76,22 +76,22 @@ function TravelBagIcon() {
       aria-hidden="true"
     >
       {/* Handle */}
-      <rect x="10" y="4" width="8" height="2" fill="#1E3A5F" />
-      <rect x="9" y="4" width="2" height="5" fill="#1E3A5F" />
-      <rect x="17" y="4" width="2" height="5" fill="#1E3A5F" />
+      <rect x="10" y="4" width="8" height="2" fill="var(--pt-bg-card)" />
+      <rect x="9" y="4" width="2" height="5" fill="var(--pt-bg-card)" />
+      <rect x="17" y="4" width="2" height="5" fill="var(--pt-bg-card)" />
       {/* Bag body */}
       <rect x="4" y="9" width="20" height="14" fill="#FB923C" />
       {/* Bag top strip */}
-      <rect x="4" y="9" width="20" height="3" fill="#1E3A5F" />
+      <rect x="4" y="9" width="20" height="3" fill="var(--pt-bg-card)" />
       {/* Bag bottom strip */}
-      <rect x="4" y="20" width="20" height="3" fill="#1E3A5F" />
+      <rect x="4" y="20" width="20" height="3" fill="var(--pt-bg-card)" />
       {/* Center zip line */}
-      <rect x="4" y="15" width="20" height="1" fill="#FEF3C7" />
+      <rect x="4" y="15" width="20" height="1" fill="var(--pt-bg-card)" />
       {/* Zip pull */}
-      <rect x="13" y="13" width="2" height="4" fill="#FEF3C7" />
+      <rect x="13" y="13" width="2" height="4" fill="var(--pt-bg-card)" />
       {/* Side pockets */}
-      <rect x="4" y="12" width="4" height="8" fill="#1E3A5F" />
-      <rect x="20" y="12" width="4" height="8" fill="#1E3A5F" />
+      <rect x="4" y="12" width="4" height="8" fill="var(--pt-bg-card)" />
+      <rect x="20" y="12" width="4" height="8" fill="var(--pt-bg-card)" />
       {/* Pocket highlight */}
       <rect x="5" y="13" width="2" height="5" fill="#38BDF8" />
       <rect x="21" y="13" width="2" height="5" fill="#38BDF8" />
@@ -110,26 +110,26 @@ function SuitcaseIcon() {
       aria-hidden="true"
     >
       {/* Handle base */}
-      <rect x="10" y="3" width="8" height="2" fill="#1E3A5F" />
-      <rect x="9" y="3" width="2" height="5" fill="#1E3A5F" />
-      <rect x="17" y="3" width="2" height="5" fill="#1E3A5F" />
+      <rect x="10" y="3" width="8" height="2" fill="var(--pt-bg-card)" />
+      <rect x="9" y="3" width="2" height="5" fill="var(--pt-bg-card)" />
+      <rect x="17" y="3" width="2" height="5" fill="var(--pt-bg-card)" />
       {/* Main body */}
-      <rect x="4" y="8" width="20" height="17" fill="#A855F7" />
+      <rect x="4" y="8" width="20" height="17" fill="var(--pt-agent-atlas)" />
       {/* Body border outline */}
-      <rect x="4" y="8" width="20" height="2" fill="#1E3A5F" />
-      <rect x="4" y="23" width="20" height="2" fill="#1E3A5F" />
-      <rect x="4" y="8" width="2" height="17" fill="#1E3A5F" />
-      <rect x="22" y="8" width="2" height="17" fill="#1E3A5F" />
+      <rect x="4" y="8" width="20" height="2" fill="var(--pt-bg-card)" />
+      <rect x="4" y="23" width="20" height="2" fill="var(--pt-bg-card)" />
+      <rect x="4" y="8" width="2" height="17" fill="var(--pt-bg-card)" />
+      <rect x="22" y="8" width="2" height="17" fill="var(--pt-bg-card)" />
       {/* Horizontal band */}
-      <rect x="6" y="15" width="16" height="2" fill="#1E3A5F" />
+      <rect x="6" y="15" width="16" height="2" fill="var(--pt-bg-card)" />
       {/* Latch */}
-      <rect x="12" y="14" width="4" height="4" fill="#FEF3C7" />
+      <rect x="12" y="14" width="4" height="4" fill="var(--pt-bg-card)" />
       <rect x="13" y="15" width="2" height="2" fill="#FB923C" />
       {/* Wheels */}
-      <rect x="6" y="25" width="4" height="2" fill="#1E3A5F" />
-      <rect x="18" y="25" width="4" height="2" fill="#1E3A5F" />
+      <rect x="6" y="25" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="18" y="25" width="4" height="2" fill="var(--pt-bg-card)" />
       {/* Sheen line */}
-      <rect x="6" y="10" width="1" height="12" fill="#FEF3C7" opacity={0.4} />
+      <rect x="6" y="10" width="1" height="12" fill="var(--pt-bg-card)" opacity={0.4} />
     </svg>
   );
 }
@@ -217,11 +217,11 @@ export default function BudgetSelector({
             style={{
               border: isSelected
                 ? "2px solid #FB923C"
-                : "2px solid #1E3A5F",
-              backgroundColor: isSelected ? "#FFF7ED" : "#FEF3C7",
+                : "2px solid var(--pt-border, #335F91)",
+              backgroundColor: isSelected ? "var(--pt-bg-card-hover)" : "var(--pt-bg-card)",
               boxShadow: isSelected
-                ? "4px 4px 0px #1E3A5F"
-                : "2px 2px 0px #1E3A5F",
+                ? "4px 4px 0px #FB923C"
+                : "none",
             }}
           >
             {/* SVG icon */}
@@ -232,7 +232,7 @@ export default function BudgetSelector({
             {/* Label */}
             <span
               className="font-bold text-sm text-center leading-tight"
-              style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+              style={{ color: "var(--pt-text-primary, #E8ECF1)", fontFamily: "monospace" }}
             >
               {label}
             </span>
@@ -240,7 +240,7 @@ export default function BudgetSelector({
             {/* Sublabel */}
             <span
               className="text-xs text-center leading-tight"
-              style={{ color: "#1E3A5F", opacity: 0.7 }}
+              style={{ color: "var(--pt-text-primary, #E8ECF1)", opacity: 0.7 }}
             >
               {sublabel}
             </span>

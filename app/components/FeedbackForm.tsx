@@ -82,11 +82,11 @@ function TagInput({ label, tags, onAdd, onRemove, disabled = false, maxCount }: 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+        <label className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           {label}
         </label>
         {maxCount !== undefined && (
-          <span className="text-xs font-bold text-[#1E3A5F] opacity-60">
+          <span className="text-xs font-bold text-pt-text-primary opacity-60">
             ({tags.length}/{maxCount})
           </span>
         )}
@@ -99,14 +99,14 @@ function TagInput({ label, tags, onAdd, onRemove, disabled = false, maxCount }: 
             <span
               key={tag}
               role="listitem"
-              className="inline-flex items-center gap-1 border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2.5 py-1 text-sm font-medium text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]"
+              className="inline-flex items-center gap-1 border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-2.5 py-1 text-sm font-medium text-pt-text-primary shadow-pixel-sm"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => onRemove(tag)}
                 aria-label={`Remove ${tag}`}
-                className="ml-1 text-[#1E3A5F] hover:text-red-600 font-bold leading-none"
+                className="ml-1 text-pt-text-primary hover:text-red-600 font-bold leading-none"
               >
                 ×
               </button>
@@ -125,14 +125,14 @@ function TagInput({ label, tags, onAdd, onRemove, disabled = false, maxCount }: 
           onKeyDown={handleKey}
           disabled={disabled || atLimit}
           placeholder={atLimit ? "Limit reached" : "Type and press Enter…"}
-          className="flex-1 border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2 text-sm font-medium text-[#1E3A5F] placeholder-[#1E3A5F]/40 shadow-[2px_2px_0px_#1E3A5F] outline-none focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-2 text-sm font-medium text-pt-text-primary placeholder-[var(--pt-bg-card)]/40 shadow-pixel-sm outline-none focus:bg-pt-card disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={`Add to ${label}`}
         />
         <button
           type="button"
           onClick={handleAdd}
           disabled={disabled || atLimit || value.trim() === ""}
-          className="border-2 border-[#1E3A5F] bg-[#38BDF8] px-4 py-2 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#7dd3fc] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-4 py-2 text-sm font-bold text-pt-text-primary shadow-pixel-sm hover:bg-[#7dd3fc] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label={`Add tag to ${label}`}
         >
           Add
@@ -239,21 +239,21 @@ export default function FeedbackForm({
       {error && (
         <div
           role="alert"
-          className="border-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-[2px_2px_0px_#1E3A5F]"
+          className="border-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-pixel-sm"
         >
           ⚠️ {error}
         </div>
       )}
 
       {/* ── Score slider ── */}
-      <fieldset className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
-        <legend className="px-1 text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <fieldset className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
+        <legend className="px-1 text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Overall Score
         </legend>
         <div className="mt-3 flex flex-col gap-3">
           {/* Numeric display */}
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+            <span className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
               1 — Poor
             </span>
             <span
@@ -263,7 +263,7 @@ export default function FeedbackForm({
             >
               {score} / 10
             </span>
-            <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+            <span className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
               10 — Excellent
             </span>
           </div>
@@ -272,7 +272,7 @@ export default function FeedbackForm({
           <div className="relative h-4">
             {/* Filled portion */}
             <div
-              className={`absolute inset-y-0 left-0 ${thumbColor} border-2 border-[#1E3A5F] transition-all`}
+              className={`absolute inset-y-0 left-0 ${thumbColor} border-2 border-pt-text-primary border-opacity-20 transition-all`}
               style={{ width: `${((score - 1) / 9) * 100}%` }}
               aria-hidden="true"
             />
@@ -291,7 +291,7 @@ export default function FeedbackForm({
               aria-valuetext={`${score} out of 10`}
             />
             {/* Track outline */}
-            <div className="absolute inset-0 border-2 border-[#1E3A5F] pointer-events-none" />
+            <div className="absolute inset-0 border-2 border-pt-text-primary border-opacity-20 pointer-events-none" />
           </div>
 
           {/* Pip labels */}
@@ -301,10 +301,10 @@ export default function FeedbackForm({
                 key={n}
                 type="button"
                 onClick={() => setScore(n)}
-                className={`w-6 h-6 text-xs font-bold border-2 border-[#1E3A5F] transition-colors shadow-[1px_1px_0px_#1E3A5F] ${
+                className={`w-6 h-6 text-xs font-bold border-2 border-pt-text-primary border-opacity-20 transition-colors shadow-pixel-bubble ${
                   score === n
-                    ? `${thumbColor} text-[#1E3A5F]`
-                    : "bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#FDE68A]"
+                    ? `${thumbColor} text-pt-text-primary`
+                    : "bg-[var(--pt-bg-card)] text-pt-text-primary hover:bg-[#FDE68A]"
                 }`}
                 aria-label={`Set score to ${n}`}
                 aria-pressed={score === n}
@@ -318,11 +318,11 @@ export default function FeedbackForm({
 
       {/* ── Liked / Disliked multi-select chips ── */}
       {allTitles.length > 0 && (
-        <fieldset className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
-          <legend className="px-1 text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+        <fieldset className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
+          <legend className="px-1 text-sm font-bold uppercase tracking-wide text-pt-text-primary">
             What did you think of each item?
           </legend>
-          <p className="mt-1 mb-3 text-xs text-[#1E3A5F] opacity-60">
+          <p className="mt-1 mb-3 text-xs text-pt-text-primary opacity-60">
             Click items to mark them as liked (green) or disliked (red). Items can only be in one
             group.
           </p>
@@ -332,15 +332,15 @@ export default function FeedbackForm({
               const isDisliked = dislikedItems.includes(title);
 
               let chipClass =
-                "border-2 border-[#1E3A5F] bg-[#FEF3C7] text-[#1E3A5F] hover:bg-[#FDE68A]";
+                "border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] text-pt-text-primary hover:bg-[#FDE68A]";
               let ariaLabel = `${title} — not rated`;
               if (isLiked) {
                 chipClass =
-                  "border-2 border-[#1E3A5F] bg-[#4ADE80] text-[#1E3A5F] ring-2 ring-[#4ADE80]";
+                  "border-2 border-pt-text-primary border-opacity-20 bg-[#4ADE80] text-pt-text-primary ring-2 ring-[#4ADE80]";
                 ariaLabel = `${title} — liked`;
               } else if (isDisliked) {
                 chipClass =
-                  "border-2 border-[#1E3A5F] bg-red-400 text-white ring-2 ring-red-400";
+                  "border-2 border-pt-text-primary border-opacity-20 bg-red-400 text-white ring-2 ring-red-400";
                 ariaLabel = `${title} — disliked`;
               }
 
@@ -355,7 +355,7 @@ export default function FeedbackForm({
                     }}
                     aria-label={`${isLiked ? "Unlike" : "Like"} ${title}`}
                     aria-pressed={isLiked}
-                    className={`px-2.5 py-1 text-xs font-bold shadow-[2px_2px_0px_#1E3A5F] transition-colors ${chipClass}`}
+                    className={`px-2.5 py-1 text-xs font-bold shadow-pixel-sm transition-colors ${chipClass}`}
                   >
                     {isLiked ? "👍 " : ""}{title}
                   </button>
@@ -369,8 +369,8 @@ export default function FeedbackForm({
                     }}
                     aria-label={`${isDisliked ? "Remove dislike from" : "Dislike"} ${title}`}
                     aria-pressed={isDisliked}
-                    className={`px-2 py-1 text-xs font-bold border-2 border-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] transition-colors ${
-                      isDisliked ? "bg-red-400 text-white" : "bg-[#FEF3C7] text-[#1E3A5F] hover:bg-red-100"
+                    className={`px-2 py-1 text-xs font-bold border-2 border-pt-text-primary border-opacity-20 shadow-pixel-sm transition-colors ${
+                      isDisliked ? "bg-red-400 text-white" : "bg-[var(--pt-bg-card)] text-pt-text-primary hover:bg-red-100"
                     }`}
                   >
                     👎
@@ -382,7 +382,7 @@ export default function FeedbackForm({
 
           {/* Summary line */}
           {(likedItems.length > 0 || dislikedItems.length > 0) && (
-            <p className="mt-3 text-xs text-[#1E3A5F] opacity-70">
+            <p className="mt-3 text-xs text-pt-text-primary opacity-70">
               {likedItems.length > 0 && (
                 <span className="text-[#16a34a] font-bold">
                   👍 {likedItems.length} liked
@@ -400,7 +400,7 @@ export default function FeedbackForm({
       )}
 
       {/* ── Requested additions ── */}
-      <div className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
+      <div className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
         <TagInput
           label="Requested Additions"
           tags={requestedAdditions}
@@ -411,7 +411,7 @@ export default function FeedbackForm({
       </div>
 
       {/* ── Requested removals ── */}
-      <div className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
+      <div className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
         <TagInput
           label="Requested Removals"
           tags={requestedRemovals}
@@ -422,7 +422,7 @@ export default function FeedbackForm({
       </div>
 
       {/* ── Important requests (capped at 3) ── */}
-      <div className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
+      <div className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
         <TagInput
           label="Important Requests"
           tags={importantRequests}
@@ -431,7 +431,7 @@ export default function FeedbackForm({
           disabled={submitting}
           maxCount={3}
         />
-        <p className="mt-2 text-xs text-[#1E3A5F] opacity-60">
+        <p className="mt-2 text-xs text-pt-text-primary opacity-60">
           Your top priorities for the next revision. Capped at 3 so the AI can focus on what matters most.
         </p>
       </div>
@@ -440,7 +440,7 @@ export default function FeedbackForm({
       <button
         type="submit"
         disabled={submitting}
-        className="border-4 border-[#1E3A5F] bg-[#FB923C] shadow-[4px_4px_0px_#1E3A5F] px-6 py-3 text-base font-black uppercase tracking-wide text-[#1E3A5F] hover:bg-[#fdba74] disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-start"
+        className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] shadow-pixel-card px-6 py-3 text-base font-black uppercase tracking-wide text-pt-text-primary hover:bg-[#fdba74] disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-start"
       >
         {submitting ? "Submitting…" : existing ? "Update Feedback" : "Submit Feedback"}
       </button>

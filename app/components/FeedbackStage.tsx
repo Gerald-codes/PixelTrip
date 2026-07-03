@@ -217,8 +217,8 @@ export default function FeedbackStage({
   if (itineraryLoading) {
     return (
       <section className="mx-auto flex max-w-3xl flex-col gap-6">
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">Loading itinerary…</p>
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">Loading itinerary…</p>
         </div>
       </section>
     );
@@ -227,7 +227,7 @@ export default function FeedbackStage({
   if (itineraryError) {
     return (
       <section className="mx-auto flex max-w-3xl flex-col gap-6">
-        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-pixel-card">
           <p className="text-sm font-semibold text-red-700">{itineraryError}</p>
         </div>
       </section>
@@ -239,15 +239,15 @@ export default function FeedbackStage({
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* ── Stage header ── */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Feedback</h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">Feedback</h2>
+        <p className="mt-2 text-pt-text-primary">
           Rate the itinerary and let the AI know what you&apos;d like changed.
         </p>
-        <p className="mt-2 text-xs font-semibold text-[#1E3A5F]">
+        <p className="mt-2 text-xs font-semibold text-pt-text-primary">
           📍 {itinerary.destination} &nbsp;·&nbsp;
           <span className="font-mono">{itinerary.startDate}</span> →{" "}
           <span className="font-mono">{itinerary.endDate}</span> &nbsp;·&nbsp;
@@ -268,10 +268,10 @@ export default function FeedbackStage({
       )}
 
       {/* ── Feedback form / submitted view ── */}
-      <div className="border-4 border-[#1E3A5F] bg-white p-6 shadow-[4px_4px_0px_#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-pt-card p-6 shadow-pixel-card">
         {hasSubmitted && !editing ? (
           <>
-            <div className="mb-4 border-2 border-[#4ADE80] bg-[#f0fdf4] px-4 py-3 shadow-[2px_2px_0px_#1E3A5F]">
+            <div className="mb-4 border-2 border-[#4ADE80] bg-pt-card-hover px-4 py-3 shadow-pixel-sm">
               <p className="font-bold text-[#166534]">✅ Feedback submitted!</p>
               <p className="mt-1 text-sm text-[#166534]">
                 Score: <span className="font-black">{myFeedback!.score} / 10</span>
@@ -280,14 +280,14 @@ export default function FeedbackStage({
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="border-2 border-[#1E3A5F] bg-[#FEF3C7] px-4 py-2 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#FDE68A] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+              className="border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-4 py-2 text-sm font-bold text-pt-text-primary shadow-pixel-sm hover:bg-[#FDE68A] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
               ✏️ Edit feedback
             </button>
           </>
         ) : (
           <>
-            <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">
+            <h3 className="mb-4 text-lg font-bold text-pt-text-primary">
               {editing ? "Edit your feedback" : "Submit your feedback"}
             </h3>
             <FeedbackForm
@@ -300,7 +300,7 @@ export default function FeedbackStage({
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="mt-3 border-2 border-[#1E3A5F] bg-[#FEF3C7] px-3 py-1 text-sm font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#FDE68A] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                className="mt-3 border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-1 text-sm font-bold text-pt-text-primary shadow-pixel-sm hover:bg-[#FDE68A] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
               >
                 Cancel
               </button>
@@ -311,8 +311,8 @@ export default function FeedbackStage({
 
       {/* ── Non-host waiting message ── */}
       {!isHost && hasSubmitted && !editing && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">
             ⏳ Waiting for the host to analyse feedback…
           </p>
         </div>
@@ -328,7 +328,7 @@ export default function FeedbackStage({
                 type="button"
                 onClick={() => void handleAnalyse()}
                 disabled={analysing}
-                className="self-start border-4 border-[#1E3A5F] bg-[#38BDF8] px-5 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#7dd3fc] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-5 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#7dd3fc] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {analysing ? "🔍 Analysing group feedback…" : "🔍 Analyse feedback"}
               </button>
@@ -378,7 +378,7 @@ function HostDashboard({
 }: HostDashboardProps) {
   const scoreColorClass =
     averageScore === null
-      ? "text-[#1E3A5F]"
+      ? "text-pt-text-primary"
       : averageScore >= 7
         ? "text-[#16a34a]"
         : averageScore >= 5
@@ -396,18 +396,18 @@ function HostDashboard({
   }
 
   return (
-    <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-      <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">📊 Host dashboard</h3>
+    <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+      <h3 className="mb-4 text-lg font-bold text-pt-text-primary">📊 Host dashboard</h3>
 
       {/* Submission progress */}
       <div className="mb-4">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-sm font-bold text-[#1E3A5F]">Submissions</span>
-          <span className="text-sm font-black text-[#1E3A5F]">
+          <span className="text-sm font-bold text-pt-text-primary">Submissions</span>
+          <span className="text-sm font-black text-pt-text-primary">
             {submittedCount} / {totalMembers} members
           </span>
         </div>
-        <div className="relative h-4 border-2 border-[#1E3A5F]">
+        <div className="relative h-4 border-2 border-pt-text-primary border-opacity-20">
           <div
             className="h-full bg-[#4ADE80] transition-all"
             style={{ width: `${progressPct}%` }}
@@ -418,7 +418,7 @@ function HostDashboard({
       {/* Average score */}
       {averageScore !== null && (
         <div className="mb-4 flex items-center gap-3">
-          <span className="text-sm font-bold text-[#1E3A5F]">Average score:</span>
+          <span className="text-sm font-bold text-pt-text-primary">Average score:</span>
           <span className={`text-2xl font-black tabular-nums ${scoreColorClass}`}>
             {averageScore.toFixed(1)} / 10
           </span>
@@ -429,7 +429,7 @@ function HostDashboard({
       {averageScore !== null && averageScore < 6 && (
         <div
           role="alert"
-          className="mb-3 border-2 border-[#FB923C] bg-amber-50 px-4 py-3 shadow-[2px_2px_0px_#1E3A5F]"
+          className="mb-3 border-2 border-[#FB923C] bg-amber-50 px-4 py-3 shadow-pixel-sm"
         >
           <p className="text-sm font-bold text-[#92400e]">
             ⚠️ Low satisfaction — consider triggering a revision
@@ -445,7 +445,7 @@ function HostDashboard({
           <div
             key={m.id}
             role="alert"
-            className="mb-2 border-2 border-red-500 bg-red-50 px-4 py-2 shadow-[2px_2px_0px_#1E3A5F]"
+            className="mb-2 border-2 border-red-500 bg-red-50 px-4 py-2 shadow-pixel-sm"
           >
             <p className="text-sm font-bold text-red-700">
               ⚠️ {m.displayName} rated this below 4
@@ -483,14 +483,14 @@ function AnalysisPanel({
   return (
     <div className="flex flex-col gap-4">
       {/* Analysis summary */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <h3 className="mb-2 text-lg font-bold text-[#1E3A5F]">🤖 AI Analysis</h3>
-        <p className="text-sm text-[#1E3A5F]">{analysisText}</p>
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <h3 className="mb-2 text-lg font-bold text-pt-text-primary">🤖 AI Analysis</h3>
+        <p className="text-sm text-pt-text-primary">{analysisText}</p>
       </div>
 
       {!requiresNegotiation ? (
         /* ── Happy path ── */
-        <div className="border-4 border-[#4ADE80] bg-[#f0fdf4] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-[#4ADE80] bg-pt-card-hover p-6 shadow-pixel-card">
           <p className="mb-4 font-bold text-[#166534]">
             🎉 The group is satisfied!
           </p>
@@ -499,7 +499,7 @@ function AnalysisPanel({
               type="button"
               onClick={onAdvanceFinal}
               disabled={advancing}
-              className="border-4 border-[#1E3A5F] bg-[#4ADE80] px-5 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#86efac] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-4 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-5 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#86efac] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               {advancing ? "Advancing…" : "✅ Advance to Final"}
             </button>
@@ -507,7 +507,7 @@ function AnalysisPanel({
               type="button"
               onClick={onAdvanceNegotiation}
               disabled={advancing}
-              className="border-4 border-[#1E3A5F] bg-[#FB923C] px-5 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#fdba74] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-5 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fdba74] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               {advancing ? "Advancing…" : "🔄 Trigger revision anyway"}
             </button>
@@ -521,7 +521,7 @@ function AnalysisPanel({
         <div className="flex flex-col gap-4">
           <div
             role="alert"
-            className="border-4 border-[#FB923C] bg-amber-50 p-4 shadow-[4px_4px_0px_#1E3A5F]"
+            className="border-4 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card"
           >
             <p className="font-bold text-[#92400e]">
               ⚠️ Conflicts detected — negotiation needed
@@ -543,7 +543,7 @@ function AnalysisPanel({
               type="button"
               onClick={onAdvanceNegotiation}
               disabled={advancing}
-              className="self-start border-4 border-[#1E3A5F] bg-[#FB923C] px-5 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#fdba74] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-5 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fdba74] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               {advancing ? "Advancing…" : "🤝 Go to Negotiation"}
             </button>
@@ -567,19 +567,19 @@ function ConflictPreviewCard({
   index: number;
 }) {
   return (
-    <div className="border-2 border-[#1E3A5F] bg-white p-4 shadow-[2px_2px_0px_#1E3A5F]">
-      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+    <div className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-4 shadow-pixel-sm">
+      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
         Conflict {index}
       </p>
-      <p className="mb-3 font-semibold text-[#1E3A5F]">{conflict.conflictSummary}</p>
+      <p className="mb-3 font-semibold text-pt-text-primary">{conflict.conflictSummary}</p>
       <div className="flex flex-col gap-2">
         {conflict.proposedOptions.map((opt) => (
           <div
             key={opt.id}
-            className="border border-[#1E3A5F] bg-[#FEF3C7] px-3 py-2"
+            className="border border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-3 py-2"
           >
-            <p className="text-sm font-bold text-[#1E3A5F]">{opt.description}</p>
-            <p className="mt-1 text-xs text-[#1E3A5F] opacity-70">{opt.tradeoffs}</p>
+            <p className="text-sm font-bold text-pt-text-primary">{opt.description}</p>
+            <p className="mt-1 text-xs text-pt-text-primary opacity-70">{opt.tradeoffs}</p>
           </div>
         ))}
       </div>

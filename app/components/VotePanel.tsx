@@ -99,17 +99,17 @@ export default function VotePanel({
   return (
     <div className="flex flex-col gap-4">
       {typeof totalVoters === "number" && (
-        <p className="text-sm font-semibold text-[#1E3A5F]">
+        <p className="text-sm font-semibold text-pt-text-primary">
           {typeof totalVotes === "number" ? (
             <>
-              <span className="font-bold text-[#1E3A5F]">
+              <span className="font-bold text-pt-text-primary">
                 {totalVotes}/{totalVoters}
               </span>{" "}
               voted
             </>
           ) : (
             <>
-              <span className="font-bold text-[#1E3A5F]">{totalVoters}</span>{" "}
+              <span className="font-bold text-pt-text-primary">{totalVoters}</span>{" "}
               {totalVoters === 1 ? "voter" : "voters"} in this room
             </>
           )}
@@ -130,20 +130,20 @@ export default function VotePanel({
             ? "border-[#4ADE80]"
             : isSelected
               ? "border-[#38BDF8]"
-              : "border-[#1E3A5F]";
+              : "border-pt-text-primary border-opacity-20";
           const bgClass = isSelected
             ? "bg-[#e0f2fe]"
             : isWinner
-              ? "bg-[#f0fdf4]"
-              : "bg-[#FEF3C7]";
+              ? "bg-pt-card-hover"
+              : "bg-[var(--pt-bg-card)]";
           const shadowClass = isWinner
             ? "shadow-[4px_4px_0px_#4ADE80]"
             : isSelected
               ? "shadow-[4px_4px_0px_#38BDF8]"
-              : "shadow-[4px_4px_0px_#1E3A5F]";
+              : "shadow-pixel-card";
           const hoverClass = interactionBlocked
             ? ""
-            : "hover:bg-[#fde68a] hover:shadow-[3px_3px_0px_#1E3A5F]";
+            : "hover:bg-[#fde68a] hover:shadow-[3px_3px_0px_var(--pt-bg-card)]";
           const cursorClass = interactionBlocked ? "cursor-default" : "cursor-pointer";
 
           return (
@@ -161,17 +161,17 @@ export default function VotePanel({
                 className={`flex w-full min-w-0 flex-col gap-2 border-4 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[#38BDF8] disabled:cursor-default ${borderClass} ${bgClass} ${shadowClass} ${hoverClass} ${cursorClass}`}
               >
                 <div className="flex min-w-0 items-start justify-between gap-2">
-                  <span className="min-w-0 flex-1 break-words text-base font-bold text-[#1E3A5F]">
+                  <span className="min-w-0 flex-1 break-words text-base font-bold text-pt-text-primary">
                     {option.label}
                   </span>
                   <span className="flex flex-none flex-wrap items-center gap-1">
                     {isSelected && (
-                      <span className="border-2 border-[#1E3A5F] bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+                      <span className="border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-sm">
                         Your vote
                       </span>
                     )}
                     {isWinner && (
-                      <span className="border-2 border-[#1E3A5F] bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F]">
+                      <span className="border-2 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-sm">
                         {hasMultipleWinners ? "Tied" : "Winner"}
                       </span>
                     )}
@@ -179,13 +179,13 @@ export default function VotePanel({
                 </div>
 
                 {option.description && (
-                  <div className="min-w-0 break-words text-sm font-semibold text-[#1E3A5F]">
+                  <div className="min-w-0 break-words text-sm font-semibold text-pt-text-primary">
                     {option.description}
                   </div>
                 )}
 
                 {tally && (
-                  <p className="text-xs font-bold text-[#1E3A5F]">
+                  <p className="text-xs font-bold text-pt-text-primary">
                     {optionTally} {optionTally === 1 ? "vote" : "votes"}
                   </p>
                 )}
@@ -196,12 +196,12 @@ export default function VotePanel({
       </ul>
 
       {hasVoted && !locked && (
-        <p className="text-xs font-semibold text-[#1E3A5F]">
+        <p className="text-xs font-semibold text-pt-text-primary">
           Tap another option to change your vote before the round closes.
         </p>
       )}
       {hasVoted && locked && (
-        <p className="text-xs font-semibold text-[#1E3A5F]">
+        <p className="text-xs font-semibold text-pt-text-primary">
           Vote locked — the round is closed.
         </p>
       )}

@@ -79,7 +79,7 @@ export default function DestinationVoteStage({
       </span>
     ),
     description: (
-      <p className="text-sm text-gray-700">
+      <p className="text-sm text-pt-text-primary">
         {truncate(s.recommendationReason, 220)}
       </p>
     ),
@@ -142,7 +142,7 @@ export default function DestinationVoteStage({
   // ── Render ───────────────────────────────────────────────────────────────
   if (suggestions === null) {
     return (
-      <section className="mx-auto max-w-3xl rounded-lg border border-gray-200 p-6 text-sm text-gray-500">
+      <section className="mx-auto max-w-3xl rounded-lg border border-pt-text-primary border-opacity-10 p-6 text-sm text-gray-500">
         Loading destinations…
       </section>
     );
@@ -150,9 +150,9 @@ export default function DestinationVoteStage({
 
   if (suggestions.length === 0) {
     return (
-      <section className="mx-auto max-w-3xl rounded-lg border border-gray-200 p-6">
+      <section className="mx-auto max-w-3xl rounded-lg border border-pt-text-primary border-opacity-10 p-6">
         <h2 className="text-2xl font-bold">Vote for a destination</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-pt-text-muted">
           {loadError ?? "No destination suggestions are available yet."} Ask
           the host to regenerate destinations in the previous stage.
         </p>

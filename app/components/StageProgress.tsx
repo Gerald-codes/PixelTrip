@@ -13,7 +13,7 @@ interface StageProgressProps {
  * Visual states:
  *   Completed  (index < currentIndex) — grass-green  #4ADE80, filled, 2px border
  *   Active     (index === currentIndex) — sunset-orange #FB923C, filled, pulse animation
- *   Pending    (index > currentIndex)  — sand-cream   #FEF3C7 bg, 2px deep-navy border
+ *   Pending    (index > currentIndex)  — sand-cream   var(--pt-bg-card) bg, 2px deep-navy border
  *
  * The pulse animation respects prefers-reduced-motion.
  */
@@ -48,8 +48,8 @@ export default function StageProgress({ currentStage, stages }: StageProgressPro
           const isActive    = index === currentIndex;
           // isPending: index > currentIndex
 
-          let bgColor     = "#FEF3C7"; // pending — sand-cream
-          let borderColor = "#1E3A5F"; // pending — deep-navy
+          let bgColor     = "var(--pt-bg-card)"; // pending — sand-cream
+          let borderColor = "var(--pt-bg-card)"; // pending — deep-navy
           if (isCompleted) {
             bgColor     = "#4ADE80"; // grass-green
             borderColor = "#4ADE80";

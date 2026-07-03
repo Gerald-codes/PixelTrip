@@ -18,7 +18,7 @@
  * Multi-selection: toggling adds/removes a vibe; all others unaffected.
  *
  * Selected card:  sky-blue #38BDF8 background + 2px sunset-orange #FB923C border + ✓ checkmark
- * Unselected card: sand-cream #FEF3C7 background + 2px deep-navy #1E3A5F border
+ * Unselected card: sand-cream var(--pt-bg-card) background + 2px deep-navy var(--pt-bg-card) border
  * No border-radius (8-bit pixel style).
  *
  * Disabled: 50% opacity + cursor-not-allowed + clicks blocked.
@@ -49,15 +49,15 @@ function ToriiGateIcon() {
       {/* Right pillar */}
       <rect x="23" y="10" width="4" height="20" fill="#FB923C" />
       {/* Top crossbeam (wide, curves up at ends) */}
-      <rect x="2" y="6" width="28" height="4" fill="#1E3A5F" />
+      <rect x="2" y="6" width="28" height="4" fill="var(--pt-bg-card)" />
       {/* Lower crossbeam */}
-      <rect x="5" y="13" width="22" height="3" fill="#1E3A5F" />
+      <rect x="5" y="13" width="22" height="3" fill="var(--pt-bg-card)" />
       {/* Top cap ends */}
-      <rect x="0" y="4" width="6" height="3" fill="#1E3A5F" />
-      <rect x="26" y="4" width="6" height="3" fill="#1E3A5F" />
+      <rect x="0" y="4" width="6" height="3" fill="var(--pt-bg-card)" />
+      <rect x="26" y="4" width="6" height="3" fill="var(--pt-bg-card)" />
       {/* Pillar feet */}
-      <rect x="4" y="28" width="6" height="3" fill="#1E3A5F" />
-      <rect x="22" y="28" width="6" height="3" fill="#1E3A5F" />
+      <rect x="4" y="28" width="6" height="3" fill="var(--pt-bg-card)" />
+      <rect x="22" y="28" width="6" height="3" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -67,25 +67,25 @@ function EiffelTowerIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Tip */}
-      <rect x="15" y="1" width="2" height="4" fill="#1E3A5F" />
+      <rect x="15" y="1" width="2" height="4" fill="var(--pt-bg-card)" />
       {/* Upper section */}
-      <rect x="14" y="5" width="4" height="5" fill="#1E3A5F" />
+      <rect x="14" y="5" width="4" height="5" fill="var(--pt-bg-card)" />
       {/* Upper spread */}
-      <rect x="12" y="10" width="8" height="3" fill="#1E3A5F" />
+      <rect x="12" y="10" width="8" height="3" fill="var(--pt-bg-card)" />
       {/* Mid section — narrowing body */}
-      <rect x="11" y="13" width="2" height="7" fill="#1E3A5F" />
-      <rect x="19" y="13" width="2" height="7" fill="#1E3A5F" />
+      <rect x="11" y="13" width="2" height="7" fill="var(--pt-bg-card)" />
+      <rect x="19" y="13" width="2" height="7" fill="var(--pt-bg-card)" />
       {/* Mid cross brace */}
-      <rect x="11" y="17" width="10" height="2" fill="#1E3A5F" />
+      <rect x="11" y="17" width="10" height="2" fill="var(--pt-bg-card)" />
       {/* Lower spread */}
-      <rect x="8" y="20" width="16" height="3" fill="#1E3A5F" />
+      <rect x="8" y="20" width="16" height="3" fill="var(--pt-bg-card)" />
       {/* Legs */}
-      <rect x="7" y="23" width="4" height="7" fill="#1E3A5F" />
-      <rect x="21" y="23" width="4" height="7" fill="#1E3A5F" />
+      <rect x="7" y="23" width="4" height="7" fill="var(--pt-bg-card)" />
+      <rect x="21" y="23" width="4" height="7" fill="var(--pt-bg-card)" />
       {/* Arch between legs */}
       <rect x="11" y="25" width="10" height="3" fill="#38BDF8" />
-      <rect x="11" y="23" width="2" height="5" fill="#1E3A5F" />
-      <rect x="19" y="23" width="2" height="5" fill="#1E3A5F" />
+      <rect x="11" y="23" width="2" height="5" fill="var(--pt-bg-card)" />
+      <rect x="19" y="23" width="2" height="5" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -124,19 +124,19 @@ function MountainIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Snow cap */}
-      <rect x="14" y="2" width="4" height="3" fill="#FEF3C7" />
-      <rect x="12" y="5" width="8" height="3" fill="#FEF3C7" />
+      <rect x="14" y="2" width="4" height="3" fill="var(--pt-bg-card)" />
+      <rect x="12" y="5" width="8" height="3" fill="var(--pt-bg-card)" />
       {/* Main mountain */}
-      <rect x="10" y="8" width="12" height="3" fill="#1E3A5F" />
-      <rect x="8" y="11" width="16" height="3" fill="#1E3A5F" />
-      <rect x="6" y="14" width="20" height="3" fill="#1E3A5F" />
-      <rect x="4" y="17" width="24" height="3" fill="#1E3A5F" />
-      <rect x="2" y="20" width="28" height="3" fill="#1E3A5F" />
+      <rect x="10" y="8" width="12" height="3" fill="var(--pt-bg-card)" />
+      <rect x="8" y="11" width="16" height="3" fill="var(--pt-bg-card)" />
+      <rect x="6" y="14" width="20" height="3" fill="var(--pt-bg-card)" />
+      <rect x="4" y="17" width="24" height="3" fill="var(--pt-bg-card)" />
+      <rect x="2" y="20" width="28" height="3" fill="var(--pt-bg-card)" />
       {/* Base ground */}
       <rect x="0" y="23" width="32" height="4" fill="#4ADE80" />
       {/* Small mountain (background) */}
-      <rect x="18" y="16" width="8" height="2" fill="#A855F7" opacity="0.6" />
-      <rect x="20" y="14" width="4" height="2" fill="#A855F7" opacity="0.6" />
+      <rect x="18" y="16" width="8" height="2" fill="var(--pt-agent-atlas)" opacity="0.6" />
+      <rect x="20" y="14" width="4" height="2" fill="var(--pt-agent-atlas)" opacity="0.6" />
     </svg>
   );
 }
@@ -149,22 +149,22 @@ function RamenBowlIcon() {
       <rect x="10" y="2" width="2" height="12" fill="#FB923C" transform="rotate(-10 11 8)" />
       <rect x="20" y="2" width="2" height="12" fill="#FB923C" transform="rotate(10 21 8)" />
       {/* Bowl rim */}
-      <rect x="4" y="12" width="24" height="3" fill="#1E3A5F" />
+      <rect x="4" y="12" width="24" height="3" fill="var(--pt-bg-card)" />
       {/* Bowl body */}
-      <rect x="5" y="15" width="22" height="10" fill="#FEF3C7" />
+      <rect x="5" y="15" width="22" height="10" fill="var(--pt-bg-card)" />
       {/* Soup surface */}
       <rect x="5" y="15" width="22" height="3" fill="#FB923C" opacity="0.6" />
       {/* Noodles wave */}
-      <rect x="7" y="17" width="4" height="2" fill="#FEF3C7" />
-      <rect x="13" y="16" width="4" height="2" fill="#FEF3C7" />
-      <rect x="19" y="17" width="4" height="2" fill="#FEF3C7" />
+      <rect x="7" y="17" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="13" y="16" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="19" y="17" width="4" height="2" fill="var(--pt-bg-card)" />
       {/* Toppings */}
       <rect x="8" y="19" width="4" height="3" fill="#4ADE80" />
       <rect x="14" y="20" width="3" height="3" fill="#FB923C" />
-      <rect x="19" y="19" width="4" height="3" fill="#A855F7" />
+      <rect x="19" y="19" width="4" height="3" fill="var(--pt-agent-atlas)" />
       {/* Bowl bottom curve */}
-      <rect x="7" y="25" width="18" height="3" fill="#1E3A5F" />
-      <rect x="11" y="27" width="10" height="2" fill="#1E3A5F" />
+      <rect x="7" y="25" width="18" height="3" fill="var(--pt-bg-card)" />
+      <rect x="11" y="27" width="10" height="2" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -174,27 +174,27 @@ function TempleIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Roof tier 1 (top) */}
-      <rect x="13" y="2" width="6" height="3" fill="#A855F7" />
+      <rect x="13" y="2" width="6" height="3" fill="var(--pt-agent-atlas)" />
       {/* Roof tier 2 */}
-      <rect x="9" y="5" width="14" height="3" fill="#A855F7" />
+      <rect x="9" y="5" width="14" height="3" fill="var(--pt-agent-atlas)" />
       {/* Roof eaves */}
-      <rect x="6" y="8" width="20" height="3" fill="#1E3A5F" />
+      <rect x="6" y="8" width="20" height="3" fill="var(--pt-bg-card)" />
       {/* Upper body */}
-      <rect x="10" y="11" width="12" height="5" fill="#FEF3C7" />
+      <rect x="10" y="11" width="12" height="5" fill="var(--pt-bg-card)" />
       {/* Upper windows */}
       <rect x="12" y="12" width="3" height="3" fill="#38BDF8" />
       <rect x="17" y="12" width="3" height="3" fill="#38BDF8" />
       {/* Lower roof */}
-      <rect x="5" y="16" width="22" height="3" fill="#1E3A5F" />
+      <rect x="5" y="16" width="22" height="3" fill="var(--pt-bg-card)" />
       {/* Lower body */}
-      <rect x="8" y="19" width="16" height="7" fill="#FEF3C7" />
+      <rect x="8" y="19" width="16" height="7" fill="var(--pt-bg-card)" />
       {/* Door */}
-      <rect x="13" y="21" width="6" height="5" fill="#1E3A5F" />
+      <rect x="13" y="21" width="6" height="5" fill="var(--pt-bg-card)" />
       <rect x="14" y="22" width="2" height="4" fill="#FB923C" />
       <rect x="17" y="22" width="2" height="4" fill="#FB923C" />
       {/* Steps */}
-      <rect x="4" y="26" width="24" height="2" fill="#1E3A5F" />
-      <rect x="2" y="28" width="28" height="2" fill="#1E3A5F" />
+      <rect x="4" y="26" width="24" height="2" fill="var(--pt-bg-card)" />
+      <rect x="2" y="28" width="28" height="2" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -204,29 +204,29 @@ function CompassIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Outer ring */}
-      <rect x="3" y="3" width="26" height="26" fill="none" stroke="#1E3A5F" strokeWidth="0" />
+      <rect x="3" y="3" width="26" height="26" fill="none" stroke="var(--pt-bg-card)" strokeWidth="0" />
       {/* Outer border segments (pixel circle approximation) */}
-      <rect x="11" y="2" width="10" height="3" fill="#1E3A5F" />
-      <rect x="11" y="27" width="10" height="3" fill="#1E3A5F" />
-      <rect x="2" y="11" width="3" height="10" fill="#1E3A5F" />
-      <rect x="27" y="11" width="3" height="10" fill="#1E3A5F" />
-      <rect x="5" y="5" width="4" height="4" fill="#1E3A5F" />
-      <rect x="23" y="5" width="4" height="4" fill="#1E3A5F" />
-      <rect x="5" y="23" width="4" height="4" fill="#1E3A5F" />
-      <rect x="23" y="23" width="4" height="4" fill="#1E3A5F" />
+      <rect x="11" y="2" width="10" height="3" fill="var(--pt-bg-card)" />
+      <rect x="11" y="27" width="10" height="3" fill="var(--pt-bg-card)" />
+      <rect x="2" y="11" width="3" height="10" fill="var(--pt-bg-card)" />
+      <rect x="27" y="11" width="3" height="10" fill="var(--pt-bg-card)" />
+      <rect x="5" y="5" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="23" y="5" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="5" y="23" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="23" y="23" width="4" height="4" fill="var(--pt-bg-card)" />
       {/* Inner dial */}
-      <rect x="5" y="5" width="22" height="22" fill="#FEF3C7" />
+      <rect x="5" y="5" width="22" height="22" fill="var(--pt-bg-card)" />
       {/* Cardinal markers */}
-      <rect x="15" y="5" width="2" height="4" fill="#1E3A5F" />
-      <rect x="15" y="23" width="2" height="4" fill="#1E3A5F" />
-      <rect x="5" y="15" width="4" height="2" fill="#1E3A5F" />
-      <rect x="23" y="15" width="4" height="2" fill="#1E3A5F" />
+      <rect x="15" y="5" width="2" height="4" fill="var(--pt-bg-card)" />
+      <rect x="15" y="23" width="2" height="4" fill="var(--pt-bg-card)" />
+      <rect x="5" y="15" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="23" y="15" width="4" height="2" fill="var(--pt-bg-card)" />
       {/* North arrow (red) */}
       <rect x="15" y="9" width="2" height="7" fill="#FB923C" />
       <rect x="14" y="7" width="4" height="3" fill="#FB923C" />
       {/* South arrow (navy) */}
-      <rect x="15" y="16" width="2" height="7" fill="#1E3A5F" />
-      <rect x="14" y="22" width="4" height="3" fill="#1E3A5F" />
+      <rect x="15" y="16" width="2" height="7" fill="var(--pt-bg-card)" />
+      <rect x="14" y="22" width="4" height="3" fill="var(--pt-bg-card)" />
       {/* Center dot */}
       <rect x="14" y="14" width="4" height="4" fill="#38BDF8" />
     </svg>
@@ -238,22 +238,22 @@ function ShoppingBagIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Handles */}
-      <rect x="10" y="5" width="2" height="8" fill="#1E3A5F" />
-      <rect x="20" y="5" width="2" height="8" fill="#1E3A5F" />
-      <rect x="10" y="5" width="12" height="2" fill="#1E3A5F" />
+      <rect x="10" y="5" width="2" height="8" fill="var(--pt-bg-card)" />
+      <rect x="20" y="5" width="2" height="8" fill="var(--pt-bg-card)" />
+      <rect x="10" y="5" width="12" height="2" fill="var(--pt-bg-card)" />
       {/* Bag body */}
-      <rect x="6" y="11" width="20" height="18" fill="#A855F7" />
+      <rect x="6" y="11" width="20" height="18" fill="var(--pt-agent-atlas)" />
       {/* Bag top band */}
-      <rect x="6" y="11" width="20" height="3" fill="#1E3A5F" />
+      <rect x="6" y="11" width="20" height="3" fill="var(--pt-bg-card)" />
       {/* Bag bottom */}
-      <rect x="6" y="27" width="20" height="2" fill="#1E3A5F" />
+      <rect x="6" y="27" width="20" height="2" fill="var(--pt-bg-card)" />
       {/* Side shadows */}
-      <rect x="6" y="11" width="2" height="18" fill="#1E3A5F" />
-      <rect x="24" y="11" width="2" height="18" fill="#1E3A5F" />
+      <rect x="6" y="11" width="2" height="18" fill="var(--pt-bg-card)" />
+      <rect x="24" y="11" width="2" height="18" fill="var(--pt-bg-card)" />
       {/* Logo / label on bag */}
-      <rect x="12" y="17" width="8" height="5" fill="#FEF3C7" />
-      <rect x="13" y="18" width="6" height="1" fill="#1E3A5F" />
-      <rect x="13" y="20" width="4" height="1" fill="#1E3A5F" />
+      <rect x="12" y="17" width="8" height="5" fill="var(--pt-bg-card)" />
+      <rect x="13" y="18" width="6" height="1" fill="var(--pt-bg-card)" />
+      <rect x="13" y="20" width="4" height="1" fill="var(--pt-bg-card)" />
       {/* Tissue paper peeking out top */}
       <rect x="9" y="9" width="4" height="3" fill="#38BDF8" />
       <rect x="19" y="9" width="4" height="3" fill="#FB923C" />
@@ -268,10 +268,10 @@ function DiamondIcon() {
       {/* Diamond top (facets) */}
       <rect x="12" y="4" width="8" height="2" fill="#38BDF8" />
       <rect x="9" y="6" width="14" height="2" fill="#38BDF8" />
-      <rect x="6" y="8" width="20" height="2" fill="#1E3A5F" />
+      <rect x="6" y="8" width="20" height="2" fill="var(--pt-bg-card)" />
       {/* Left upper facet */}
-      <rect x="4" y="10" width="8" height="2" fill="#A855F7" />
-      <rect x="3" y="8" width="4" height="4" fill="#A855F7" />
+      <rect x="4" y="10" width="8" height="2" fill="var(--pt-agent-atlas)" />
+      <rect x="3" y="8" width="4" height="4" fill="var(--pt-agent-atlas)" />
       {/* Right upper facet */}
       <rect x="20" y="10" width="8" height="2" fill="#4ADE80" />
       <rect x="25" y="8" width="4" height="4" fill="#4ADE80" />
@@ -279,13 +279,13 @@ function DiamondIcon() {
       <rect x="3" y="10" width="26" height="2" fill="#38BDF8" />
       {/* Lower body — converging to point */}
       <rect x="5" y="12" width="22" height="3" fill="#38BDF8" />
-      <rect x="7" y="15" width="18" height="3" fill="#A855F7" opacity="0.8" />
+      <rect x="7" y="15" width="18" height="3" fill="var(--pt-agent-atlas)" opacity="0.8" />
       <rect x="9" y="18" width="14" height="3" fill="#38BDF8" opacity="0.9" />
-      <rect x="11" y="21" width="10" height="3" fill="#A855F7" />
+      <rect x="11" y="21" width="10" height="3" fill="var(--pt-agent-atlas)" />
       <rect x="13" y="24" width="6" height="3" fill="#38BDF8" />
-      <rect x="15" y="27" width="2" height="3" fill="#A855F7" />
+      <rect x="15" y="27" width="2" height="3" fill="var(--pt-agent-atlas)" />
       {/* Shine */}
-      <rect x="8" y="12" width="3" height="5" fill="#FEF3C7" opacity="0.6" />
+      <rect x="8" y="12" width="3" height="5" fill="var(--pt-bg-card)" opacity="0.6" />
     </svg>
   );
 }
@@ -295,14 +295,14 @@ function GlobeIcon() {
   return (
     <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       {/* Outer circle (pixel approximation) */}
-      <rect x="11" y="2" width="10" height="2" fill="#1E3A5F" />
-      <rect x="11" y="28" width="10" height="2" fill="#1E3A5F" />
-      <rect x="2" y="11" width="2" height="10" fill="#1E3A5F" />
-      <rect x="28" y="11" width="2" height="10" fill="#1E3A5F" />
-      <rect x="5" y="4" width="4" height="4" fill="#1E3A5F" />
-      <rect x="23" y="4" width="4" height="4" fill="#1E3A5F" />
-      <rect x="5" y="24" width="4" height="4" fill="#1E3A5F" />
-      <rect x="23" y="24" width="4" height="4" fill="#1E3A5F" />
+      <rect x="11" y="2" width="10" height="2" fill="var(--pt-bg-card)" />
+      <rect x="11" y="28" width="10" height="2" fill="var(--pt-bg-card)" />
+      <rect x="2" y="11" width="2" height="10" fill="var(--pt-bg-card)" />
+      <rect x="28" y="11" width="2" height="10" fill="var(--pt-bg-card)" />
+      <rect x="5" y="4" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="23" y="4" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="5" y="24" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="23" y="24" width="4" height="4" fill="var(--pt-bg-card)" />
       {/* Globe body fill */}
       <rect x="4" y="4" width="24" height="24" fill="#38BDF8" />
       {/* Ocean */}
@@ -314,14 +314,14 @@ function GlobeIcon() {
       <rect x="18" y="14" width="6" height="5" fill="#4ADE80" />
       <rect x="7" y="20" width="4" height="4" fill="#4ADE80" />
       {/* Latitude lines */}
-      <rect x="4" y="16" width="24" height="1" fill="#1E3A5F" opacity="0.3" />
+      <rect x="4" y="16" width="24" height="1" fill="var(--pt-bg-card)" opacity="0.3" />
       {/* Longitude line */}
-      <rect x="16" y="4" width="1" height="24" fill="#1E3A5F" opacity="0.3" />
+      <rect x="16" y="4" width="1" height="24" fill="var(--pt-bg-card)" opacity="0.3" />
       {/* Outer border overlay */}
-      <rect x="4" y="4" width="24" height="2" fill="#1E3A5F" opacity="0.4" />
-      <rect x="4" y="26" width="24" height="2" fill="#1E3A5F" opacity="0.4" />
-      <rect x="4" y="4" width="2" height="24" fill="#1E3A5F" opacity="0.4" />
-      <rect x="26" y="4" width="2" height="24" fill="#1E3A5F" opacity="0.4" />
+      <rect x="4" y="4" width="24" height="2" fill="var(--pt-bg-card)" opacity="0.4" />
+      <rect x="4" y="26" width="24" height="2" fill="var(--pt-bg-card)" opacity="0.4" />
+      <rect x="4" y="4" width="2" height="24" fill="var(--pt-bg-card)" opacity="0.4" />
+      <rect x="26" y="4" width="2" height="24" fill="var(--pt-bg-card)" opacity="0.4" />
     </svg>
   );
 }
@@ -455,11 +455,11 @@ export default function TravelVibeSelector({
               disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-90",
             ].join(" ")}
             style={{
-              border: isSelected ? "2px solid #FB923C" : "2px solid #1E3A5F",
-              backgroundColor: isSelected ? "#38BDF8" : "#FEF3C7",
+              border: isSelected ? "2px solid #FB923C" : "2px solid var(--pt-border, #335F91)",
+              backgroundColor: isSelected ? "rgba(56, 189, 248, 0.15)" : "var(--pt-bg-card)",
               boxShadow: isSelected
-                ? "3px 3px 0px #1E3A5F"
-                : "2px 2px 0px #1E3A5F",
+                ? "3px 3px 0px #FB923C"
+                : "none",
               position: "relative",
             }}
           >
@@ -474,7 +474,7 @@ export default function TravelVibeSelector({
                   fontFamily: "monospace",
                   fontWeight: 900,
                   fontSize: "14px",
-                  color: "#1E3A5F",
+                  color: "var(--pt-text-primary, #E8ECF1)",
                   lineHeight: 1,
                 }}
               >
@@ -493,7 +493,7 @@ export default function TravelVibeSelector({
             {/* Human-readable label — vibe: prefix is NEVER shown */}
             <span
               className="font-bold text-sm text-center leading-tight"
-              style={{ color: "#1E3A5F", fontFamily: "monospace" }}
+              style={{ color: "var(--pt-text-primary, #E8ECF1)", fontFamily: "monospace" }}
             >
               {label}
             </span>
@@ -501,7 +501,7 @@ export default function TravelVibeSelector({
             {/* Tagline */}
             <span
               className="text-xs text-center leading-tight"
-              style={{ color: "#1E3A5F", opacity: isSelected ? 0.8 : 0.65 }}
+              style={{ color: "var(--pt-text-primary, #E8ECF1)", opacity: isSelected ? 0.8 : 0.65 }}
             >
               {tagline}
             </span>

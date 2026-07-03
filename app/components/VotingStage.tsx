@@ -257,21 +257,21 @@ export default function VotingStage({
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">{title}</h2>
-        {description && <p className="mt-2 text-[#1E3A5F]">{description}</p>}
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">{title}</h2>
+        {description && <p className="mt-2 text-pt-text-primary">{description}</p>}
       </div>
 
       {loadError && !results && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
           {loadError}
         </div>
       )}
 
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
         <VotePanel
           options={options}
           selectedOption={selectedOption}
@@ -316,12 +316,12 @@ export default function VotingStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || (!hasClearWinner && !isTied)}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : advanceLabel}
           </button>
           {!hasClearWinner && !isTied && (
-            <p className="text-xs font-semibold text-[#1E3A5F]">
+            <p className="text-xs font-semibold text-pt-text-primary">
               Wait for everyone to vote before advancing.
             </p>
           )}
@@ -332,7 +332,7 @@ export default function VotingStage({
       )}
 
       {!isHost && (
-        <p className="text-sm font-semibold text-[#1E3A5F]">
+        <p className="text-sm font-semibold text-pt-text-primary">
           Waiting for the host to advance to the next stage…
         </p>
       )}

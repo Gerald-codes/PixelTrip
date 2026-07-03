@@ -58,10 +58,10 @@ export default function CustomDestinationInput({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
-                backgroundColor: "#FEF3C7",       // sand-cream
-                border: "2px solid #1E3A5F",       // deep-navy
+                backgroundColor: "var(--pt-bg-card, #162032)",       // sand-cream
+                border: "1px solid rgba(255,255,255,0.12)",       // deep-navy
                 borderRadius: 0,                   // 8-bit: no radius
-                color: "#1E3A5F",                  // deep-navy text
+                color: "var(--pt-text-primary, #E8ECF1)",                  // deep-navy text
                 padding: "4px 8px",
                 fontFamily: "monospace",
                 fontWeight: 600,
@@ -104,10 +104,10 @@ export default function CustomDestinationInput({
           aria-label="Custom destination input"
           style={{
             flex: 1,
-            border: "2px solid #1E3A5F",         // deep-navy border
+            border: "1px solid rgba(255,255,255,0.12)",         // deep-navy border
             borderRadius: 0,                      // 8-bit: no radius
-            backgroundColor: "#FEF3C7",           // sand-cream background
-            color: "#1E3A5F",                     // deep-navy text
+            backgroundColor: "var(--pt-bg-card, #162032)",           // sand-cream background
+            color: "var(--pt-text-primary, #E8ECF1)",                     // deep-navy text
             padding: "6px 10px",
             fontFamily: "monospace",
             fontSize: "0.875rem",
@@ -125,9 +125,9 @@ export default function CustomDestinationInput({
           aria-disabled={isAddDisabled}
           style={{
             backgroundColor: "#38BDF8",           // sky-blue
-            border: "2px solid #1E3A5F",          // deep-navy border
+            border: "1px solid rgba(255,255,255,0.12)",          // deep-navy border
             borderRadius: 0,                      // 8-bit: no radius
-            color: "#1E3A5F",                     // deep-navy text
+            color: "var(--pt-text-primary, #E8ECF1)",                     // deep-navy text
             padding: "6px 14px",
             fontFamily: "monospace",
             fontWeight: 700,
@@ -135,7 +135,7 @@ export default function CustomDestinationInput({
             cursor: isAddDisabled ? "not-allowed" : "pointer",
             opacity: isAddDisabled ? 0.5 : 1,
             whiteSpace: "nowrap",
-            boxShadow: isAddDisabled ? "none" : "2px 2px 0px #1E3A5F",
+            boxShadow: isAddDisabled ? "none" : "2px 2px 0px var(--pt-bg-card)",
             transition: "opacity 0.1s",
           }}
         >

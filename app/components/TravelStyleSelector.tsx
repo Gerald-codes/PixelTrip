@@ -6,12 +6,12 @@
  * Palette:
  *   Sky blue     #38BDF8
  *   Sunset orange #FB923C  ← selected border + shadow
- *   Sand cream   #FEF3C7  ← unselected card background
+ *   Sand cream   var(--pt-bg-card)  ← unselected card background
  *   Grass green  #4ADE80
- *   Deep navy    #1E3A5F  ← unselected border + shadow text
- *   Neon purple  #A855F7
+ *   Deep navy    var(--pt-bg-card)  ← unselected border + shadow text
+ *   Neon purple  var(--pt-agent-atlas)
  *
- * Selected:   2px sunset-orange border + box-shadow 4px 4px 0px #1E3A5F
+ * Selected:   2px sunset-orange border + box-shadow 4px 4px 0px var(--pt-bg-card)
  * Unselected: 2px deep-navy border + sand-cream background
  * No border-radius (8-bit square aesthetic)
  * Disabled:   50% opacity, cursor-not-allowed, clicks blocked
@@ -78,17 +78,17 @@ function IconLeader() {
       aria-hidden="true"
     >
       {/* Hat brim */}
-      <rect x="2" y="15" width="28" height="4" fill="#1E3A5F" />
+      <rect x="2" y="15" width="28" height="4" fill="var(--pt-bg-card)" />
       {/* Hat crown */}
-      <rect x="8" y="5" width="16" height="11" fill="#1E3A5F" />
+      <rect x="8" y="5" width="16" height="11" fill="var(--pt-bg-card)" />
       {/* Crown notch */}
-      <rect x="8" y="5" width="4" height="4" fill="#FEF3C7" />
-      <rect x="20" y="5" width="4" height="4" fill="#FEF3C7" />
+      <rect x="8" y="5" width="4" height="4" fill="var(--pt-bg-card)" />
+      <rect x="20" y="5" width="4" height="4" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="8" y="13" width="16" height="3" fill="#FB923C" />
       {/* Centre badge / anchor */}
-      <rect x="14" y="7" width="4" height="6" fill="#FEF3C7" />
-      <rect x="12" y="11" width="8" height="2" fill="#FEF3C7" />
+      <rect x="14" y="7" width="4" height="6" fill="var(--pt-bg-card)" />
+      <rect x="12" y="11" width="8" height="2" fill="var(--pt-bg-card)" />
       {/* Star on badge */}
       <rect x="15" y="8" width="2" height="4" fill="#FB923C" />
       <rect x="14" y="9" width="4" height="2" fill="#FB923C" />
@@ -107,17 +107,17 @@ function IconPlanner() {
       aria-hidden="true"
     >
       {/* Clipboard body */}
-      <rect x="4" y="4" width="24" height="18" fill="#FEF3C7" />
-      <rect x="4" y="4" width="24" height="18" fill="none" stroke="#1E3A5F" strokeWidth="2" />
+      <rect x="4" y="4" width="24" height="18" fill="var(--pt-bg-card)" />
+      <rect x="4" y="4" width="24" height="18" fill="none" stroke="var(--pt-bg-card)" strokeWidth="2" />
       {/* Clip at top */}
-      <rect x="11" y="2" width="10" height="5" fill="#1E3A5F" />
+      <rect x="11" y="2" width="10" height="5" fill="var(--pt-bg-card)" />
       <rect x="13" y="1" width="6" height="3" fill="#38BDF8" />
       {/* Horizontal grid lines */}
-      <rect x="7" y="10" width="18" height="2" fill="#1E3A5F" />
-      <rect x="7" y="14" width="18" height="2" fill="#1E3A5F" />
-      <rect x="7" y="18" width="18" height="2" fill="#1E3A5F" />
+      <rect x="7" y="10" width="18" height="2" fill="var(--pt-bg-card)" />
+      <rect x="7" y="14" width="18" height="2" fill="var(--pt-bg-card)" />
+      <rect x="7" y="18" width="18" height="2" fill="var(--pt-bg-card)" />
       {/* Vertical grid line */}
-      <rect x="16" y="8" width="2" height="13" fill="#1E3A5F" />
+      <rect x="16" y="8" width="2" height="13" fill="var(--pt-bg-card)" />
       {/* Location pin top-left cell */}
       <rect x="10" y="7" width="3" height="3" fill="#FB923C" />
       {/* Tick in bottom-right cell */}
@@ -140,17 +140,17 @@ function IconFollower() {
       {/* Wide brim */}
       <rect x="2" y="14" width="28" height="4" fill="#FB923C" />
       {/* Hat dome */}
-      <rect x="8" y="6" width="16" height="9" fill="#FEF3C7" />
+      <rect x="8" y="6" width="16" height="9" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="8" y="12" width="16" height="3" fill="#4ADE80" />
       {/* Band detail */}
-      <rect x="10" y="13" width="2" height="1" fill="#1E3A5F" />
-      <rect x="14" y="13" width="2" height="1" fill="#1E3A5F" />
-      <rect x="18" y="13" width="2" height="1" fill="#1E3A5F" />
+      <rect x="10" y="13" width="2" height="1" fill="var(--pt-bg-card)" />
+      <rect x="14" y="13" width="2" height="1" fill="var(--pt-bg-card)" />
+      <rect x="18" y="13" width="2" height="1" fill="var(--pt-bg-card)" />
       {/* Small flower / daisy on brim */}
       <rect x="22" y="14" width="2" height="2" fill="#FB923C" />
-      <rect x="21" y="15" width="4" height="1" fill="#FEF3C7" />
-      <rect x="22" y="14" width="2" height="3" fill="#FEF3C7" />
+      <rect x="21" y="15" width="4" height="1" fill="var(--pt-bg-card)" />
+      <rect x="22" y="14" width="2" height="3" fill="var(--pt-bg-card)" />
       <rect x="22" y="15" width="2" height="1" fill="#FB923C" />
     </svg>
   );
@@ -167,24 +167,24 @@ function IconChill() {
       aria-hidden="true"
     >
       {/* Beanie body */}
-      <rect x="8" y="5" width="16" height="12" fill="#A855F7" />
+      <rect x="8" y="5" width="16" height="12" fill="var(--pt-agent-atlas)" />
       {/* Beanie rib lines */}
-      <rect x="8" y="9" width="16" height="2" fill="#1E3A5F" />
-      <rect x="8" y="13" width="16" height="2" fill="#1E3A5F" />
+      <rect x="8" y="9" width="16" height="2" fill="var(--pt-bg-card)" />
+      <rect x="8" y="13" width="16" height="2" fill="var(--pt-bg-card)" />
       {/* Beanie brim fold */}
-      <rect x="7" y="15" width="18" height="3" fill="#1E3A5F" />
+      <rect x="7" y="15" width="18" height="3" fill="var(--pt-bg-card)" />
       {/* Pom-pom */}
-      <rect x="12" y="2" width="8" height="4" fill="#FEF3C7" />
+      <rect x="12" y="2" width="8" height="4" fill="var(--pt-bg-card)" />
       {/* Headphone arc */}
-      <rect x="4" y="6" width="4" height="2" fill="#1E3A5F" />
-      <rect x="24" y="6" width="4" height="2" fill="#1E3A5F" />
-      <rect x="4" y="4" width="24" height="3" fill="#1E3A5F" />
+      <rect x="4" y="6" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="24" y="6" width="4" height="2" fill="var(--pt-bg-card)" />
+      <rect x="4" y="4" width="24" height="3" fill="var(--pt-bg-card)" />
       {/* Ear cups */}
       <rect x="2" y="7" width="5" height="6" fill="#38BDF8" />
       <rect x="25" y="7" width="5" height="6" fill="#38BDF8" />
       {/* Cup highlight */}
-      <rect x="3" y="8" width="2" height="3" fill="#FEF3C7" />
-      <rect x="26" y="8" width="2" height="3" fill="#FEF3C7" />
+      <rect x="3" y="8" width="2" height="3" fill="var(--pt-bg-card)" />
+      <rect x="26" y="8" width="2" height="3" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -208,15 +208,15 @@ function IconAdventurer() {
       {/* Crown body */}
       <rect x="7" y="5" width="18" height="10" fill="#FB923C" />
       {/* Crown indent / pinch crease */}
-      <rect x="10" y="5" width="12" height="2" fill="#FEF3C7" />
+      <rect x="10" y="5" width="12" height="2" fill="var(--pt-bg-card)" />
       {/* Hat band */}
       <rect x="7" y="12" width="18" height="3" fill="#4ADE80" />
       {/* Band buckle */}
-      <rect x="14" y="12" width="4" height="3" fill="#1E3A5F" />
+      <rect x="14" y="12" width="4" height="3" fill="var(--pt-bg-card)" />
       <rect x="15" y="13" width="2" height="1" fill="#FB923C" />
       {/* Chin strap lines */}
-      <rect x="7" y="17" width="2" height="4" fill="#FEF3C7" />
-      <rect x="23" y="17" width="2" height="4" fill="#FEF3C7" />
+      <rect x="7" y="17" width="2" height="4" fill="var(--pt-bg-card)" />
+      <rect x="23" y="17" width="2" height="4" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -285,13 +285,13 @@ export default function TravelStyleSelector({
               gap: "8px",
               padding: "12px 14px",
               /* 8-bit square aesthetic — no border-radius */
-              borderRadius: 0,
-              /* Border: sunset-orange when selected, deep-navy otherwise */
-              border: `2px solid ${isSelected ? "#FB923C" : "#1E3A5F"}`,
+              borderRadius: 8,
+              /* Border: sunset-orange when selected, default border otherwise */
+              border: `2px solid ${isSelected ? "#FB923C" : "var(--pt-border, #335F91)"}`,
               /* Shadow: only when selected */
-              boxShadow: isSelected ? "4px 4px 0px #1E3A5F" : "none",
-              /* Background: sky-blue tint when selected, sand-cream otherwise */
-              backgroundColor: isSelected ? "#FFF7ED" : "#FEF3C7",
+              boxShadow: isSelected ? "4px 4px 0px #FB923C" : "none",
+              /* Background: darker card when selected, base card otherwise */
+              backgroundColor: isSelected ? "var(--pt-bg-card-hover)" : "var(--pt-bg-card)",
               /* Cursor */
               cursor: disabled ? "not-allowed" : "pointer",
               /* Min width so cards don't shrink too small */
@@ -316,7 +316,7 @@ export default function TravelStyleSelector({
                 fontFamily: "'Courier New', Courier, monospace",
                 fontSize: "11px",
                 fontWeight: "700",
-                color: "#1E3A5F",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 textAlign: "center",
                 lineHeight: 1.2,
                 letterSpacing: "0.02em",
@@ -330,7 +330,7 @@ export default function TravelStyleSelector({
               style={{
                 fontFamily: "'Courier New', Courier, monospace",
                 fontSize: "9px",
-                color: "#1E3A5F",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 textAlign: "center",
                 lineHeight: 1.3,
                 opacity: 0.75,

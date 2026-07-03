@@ -9,7 +9,7 @@
  *
  * Palette:
  *   Sunset orange  #FB923C  — crown badge fill
- *   Deep navy      #1E3A5F  — crown outline, placeholder border
+ *   Deep navy      var(--pt-bg-card)  — crown outline, placeholder border
  *   Grass green    #4ADE80  — online indicator dot
  *   Grey           #9CA3AF  — placeholder silhouette
  */
@@ -30,7 +30,7 @@ interface MemberAvatarProps {
 
 /**
  * 16×12px pixel crown — 3-pronged shape in sunset-orange (#FB923C)
- * with a deep-navy (#1E3A5F) outline.
+ * with a deep-navy (var(--pt-bg-card)) outline.
  */
 function CrownBadge() {
   return (
@@ -43,17 +43,17 @@ function CrownBadge() {
       style={{ imageRendering: "pixelated" }}
     >
       {/* Base band */}
-      <rect x="1" y="7" width="14" height="4" fill="#FB923C" stroke="#1E3A5F" strokeWidth="1" />
+      <rect x="1" y="7" width="14" height="4" fill="#FB923C" stroke="var(--pt-bg-card)" strokeWidth="1" />
       {/* Left prong */}
-      <rect x="1" y="3" width="3" height="5" fill="#FB923C" stroke="#1E3A5F" strokeWidth="1" />
+      <rect x="1" y="3" width="3" height="5" fill="#FB923C" stroke="var(--pt-bg-card)" strokeWidth="1" />
       {/* Centre prong (tallest) */}
-      <rect x="6" y="1" width="4" height="7" fill="#FB923C" stroke="#1E3A5F" strokeWidth="1" />
+      <rect x="6" y="1" width="4" height="7" fill="#FB923C" stroke="var(--pt-bg-card)" strokeWidth="1" />
       {/* Right prong */}
-      <rect x="12" y="3" width="3" height="5" fill="#FB923C" stroke="#1E3A5F" strokeWidth="1" />
+      <rect x="12" y="3" width="3" height="5" fill="#FB923C" stroke="var(--pt-bg-card)" strokeWidth="1" />
       {/* Jewels on band */}
-      <rect x="3" y="8" width="2" height="2" fill="#FEF3C7" />
-      <rect x="7" y="8" width="2" height="2" fill="#FEF3C7" />
-      <rect x="11" y="8" width="2" height="2" fill="#FEF3C7" />
+      <rect x="3" y="8" width="2" height="2" fill="var(--pt-bg-card)" />
+      <rect x="7" y="8" width="2" height="2" fill="var(--pt-bg-card)" />
+      <rect x="11" y="8" width="2" height="2" fill="var(--pt-bg-card)" />
     </svg>
   );
 }
@@ -67,7 +67,7 @@ function CrownBadge() {
  * Layout:
  *   Head:  10×10 grey rect centred at top
  *   Body:  12×14 grey rect below head
- * Background: #9CA3AF, border: 2px solid #1E3A5F
+ * Background: #9CA3AF, border: 2px solid var(--pt-bg-card)
  */
 function PlaceholderSilhouette() {
   return (
@@ -76,7 +76,7 @@ function PlaceholderSilhouette() {
         width: 32,
         height: 48,
         backgroundColor: "#9CA3AF",
-        border: "2px solid #1E3A5F",
+        border: "2px solid rgba(232, 236, 241, 0.2)",
         position: "relative",
         imageRendering: "pixelated",
         flexShrink: 0,
@@ -175,7 +175,7 @@ export default function MemberAvatar({
           style={{
             fontFamily: "monospace",
             fontSize: 10,
-            color: "#1E3A5F",
+            color: "var(--pt-bg-card)",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",

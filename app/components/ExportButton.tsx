@@ -216,7 +216,7 @@ export default function ExportButton({
   if (state === "fallback") {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-bold text-[#1E3A5F]">
+        <p className="text-sm font-bold text-pt-text-primary">
           Clipboard not available — select all and copy manually:
         </p>
         <textarea
@@ -224,14 +224,14 @@ export default function ExportButton({
           readOnly
           defaultValue={getContent()}
           rows={12}
-          className="w-full border-4 border-[#1E3A5F] bg-[#FEF3C7] p-3 font-mono text-xs text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] resize-y focus:outline-none"
+          className="w-full border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-3 font-mono text-xs text-pt-text-primary shadow-pixel-card resize-y focus:outline-none"
           aria-label={`${format === "text" ? "Plain text" : "Markdown"} itinerary for manual copy`}
           onFocus={(e) => e.currentTarget.select()}
         />
         <button
           type="button"
           onClick={() => setState("idle")}
-          className="self-start border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           ✕ Close
         </button>
@@ -247,8 +247,8 @@ export default function ExportButton({
       disabled={isBusy || isCopied}
       aria-label={isCopied ? "Copied to clipboard" : label}
       className={[
-        "border-4 border-[#1E3A5F] px-4 py-2 font-bold text-[#1E3A5F]",
-        "shadow-[4px_4px_0px_#1E3A5F]",
+        "border-4 border-pt-text-primary border-opacity-20 px-4 py-2 font-bold text-pt-text-primary",
+        "shadow-pixel-card",
         "transition-colors",
         // Active / copied state → sky-blue; default → grass-green
         isCopied ? "bg-[#38BDF8]" : "bg-[#4ADE80]",

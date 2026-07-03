@@ -31,11 +31,11 @@ import type { BudgetEstimate } from "@/lib/types";
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
+const DEEP_NAVY = "var(--pt-bg-card)";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
-const SAND_CREAM = "#FEF3C7";
+const SAND_CREAM = "var(--pt-bg-card)";
 
 // ─── Prop types ───────────────────────────────────────────────────────────────
 

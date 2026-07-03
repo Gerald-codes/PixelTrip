@@ -15,10 +15,10 @@
  * Palette:
  *   Sky blue     #38BDF8
  *   Sunset orange #FB923C
- *   Sand cream   #FEF3C7
+ *   Sand cream   var(--pt-bg-card)
  *   Grass green  #4ADE80
- *   Deep navy    #1E3A5F
- *   Neon purple  #A855F7
+ *   Deep navy    var(--pt-bg-card)
+ *   Neon purple  var(--pt-agent-atlas)
  */
 
 import React, { useState } from "react";
@@ -70,7 +70,7 @@ const BUDGET_OPTIONS: BudgetOption[] = [
     value: "high",
     label: "High Budget",
     description: "Premium stays, fine dining, and business-class comfort",
-    colour: "#A855F7",
+    colour: "var(--pt-agent-atlas)",
   },
 ];
 
@@ -269,7 +269,7 @@ export default function CharacterCreator({
             position: "sticky",
             top: 0,
             zIndex: 20,
-            backgroundColor: "#1E3A5F",
+            backgroundColor: "var(--pt-bg-deep, #0F1B2E)",
             border: "2px solid #38BDF8",
             boxShadow: "4px 4px 0 #38BDF8",
             padding: "12px 16px",
@@ -280,7 +280,7 @@ export default function CharacterCreator({
         >
           <PixelAvatar avatarConfig={chatAvatarConfig} size="md" />
           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <p style={{ color: "#FEF3C7", fontSize: "11px", margin: 0, fontFamily: MONO }}>
+            <p style={{ color: "var(--pt-text-primary, #E8ECF1)", fontSize: "11px", margin: 0, fontFamily: MONO }}>
               Your travel character
             </p>
             {allSelected && personaSummary ? (
@@ -330,7 +330,7 @@ export default function CharacterCreator({
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <p
             style={{
-              color: "#FEF3C7",
+              color: "var(--pt-text-primary, #E8ECF1)",
               fontSize: "12px",
               fontFamily: MONO,
               fontWeight: 700,
@@ -366,10 +366,10 @@ export default function CharacterCreator({
                       alignItems: "flex-start",
                       gap: "4px",
                       padding: "12px 14px",
-                      border: isSelected ? `3px solid ${opt.colour}` : "2px solid #1E3A5F",
-                      backgroundColor: isSelected ? "#1E3A5F" : "#FEF3C7",
-                      boxShadow: isSelected ? `4px 4px 0 ${opt.colour}` : "2px 2px 0 #1E3A5F",
-                      borderRadius: 0,
+                      border: isSelected ? `3px solid ${opt.colour}` : "2px solid var(--pt-border, #335F91)",
+                      backgroundColor: isSelected ? "var(--pt-bg-card-hover)" : "var(--pt-bg-card)",
+                      boxShadow: isSelected ? `4px 4px 0 ${opt.colour}` : "none",
+                      borderRadius: 8,
                       cursor: "pointer",
                       fontFamily: MONO,
                       textAlign: "left",
@@ -378,7 +378,7 @@ export default function CharacterCreator({
                       outline: "none",
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.outline = "3px solid #A855F7";
+                      e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                       e.currentTarget.style.outlineOffset = "2px";
                     }}
                     onBlur={(e) => {
@@ -389,7 +389,7 @@ export default function CharacterCreator({
                       style={{
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: isSelected ? opt.colour : "#1E3A5F",
+                        color: isSelected ? opt.colour : "var(--pt-text-primary)",
                         fontFamily: MONO,
                       }}
                     >
@@ -398,7 +398,7 @@ export default function CharacterCreator({
                     <span
                       style={{
                         fontSize: "11px",
-                        color: isSelected ? "#FEF3C7" : "#1E3A5F",
+                        color: isSelected ? "var(--pt-text-secondary)" : "var(--pt-text-secondary)",
                         opacity: isSelected ? 0.9 : 0.7,
                         fontFamily: MONO,
                       }}
@@ -417,7 +417,7 @@ export default function CharacterCreator({
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <p
               style={{
-                color: "#FEF3C7",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 fontSize: "12px",
                 fontFamily: MONO,
                 fontWeight: 700,
@@ -453,10 +453,10 @@ export default function CharacterCreator({
                         alignItems: "center",
                         gap: "12px",
                         padding: "12px 14px",
-                        border: isSelected ? "3px solid #FB923C" : "2px solid #1E3A5F",
-                        backgroundColor: isSelected ? "#1E3A5F" : "#FEF3C7",
-                        boxShadow: isSelected ? "4px 4px 0 #FB923C" : "2px 2px 0 #1E3A5F",
-                        borderRadius: 0,
+                        border: isSelected ? "3px solid #FB923C" : "2px solid var(--pt-border, #335F91)",
+                        backgroundColor: isSelected ? "var(--pt-bg-card-hover)" : "var(--pt-bg-card)",
+                        boxShadow: isSelected ? "4px 4px 0 #FB923C" : "none",
+                        borderRadius: 8,
                         cursor: "pointer",
                         fontFamily: MONO,
                         textAlign: "left",
@@ -465,7 +465,7 @@ export default function CharacterCreator({
                         outline: "none",
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.outline = "3px solid #A855F7";
+                        e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                         e.currentTarget.style.outlineOffset = "2px";
                       }}
                       onBlur={(e) => {
@@ -478,7 +478,7 @@ export default function CharacterCreator({
                           style={{
                             fontSize: "13px",
                             fontWeight: 700,
-                            color: isSelected ? "#FB923C" : "#1E3A5F",
+                            color: isSelected ? "#FB923C" : "var(--pt-text-primary)",
                             fontFamily: MONO,
                           }}
                         >
@@ -487,7 +487,7 @@ export default function CharacterCreator({
                         <span
                           style={{
                             fontSize: "11px",
-                            color: isSelected ? "#FEF3C7" : "#1E3A5F",
+                            color: isSelected ? "var(--pt-text-secondary)" : "var(--pt-text-secondary)",
                             opacity: isSelected ? 0.9 : 0.7,
                             fontFamily: MONO,
                           }}
@@ -508,7 +508,7 @@ export default function CharacterCreator({
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <p
               style={{
-                color: "#FEF3C7",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 fontSize: "12px",
                 fontFamily: MONO,
                 fontWeight: 700,
@@ -554,21 +554,21 @@ export default function CharacterCreator({
                         alignItems: "center",
                         gap: "6px",
                         padding: "8px 12px",
-                        border: isSelected ? "3px solid #4ADE80" : "2px solid #1E3A5F",
-                        backgroundColor: isSelected ? "#1E3A5F" : "#FEF3C7",
-                        boxShadow: isSelected ? "3px 3px 0 #4ADE80" : "2px 2px 0 #1E3A5F",
-                        borderRadius: 0,
+                        border: isSelected ? "3px solid #4ADE80" : "2px solid var(--pt-border, #335F91)",
+                        backgroundColor: isSelected ? "var(--pt-bg-card-hover)" : "var(--pt-bg-card)",
+                        boxShadow: isSelected ? "3px 3px 0 #4ADE80" : "none",
+                        borderRadius: 8,
                         cursor: "pointer",
                         fontFamily: MONO,
                         fontSize: "12px",
                         fontWeight: isSelected ? 700 : 400,
-                        color: isSelected ? "#4ADE80" : "#1E3A5F",
+                        color: isSelected ? "#4ADE80" : "var(--pt-text-primary)",
                         transition: "box-shadow 0.08s, border-color 0.08s",
                         outline: "none",
                         whiteSpace: "nowrap",
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.outline = "3px solid #A855F7";
+                        e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                         e.currentTarget.style.outlineOffset = "2px";
                       }}
                       onBlur={(e) => {
@@ -594,8 +594,8 @@ export default function CharacterCreator({
               disabled={saving}
               aria-disabled={saving}
               style={{
-                borderRadius: 0,
-                border: "2px solid #1E3A5F",
+                borderRadius: 8,
+                border: "1px solid rgba(255,255,255,0.12)",
                 padding: "14px 28px",
                 fontFamily: MONO,
                 fontWeight: 700,
@@ -604,14 +604,14 @@ export default function CharacterCreator({
                 cursor: saving ? "not-allowed" : "pointer",
                 opacity: saving ? 0.5 : 1,
                 backgroundColor: saving ? "#9CA3AF" : "#FB923C",
-                color: "#1E3A5F",
-                boxShadow: saving ? "none" : "4px 4px 0px #1E3A5F",
+                color: "var(--pt-text-primary, #E8ECF1)",
+                boxShadow: saving ? "none" : "4px 4px 0px var(--pt-bg-card)",
                 alignSelf: "flex-start",
                 transition: "opacity 0.1s",
               }}
               onFocus={(e) => {
                 if (!saving) {
-                  e.currentTarget.style.outline = "3px solid #A855F7";
+                  e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
                   e.currentTarget.style.outlineOffset = "2px";
                 }
               }}
@@ -629,12 +629,12 @@ export default function CharacterCreator({
                 style={{
                   border: "2px solid #EF4444",
                   padding: "10px 14px",
-                  backgroundColor: "#1E3A5F",
-                  color: "#FEF3C7",
+                  backgroundColor: "var(--pt-bg-deep, #0F1B2E)",
+                  color: "var(--pt-text-primary, #E8ECF1)",
                   fontSize: "12px",
                   fontFamily: MONO,
                   lineHeight: 1.5,
-                  borderRadius: 0,
+                  borderRadius: 8,
                   boxShadow: "3px 3px 0 #EF4444",
                 }}
               >
@@ -657,8 +657,8 @@ export default function CharacterCreator({
       <div
         className="flex flex-col items-center gap-4 p-6"
         style={{
-          border: "2px solid #1E3A5F",
-          backgroundColor: "#FEF3C7",
+          border: "1px solid rgba(255,255,255,0.12)",
+          backgroundColor: "var(--pt-bg-card, #162032)",
           minWidth: "220px",
           flex: "0 0 auto",
         }}
@@ -684,7 +684,7 @@ export default function CharacterCreator({
             {personaSummary && (
               <p
                 style={{
-                  color: "#1E3A5F",
+                  color: "var(--pt-text-primary, #E8ECF1)",
                   fontSize: "11px",
                   textAlign: "center",
                   lineHeight: 1.5,
@@ -703,12 +703,12 @@ export default function CharacterCreator({
               width: "96px",
               height: "144px",
               backgroundColor: "#9CA3AF",
-              border: "2px solid #1E3A5F",
+              border: "1px solid rgba(255,255,255,0.12)",
             }}
           >
             <span
               style={{
-                color: "#FEF3C7",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 fontSize: "10px",
                 textAlign: "center",
                 padding: "8px",
@@ -723,7 +723,7 @@ export default function CharacterCreator({
         {/* Section label */}
         <p
           style={{
-            color: "#1E3A5F",
+            color: "var(--pt-text-primary, #E8ECF1)",
             fontSize: "10px",
             opacity: 0.6,
             textAlign: "center",
@@ -739,7 +739,7 @@ export default function CharacterCreator({
         <div className="flex flex-col gap-2">
           <h3
             style={{
-              color: "#1E3A5F",
+              color: "var(--pt-text-primary, #E8ECF1)",
               fontSize: "13px",
               fontWeight: 700,
               textTransform: "uppercase",
@@ -759,7 +759,7 @@ export default function CharacterCreator({
         <div className="flex flex-col gap-2">
           <h3
             style={{
-              color: "#1E3A5F",
+              color: "var(--pt-text-primary, #E8ECF1)",
               fontSize: "13px",
               fontWeight: 700,
               textTransform: "uppercase",
@@ -779,7 +779,7 @@ export default function CharacterCreator({
         <div className="flex flex-col gap-2">
           <h3
             style={{
-              color: "#1E3A5F",
+              color: "var(--pt-text-primary, #E8ECF1)",
               fontSize: "13px",
               fontWeight: 700,
               textTransform: "uppercase",
@@ -804,8 +804,8 @@ export default function CharacterCreator({
             aria-disabled={confirmDisabled}
             style={{
               // No border-radius — 8-bit aesthetic
-              borderRadius: 0,
-              border: "2px solid #1E3A5F",
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.12)",
               padding: "12px 24px",
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
@@ -815,8 +815,8 @@ export default function CharacterCreator({
               opacity: confirmDisabled ? 0.5 : 1,
               // Enabled: sunset-orange bg + deep-navy text + deep-navy shadow
               backgroundColor: confirmDisabled ? "#9CA3AF" : "#FB923C",
-              color: "#1E3A5F",
-              boxShadow: confirmDisabled ? "none" : "4px 4px 0px #1E3A5F",
+              color: "var(--pt-text-primary, #E8ECF1)",
+              boxShadow: confirmDisabled ? "none" : "4px 4px 0px var(--pt-bg-card)",
               transition: "opacity 0.1s",
               alignSelf: "flex-start",
             }}
@@ -829,14 +829,15 @@ export default function CharacterCreator({
             <div
               role="alert"
               style={{
-                border: "2px solid #FB923C",
+                border: "2px solid #EF4444",
                 padding: "10px 14px",
-                backgroundColor: "#FFF7ED",
-                color: "#1E3A5F",
+                backgroundColor: "var(--pt-bg-card)",
+                color: "var(--pt-text-primary, #E8ECF1)",
                 fontSize: "12px",
-                fontFamily: "'Courier New', Courier, monospace",
+                fontFamily: MONO,
                 lineHeight: 1.5,
-                borderRadius: 0,
+                borderRadius: 8,
+                boxShadow: "3px 3px 0 #EF4444",
               }}
             >
               {saveError}

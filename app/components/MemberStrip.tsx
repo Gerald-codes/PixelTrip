@@ -8,8 +8,8 @@
  * pushing stage content down on narrow viewports.
  *
  * Palette:
- *   Deep navy  #1E3A5F  — strip border/background accent
- *   Sand cream #FEF3C7  — strip background
+ *   Deep navy  var(--pt-bg-card)  — strip border/background accent
+ *   Sand cream var(--pt-bg-card)  — strip background
  */
 
 import React from "react";
@@ -48,8 +48,8 @@ export default function MemberStrip({
     <nav
       aria-label="Room members"
       style={{
-        backgroundColor: "#FEF3C7",
-        borderBottom: "2px solid #1E3A5F",
+        backgroundColor: "var(--pt-bg-card)",
+        borderBottom: "2px solid rgba(232, 236, 241, 0.2)",
         padding: "8px 12px",
       }}
     >

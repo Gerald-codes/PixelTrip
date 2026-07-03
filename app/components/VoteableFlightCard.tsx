@@ -23,13 +23,13 @@ import React, { useState } from "react";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
-const SAND_CREAM = "#FEF3C7";
+const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
+const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
 const SKY_BLUE = "#38BDF8";
-const NEON_PURPLE = "#A855F7";
+const NEON_PURPLE = "var(--pt-agent-atlas)";
 
 // ─── Category config ──────────────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ export default function VoteableFlightCard({
         fontFamily: "'Courier New', Courier, monospace",
         backgroundColor: SAND_CREAM,
         border: `4px solid ${DEEP_NAVY}`,
-        borderRadius: 0,
+        borderRadius: 8,
         boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
         overflow: "hidden",
         width: "100%",
@@ -256,7 +256,7 @@ export default function VoteableFlightCard({
             color: DEEP_NAVY,
             backgroundColor: isSelected ? GRASS_GREEN : isLocked ? DEEP_NAVY : SUNSET_ORANGE,
             border: `3px solid ${DEEP_NAVY}`,
-            borderRadius: 0,
+            borderRadius: 8,
             boxShadow: isLocked && !isSelected ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
             cursor: isLocked ? "not-allowed" : "pointer",
             opacity: isLocked && !isSelected ? 0.65 : 1,
@@ -283,7 +283,7 @@ export default function VoteableFlightCard({
               color: DEEP_NAVY,
               backgroundColor: SKY_BLUE,
               border: `2px solid ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
               cursor: "pointer",
               outline: "none",
@@ -309,7 +309,7 @@ function Chip({ label, bg = SAND_CREAM }: { label: string; bg?: string }) {
         alignItems: "center",
         backgroundColor: bg,
         border: `2px solid ${DEEP_NAVY}`,
-        borderRadius: 0,
+        borderRadius: 8,
         padding: "3px 8px",
         fontSize: 11,
         fontWeight: 700,

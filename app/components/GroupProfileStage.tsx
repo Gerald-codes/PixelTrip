@@ -177,28 +177,28 @@ export default function GroupProfileStage({
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">Group profile</h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">Group profile</h2>
+        <p className="mt-2 text-pt-text-primary">
           Here&apos;s how the AI sees your group — overlapping window, common
           interests, and the friction points to keep in mind before we pick a
           destination.
         </p>
-        <p className="mt-2 text-xs font-semibold text-[#1E3A5F]">
+        <p className="mt-2 text-xs font-semibold text-pt-text-primary">
           {members.length} {members.length === 1 ? "member" : "members"} in this
           room.
         </p>
       </div>
 
       {profileLoading && !profile ? (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">Loading group profile…</p>
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">Loading group profile…</p>
         </div>
       ) : profileLoadError ? (
-        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-pixel-card">
           <p className="text-sm font-semibold text-red-700">{profileLoadError}</p>
           <button
             type="button"
@@ -211,13 +211,13 @@ export default function GroupProfileStage({
       ) : profile ? (
         <ProfileView profile={profile} />
       ) : notFound ? (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
           {isHost ? (
             <>
-              <h3 className="text-lg font-bold text-[#1E3A5F]">
+              <h3 className="text-lg font-bold text-pt-text-primary">
                 {generating ? "Generating group profile…" : "Generate the group profile"}
               </h3>
-              <p className="mt-1 text-sm text-[#1E3A5F]">
+              <p className="mt-1 text-sm text-pt-text-primary">
                 {generating
                   ? "The AI is analysing your group's characters, dates, and vibes — this takes a few seconds."
                   : "The AI will summarise your group from everyone's personas, availability, and destination interests."}
@@ -227,7 +227,7 @@ export default function GroupProfileStage({
                   type="button"
                   onClick={() => void handleGenerate()}
                   disabled={generating}
-                  className="mt-4 border-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Generate group profile
                 </button>
@@ -249,7 +249,7 @@ export default function GroupProfileStage({
               )}
             </>
           ) : (
-            <p className="text-sm font-semibold text-[#1E3A5F]">
+            <p className="text-sm font-semibold text-pt-text-primary">
               Waiting for the host to generate the group profile…
             </p>
           )}
@@ -262,12 +262,12 @@ export default function GroupProfileStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing || !profile}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance stage"}
           </button>
           {!profile && (
-            <p className="text-xs font-semibold text-[#1E3A5F]">
+            <p className="text-xs font-semibold text-pt-text-primary">
               Generate the group profile before advancing.
             </p>
           )}
@@ -276,7 +276,7 @@ export default function GroupProfileStage({
           )}
         </div>
       ) : (
-        <p className="text-sm font-semibold text-[#1E3A5F]">
+        <p className="text-sm font-semibold text-pt-text-primary">
           Waiting for the host to advance to the next stage…
         </p>
       )}
@@ -289,8 +289,8 @@ export default function GroupProfileStage({
 function ProfileView({ profile }: { profile: GroupProfile }) {
   return (
     <>
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">Combined profile</h3>
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <h3 className="mb-4 text-lg font-bold text-pt-text-primary">Combined profile</h3>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Budget range" value={profile.budgetRange} />
           <Field
@@ -313,7 +313,7 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
                   </span>
                 </>
               ) : (
-                <span className="font-semibold text-[#1E3A5F] opacity-60">No common window yet</span>
+                <span className="font-semibold text-pt-text-primary opacity-60">No common window yet</span>
               )
             }
           />
@@ -323,21 +323,21 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
               profile.dominantPersonaTraits.length > 0 ? (
                 <TagList tags={profile.dominantPersonaTraits} tone="neutral" />
               ) : (
-                <span className="font-semibold text-[#1E3A5F] opacity-60">None identified</span>
+                <span className="font-semibold text-pt-text-primary opacity-60">None identified</span>
               )
             }
           />
         </dl>
 
         <div className="mt-6">
-          <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+          <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary">
             Common interests
           </p>
           <div className="mt-2">
             {profile.commonInterests.length > 0 ? (
               <TagList tags={profile.commonInterests} tone="info" />
             ) : (
-              <p className="text-sm font-semibold text-[#1E3A5F] opacity-60">
+              <p className="text-sm font-semibold text-pt-text-primary opacity-60">
                 No shared interests surfaced.
               </p>
             )}
@@ -347,26 +347,26 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
 
       <div
         role="alert"
-        className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-[4px_4px_0px_#1E3A5F]"
+        className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-pixel-card"
       >
         <div className="flex items-center gap-2">
           <span aria-hidden="true">⚠️</span>
-          <h3 className="text-lg font-bold text-[#1E3A5F]">
+          <h3 className="text-lg font-bold text-pt-text-primary">
             Tension points
           </h3>
         </div>
-        <p className="mt-1 text-sm font-semibold text-[#1E3A5F]">
+        <p className="mt-1 text-sm font-semibold text-pt-text-primary">
           Worth flagging before we pick a destination so we can plan around
           them.
         </p>
         {profile.tensionPoints.length > 0 ? (
-          <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-[#1E3A5F]">
+          <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-pt-text-primary">
             {profile.tensionPoints.map((point, i) => (
               <li key={`${point}-${i}`}>{point}</li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm font-semibold text-[#1E3A5F]">
+          <p className="mt-3 text-sm font-semibold text-pt-text-primary">
             None — this group is well aligned.
           </p>
         )}
@@ -384,10 +384,10 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <dt className="text-xs font-bold uppercase tracking-wide text-pt-text-primary">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-semibold text-[#1E3A5F]">{value}</dd>
+      <dd className="mt-1 text-sm font-semibold text-pt-text-primary">{value}</dd>
     </div>
   );
 }
@@ -401,14 +401,14 @@ function TagList({
 }) {
   const toneClass =
     tone === "info"
-      ? "bg-[#38BDF8] text-[#1E3A5F] border-2 border-[#1E3A5F]"
-      : "bg-[#4ADE80] text-[#1E3A5F] border-2 border-[#1E3A5F]";
+      ? "bg-[#38BDF8] text-pt-text-primary border-2 border-pt-text-primary border-opacity-20"
+      : "bg-[#4ADE80] text-pt-text-primary border-2 border-pt-text-primary border-opacity-20";
   return (
     <ul className="flex flex-wrap gap-1.5">
       {tags.map((tag, i) => (
         <li
           key={`${tag}-${i}`}
-          className={`px-2.5 py-0.5 text-xs font-bold shadow-[2px_2px_0px_#1E3A5F] ${toneClass}`}
+          className={`px-2.5 py-0.5 text-xs font-bold shadow-pixel-sm ${toneClass}`}
         >
           {tag}
         </li>

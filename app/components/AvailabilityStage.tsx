@@ -28,8 +28,8 @@ import type { Availability, DestinationPreference, TravelVibe } from "@/lib/type
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "#1E3A5F";
-const SAND_CREAM = "#FEF3C7";
+const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
+const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const SKY_BLUE = "#38BDF8";
@@ -246,7 +246,7 @@ export default function AvailabilityStage({
 
   const submitBtnStyle: React.CSSProperties = {
     border: `3px solid ${DEEP_NAVY}`,
-    borderRadius: 0,
+    borderRadius: 8,
     backgroundColor: saving ? DEEP_NAVY : GRASS_GREEN,
     color: DEEP_NAVY,
     padding: "10px 28px",
@@ -328,7 +328,7 @@ export default function AvailabilityStage({
                   aria-label={`Start date for range ${i + 1}`}
                   style={{
                     border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 0,
+                    borderRadius: 8,
                     backgroundColor: SAND_CREAM,
                     color: DEEP_NAVY,
                     padding: "4px 8px",
@@ -359,7 +359,7 @@ export default function AvailabilityStage({
                   aria-label={`End date for range ${i + 1}`}
                   style={{
                     border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 0,
+                    borderRadius: 8,
                     backgroundColor: SAND_CREAM,
                     color: DEEP_NAVY,
                     padding: "4px 8px",
@@ -377,7 +377,7 @@ export default function AvailabilityStage({
                   aria-label={`Remove date range ${i + 1}`}
                   style={{
                     border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 0,
+                    borderRadius: 8,
                     backgroundColor:
                       draftRanges.length === 1 ? SAND_CREAM : SUNSET_ORANGE,
                     color: DEEP_NAVY,
@@ -408,7 +408,7 @@ export default function AvailabilityStage({
             style={{
               marginTop: 10,
               border: `2px dashed ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               backgroundColor: "transparent",
               color: DEEP_NAVY,
               padding: "6px 16px",
@@ -488,7 +488,7 @@ export default function AvailabilityStage({
             disabled={submitted}
             style={{
               border: `2px dashed ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               backgroundColor: "transparent",
               color: DEEP_NAVY,
               padding: "6px 14px",
@@ -589,7 +589,7 @@ export default function AvailabilityStage({
             onClick={() => setSubmitted(false)}
             style={{
               border: `2px solid ${DEEP_NAVY}`,
-              borderRadius: 0,
+              borderRadius: 8,
               backgroundColor: SUNSET_ORANGE,
               color: DEEP_NAVY,
               padding: "4px 12px",

@@ -48,12 +48,12 @@ export interface StageProps {
 
 function StagePlaceholder({ stage }: { stage: RoomStage }) {
   return (
-    <section className="mx-auto max-w-2xl rounded-lg border border-dashed border-gray-300 p-8 text-center">
+    <section className="mx-auto max-w-2xl rounded-lg border border-dashed border-pt-text-primary border-opacity-20 p-8 text-center">
       <p className="text-sm uppercase tracking-wide text-gray-500">
         Current stage
       </p>
       <h2 className="mt-1 text-2xl font-bold">{stage}</h2>
-      <p className="mt-4 text-gray-600">
+      <p className="mt-4 text-pt-text-muted">
         This stage is not built yet. It will be wired in by a later task.
       </p>
     </section>

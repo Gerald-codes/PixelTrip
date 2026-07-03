@@ -34,7 +34,6 @@ import React, {
   useState,
 } from "react";
 
-import MemberStrip from "@/app/components/MemberStrip";
 import StageProgress from "@/app/components/StageProgress";
 import TripContextPanel from "@/app/components/TripContextPanel";
 import TripAgentChat from "@/app/components/TripAgentChat";
@@ -141,7 +140,6 @@ export default function RoomShell({
   itineraryCosts = [],
 }: RoomShellProps) {
   // ── Local state ─────────────────────────────────────────────────────────────
-  const [copied, setCopied] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [goingBack, setGoingBack] = useState(false);
   const [goBackError, setGoBackError] = useState<string | null>(null);
@@ -235,14 +233,6 @@ export default function RoomShell({
     if (typeof window === "undefined") return `/?join=${room.roomCode}`;
     return `${window.location.origin}/?join=${room.roomCode}`;
   }, [room.roomCode]);
-
-  // ── Copy invite link ─────────────────────────────────────────────────────────
-  function handleCopy() {
-    void navigator.clipboard.writeText(inviteLink).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  }
 
   // ── Fetch room helper ────────────────────────────────────────────────────────
   const fetchRoom = useCallback(async (): Promise<TripRoom | null> => {
@@ -372,182 +362,139 @@ export default function RoomShell({
   }, [goingBack, onGoBack, room.roomCode, room.id, identity.userId, onRoomUpdated]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
+
+  // Stage label for header
+  const STAGE_LABEL: Record<string, string> = {
+    LOBBY: "LOBBY", PERSONA: "PERSONA", AVAILABILITY: "AVAILABILITY",
+    GROUP_PROFILE: "GROUP PROFILE", DESTINATIONS: "DESTINATIONS",
+    DESTINATION_VOTE: "DESTINATION VOTE", FLIGHTS: "FLIGHTS",
+    FLIGHT_VOTE: "FLIGHT VOTE", ACTIVITIES: "ACTIVITIES",
+    ITINERARY: "ITINERARY", FEEDBACK: "FEEDBACK",
+    NEGOTIATION: "NEGOTIATION", FINAL: "FINAL",
+  };
+
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* ── Persistent header ──────────────────────────────────────────────── */}
+    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "var(--pt-bg-deep)" }}>
+      {/* ── Slim top navigation bar ─────────────────────────────────────────── */}
       <header
         style={{
-          background: "linear-gradient(135deg, #1E3A5F 0%, #38BDF8 100%)",
-          borderBottom: "3px solid #1E3A5F",
+          backgroundColor: "#081A33",
+          borderBottom: "1px solid #335F91",
+          padding: "10px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexShrink: 0,
         }}
       >
-        <div
-          className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4"
-          style={{ fontFamily: "inherit" }}
-        >
-          {/* Row 1: room code + member count + sync button */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <h1
-                className="font-bold text-white"
-                style={{ fontSize: "1.25rem" /* text-xl = 20px ≥ 18px */ }}
-              >
-                Room{" "}
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: "1.125rem" /* text-lg = 18px, per spec */,
-                    letterSpacing: "0.08em",
-                    background: "rgba(255,255,255,0.15)",
-                    padding: "2px 8px",
-                    border: "2px solid rgba(255,255,255,0.4)",
-                  }}
-                >
-                  {room.roomCode}
-                </span>
-              </h1>
+        {/* Left: brand + room code */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            style={{
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 11,
+              color: "#F4F8FF",
+              letterSpacing: "0.04em",
+            }}
+          >
+            PixelTrip
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 10,
+              color: "#F4F8FF",
+              backgroundColor: "rgba(56, 217, 200, 0.15)",
+              border: "1px solid #38D9C8",
+              padding: "3px 8px",
+              letterSpacing: "0.1em",
+            }}
+          >
+            {room.roomCode}
+          </span>
+        </div>
 
-              <span className="text-sm text-sky-100">
-                {members.length}{" "}
-                {members.length === 1 ? "member" : "members"}
-              </span>
-            </div>
+        {/* Center: phase indicator */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span
+            style={{
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 8,
+              color: "#8FA9C8",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Progress
+          </span>
+          <span style={{ color: "#6B8AA8", fontSize: 12 }}>—</span>
+          <StageProgress currentStage={room.currentStage} stages={STAGE_ORDER} />
+        </div>
 
-            {/* Sync button */}
+        {/* Right: stage badge + controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {isHost && !isLobby && (
             <button
               type="button"
-              onClick={() => void handleSync()}
-              disabled={syncing}
+              onClick={() => void handleGoBack()}
+              disabled={goingBack}
+              aria-label="Go to previous stage"
               style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "2px solid rgba(255,255,255,0.4)",
-                color: "#fff",
-                padding: "4px 12px",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                cursor: syncing ? "not-allowed" : "pointer",
-                opacity: syncing ? 0.6 : 1,
-              }}
-            >
-              {syncing ? "Syncing…" : "↻ Sync"}
-            </button>
-          </div>
-
-          {/* Row 2: invite link + copy button */}
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="shrink-0 text-xs text-sky-100">Invite:</span>
-            <code
-              className="min-w-0 flex-1 truncate text-xs text-white"
-              style={{
-                background: "rgba(0,0,0,0.25)",
-                padding: "2px 8px",
-                border: "1px solid rgba(255,255,255,0.2)",
-                maxWidth: "100%",
-              }}
-              title={inviteLink}
-            >
-              {inviteLink}
-            </code>
-            <button
-              type="button"
-              onClick={handleCopy}
-              aria-label="Copy invite link"
-              style={{
-                flexShrink: 0,
-                background: copied ? "#4ADE80" : "#FB923C",
-                border: copied
-                  ? "2px solid #16A34A"
-                  : "2px solid #C2410C",
-                color: "#1E3A5F",
+                background: "#102B4F",
+                border: "1px solid #335F91",
+                color: "#F4F8FF",
                 padding: "3px 10px",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                transition: "background 0.15s",
-                whiteSpace: "nowrap",
-                boxShadow: "2px 2px 0px #1E3A5F",
+                fontSize: 10,
+                fontFamily: "var(--pt-font-pixel)",
+                cursor: goingBack ? "not-allowed" : "pointer",
+                opacity: goingBack ? 0.5 : 1,
               }}
             >
-              {copied ? "Copied!" : "Copy"}
+              ←
             </button>
-          </div>
+          )}
+          {goBackError && (
+            <span style={{ fontSize: 10, color: "#F87171" }}>{goBackError}</span>
+          )}
 
-          {/* Row 3: StageProgress + host controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Pipeline progress dots */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-sky-100">
-                Progress:
-              </span>
-              <StageProgress
-                currentStage={room.currentStage}
-                stages={STAGE_ORDER}
-              />
-            </div>
+          <span
+            style={{
+              fontFamily: "var(--pt-font-pixel)",
+              fontSize: 8,
+              color: "#081A33",
+              backgroundColor: "#FF9F43",
+              padding: "4px 10px",
+              letterSpacing: "0.04em",
+              fontWeight: 700,
+            }}
+          >
+            {STAGE_LABEL[room.currentStage] ?? room.currentStage}
+          </span>
 
-            {/* Host controls: Previous stage (hidden on LOBBY) */}
-            <div className="flex items-center gap-2">
-              {isHost && !isLobby && (
-                <button
-                  type="button"
-                  onClick={() => void handleGoBack()}
-                  disabled={goingBack}
-                  aria-label="Go to previous stage"
-                  style={{
-                    background: "rgba(255,255,255,0.15)",
-                    border: "2px solid #FB923C",
-                    color: "#FEF3C7",
-                    padding: "4px 12px",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    cursor: goingBack ? "not-allowed" : "pointer",
-                    opacity: goingBack ? 0.6 : 1,
-                    boxShadow: "2px 2px 0px #1E3A5F",
-                  }}
-                >
-                  {goingBack ? "Going back…" : "← Previous"}
-                </button>
-              )}
-              {goBackError && (
-                <span className="text-xs text-red-300">{goBackError}</span>
-              )}
-
-              {/* Dev-only stage badge */}
-              {IS_DEV && (
-                <span
-                  style={{
-                    background: "rgba(0,0,0,0.4)",
-                    color: "#FEF3C7",
-                    fontFamily: "monospace",
-                    fontSize: "0.7rem",
-                    padding: "2px 6px",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                  }}
-                >
-                  {room.currentStage}
-                </span>
-              )}
-            </div>
-          </div>
+          {/* Sync button */}
+          <button
+            type="button"
+            onClick={() => void handleSync()}
+            disabled={syncing}
+            aria-label="Sync room"
+            style={{
+              background: "#102B4F",
+              border: "1px solid #335F91",
+              color: "#F4F8FF",
+              padding: "3px 8px",
+              fontSize: 12,
+              cursor: syncing ? "not-allowed" : "pointer",
+              opacity: syncing ? 0.5 : 1,
+              lineHeight: 1,
+            }}
+          >
+            ↻
+          </button>
         </div>
       </header>
 
-      {/* ── Member strip ───────────────────────────────────────────────────── */}
-      <MemberStrip
-        members={members}
-        hostUserId={room.hostUserId}
-        characterProfiles={characterProfiles}
-      />
-
       {/* ── Two-column main layout ────────────────────────────────────────── */}
-      {/*
-       * ≥ 1024px: flex-row, left col grows to fill ~65% via flex-[3], right
-       *           col fills ~35% via flex-[1]. Both columns have min-w-0 so
-       *           content cannot force overflow.
-       * < 1024px: single column, TripContextPanel hidden.
-       *   Requirements: 2.1, 2.2
-       */}
-      <main className="flex flex-1 flex-col lg:flex-row min-h-0">
+      <main className="flex flex-1 flex-col lg:flex-row min-h-0" style={{ backgroundColor: "var(--pt-bg-deep)" }}>
         {/* ── Left column: TripAgentChat ─────────────────────────────────── */}
         <div className="flex min-w-0 flex-1 flex-col lg:flex-[3]">
           <TripAgentChat
@@ -560,19 +507,12 @@ export default function RoomShell({
           />
         </div>
 
-        {/* ── Right column: TripContextPanel ──────────────────────────────── */}
-        {/*
-         * Desktop: sticky to viewport top, scrolls internally.
-         * The column is position:sticky + height:100vh so it stays in view
-         * while the left column (TripAgentChat) scrolls freely.
-         * Mobile: full-height fixed overlay when isMobileContextOpen=true.
-         * Requirements: 2.1, 2.2, 9.7
-         */}
+        {/* ── Right column: TripContextPanel ─────────────────────────────── */}
         <div
           className={
             isMobileContextOpen
               ? "fixed inset-0 z-50 flex flex-col"
-              : "hidden lg:flex lg:flex-[1] lg:flex-col lg:min-w-0"
+              : "hidden lg:flex lg:flex-col lg:min-w-0"
           }
           style={
             !isMobileContextOpen
@@ -582,19 +522,22 @@ export default function RoomShell({
                   height: "100vh",
                   overflowY: "auto",
                   flexShrink: 0,
+                  width: 320,
+                  minWidth: 320,
                 }
-              : undefined
+              : {}
           }
         >
-          {/* Close button inside the overlay — only rendered on mobile overlay */}
+          {/* Close button — mobile overlay only */}
           {isMobileContextOpen && (
             <div
               className="lg:hidden"
               style={{
                 display: "flex",
                 justifyContent: "flex-end",
-                padding: "10px 12px 0",
-                backgroundColor: "#1E3A5F",
+                padding: "10px 12px",
+                backgroundColor: "var(--pt-bg-deep)",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
                 flexShrink: 0,
               }}
             >
@@ -603,29 +546,29 @@ export default function RoomShell({
                 aria-label="Close trip context panel"
                 onClick={() => setIsMobileContextOpen(false)}
                 style={{
-                  background: "rgba(255,255,255,0.12)",
-                  border: "2px solid #FB923C",
-                  color: "#FEF3C7",
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "var(--pt-text-muted)",
                   padding: "4px 12px",
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
+                  fontSize: 11,
+                  fontFamily: "var(--pt-font-body)",
                   cursor: "pointer",
-                  fontFamily: "'Courier New', Courier, monospace",
-                  boxShadow: "2px 2px 0 #1E3A5F",
                 }}
               >
                 ✕ Close
               </button>
             </div>
           )}
+
+          {/* Full TripContextPanel component */}
           <TripContextPanel
             room={room}
-            runningSpend={runningSpend}
             members={members}
             characterProfiles={characterProfiles}
             currentStage={room.currentStage}
             submittedUserIds={submittedUserIds}
             budgetEstimate={budgetEstimate}
+            runningSpend={runningSpend}
             isOpen={isMobileContextOpen}
             travelDates={travelDates}
             travelVibes={travelVibes}
@@ -635,41 +578,36 @@ export default function RoomShell({
       </main>
 
       {/* ── Mobile toggle button (fixed, bottom-right, < 1024px only) ────── */}
-      {/*
-       * Renders a fixed "📋 Trip Info" button at the bottom-right corner on
-       * screens narrower than 1024px. Clicking toggles the TripContextPanel
-       * drawer overlay. Hidden on desktop via `lg:hidden`.
-       * Requirements: 2.2, 9.7
-       */}
       <button
         type="button"
         className="fixed bottom-4 right-4 z-40 lg:hidden"
         aria-label={
           isMobileContextOpen
-            ? "Close trip context panel"
-            : "Open trip context panel"
+            ? "Close trip info panel"
+            : "Open trip info panel"
         }
         onClick={() => setIsMobileContextOpen((prev) => !prev)}
         style={{
-          background: "#A855F7",
-          border: "2px solid #1E3A5F",
-          color: "#FEF3C7",
+          background: "var(--pt-agent-atlas)",
+          border: "none",
+          color: "#fff",
           padding: "10px 16px",
-          fontSize: "0.85rem",
-          fontWeight: 700,
+          fontSize: 12,
+          fontWeight: 600,
           cursor: "pointer",
-          fontFamily: "'Courier New', Courier, monospace",
-          boxShadow: "4px 4px 0 #1E3A5F",
+          fontFamily: "var(--pt-font-body)",
+          borderRadius: 8,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
           display: "flex",
           alignItems: "center",
           gap: 6,
         }}
       >
-        <span aria-hidden="true">📋</span>
+        <span aria-hidden="true">ℹ️</span>
         <span>Trip Info</span>
       </button>
 
-      {/* ── "Having trouble syncing" banner (3+ consecutive poll failures) ─── */}
+      {/* ── Sync trouble banner ─── */}
       {showSyncBanner && (
         <div
           role="alert"
@@ -680,9 +618,8 @@ export default function RoomShell({
             left: 0,
             right: 0,
             zIndex: 50,
-            background: "#FEF3C7",
-            borderTop: "2px solid #1E3A5F",
-            boxShadow: "0 -2px 0px #1E3A5F",
+            background: "var(--pt-bg-card)",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -690,54 +627,25 @@ export default function RoomShell({
             gap: 12,
           }}
         >
-          <div className="flex items-center gap-2">
-            <span
-              style={{
-                fontSize: "1.1rem",
-                lineHeight: 1,
-              }}
-              aria-hidden="true"
-            >
-              ⚠️
-            </span>
-            <span
-              style={{
-                color: "#1E3A5F",
-                fontWeight: 700,
-                fontSize: "0.85rem",
-                fontFamily: "inherit",
-              }}
-            >
-              Having trouble syncing
-            </span>
-            <span
-              style={{
-                color: "#1E3A5F",
-                fontSize: "0.8rem",
-                opacity: 0.75,
-              }}
-            >
-              — your connection may be unstable. Changes will sync when restored.
-            </span>
-          </div>
+          <span style={{ color: "var(--pt-warn)", fontSize: 13, fontFamily: "var(--pt-font-body)" }}>
+            ⚠ Having trouble syncing — changes will sync when connection restores.
+          </span>
           <button
             type="button"
             aria-label="Dismiss sync warning"
             onClick={() => setShowSyncBanner(false)}
             style={{
-              background: "#FB923C",
-              border: "2px solid #C2410C",
-              color: "#1E3A5F",
-              padding: "4px 12px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.15)",
+              color: "var(--pt-text-muted)",
+              padding: "4px 10px",
+              fontSize: 11,
               cursor: "pointer",
-              boxShadow: "2px 2px 0px #1E3A5F",
               whiteSpace: "nowrap",
               flexShrink: 0,
             }}
           >
-            ✕ Dismiss
+            Dismiss
           </button>
         </div>
       )}

@@ -11,9 +11,10 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        /* Hero gradient matches LandingForm so there's no flash on load */
-        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1E3A5F] to-[#38BDF8] p-8">
-          <p className="font-bold text-[#FEF3C7]">Loading…</p>
+        <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0A1628" }}>
+          <p style={{ fontFamily: "var(--pt-font-pixel)", fontSize: 9, color: "rgba(232,236,241,0.4)", letterSpacing: "0.08em" }}>
+            Loading…
+          </p>
         </main>
       }
     >

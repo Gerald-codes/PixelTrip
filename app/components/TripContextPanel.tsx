@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * TripContextPanel — sticky right-side trip context sidebar.
+ * TripContextPanel - sticky right-side trip context sidebar.
  *
  * Always shows the group's key trip decisions so members never lose track
  * of what has been decided. Displays member statuses, room code with
  * copy-to-clipboard, budget badge, and all trip decision fields.
  *
  * Layout:
- *   - Desktop (≥ 1024px): sticky, right-hand column, min-height: 100vh
+ *   - Desktop (>= 1024px): sticky, right-hand column, min-height: 100vh
  *   - Mobile (< 1024px): visibility controlled by parent via `isOpen` prop;
  *     when closed uses `hidden lg:block` pattern
  *
@@ -44,7 +44,7 @@ import RunningBudgetBar from "./RunningBudgetBar";
 import type { RunningBudgetEstimate } from "@/lib/budgetEstimate";
 import PixelAvatar from "./PixelAvatar";
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
+// --- Palette -----------------------------------------------------------------
 
 const DEEP_NAVY = "#1E3A5F";
 const SAND_CREAM = "#FEF3C7";
@@ -52,7 +52,7 @@ const NEON_PURPLE = "#A855F7";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 
-// ─── Stage label map ──────────────────────────────────────────────────────────
+// --- Stage label map ----------------------------------------------------------
 
 const STAGE_LABELS: Record<RoomStage, string> = {
   LOBBY: "Character Creation",
@@ -70,7 +70,7 @@ const STAGE_LABELS: Record<RoomStage, string> = {
   FINAL: "Final Plan",
 } as Record<RoomStage, string>;
 
-// ─── Flight option label map ──────────────────────────────────────────────────
+// --- Flight option label map --------------------------------------------------
 
 const FLIGHT_LABELS: Record<
   NonNullable<TripRoom["selectedFlightOption"]>,
@@ -81,7 +81,7 @@ const FLIGHT_LABELS: Record<
   comfort: "Comfort",
 };
 
-// ─── Budget level label map ───────────────────────────────────────────────────
+// --- Budget level label map ---------------------------------------------------
 
 const BUDGET_LEVEL_LABELS: Record<string, string> = {
   low: "Low Budget",
@@ -89,7 +89,7 @@ const BUDGET_LEVEL_LABELS: Record<string, string> = {
   high: "High Budget",
 };
 
-// ─── Prop types ───────────────────────────────────────────────────────────────
+// --- Prop types ---------------------------------------------------------------
 
 export interface TripContextPanelProps {
   /** The current trip room. */
@@ -105,7 +105,7 @@ export interface TripContextPanelProps {
   /** Computed budget estimate, or null when not available. */
   budgetEstimate: BudgetEstimate | null;
   /**
-   * Progressive "money committed so far" running spend — starts at $0 and
+   * Progressive "money committed so far" running spend - starts at $0 and
    * fills up as flight, activities, and itinerary items add cost. Always
    * present (never null) so the bar is visible from the start of the trip.
    */
@@ -133,7 +133,7 @@ export interface TripContextPanelProps {
   destinationShortlist?: string[] | null;
 }
 
-// ─── Copy button ──────────────────────────────────────────────────────────────
+// --- Copy button --------------------------------------------------------------
 
 function CopyRoomCodeButton({ roomCode }: { roomCode: string }) {
   const [copied, setCopied] = useState(false);
@@ -196,7 +196,7 @@ function CopyRoomCodeButton({ roomCode }: { roomCode: string }) {
   );
 }
 
-// ─── Section label ────────────────────────────────────────────────────────────
+// --- Section label ------------------------------------------------------------
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -217,7 +217,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── Field value ─────────────────────────────────────────────────────────────
+// --- Field value -------------------------------------------------------------
 
 function FieldValue({
   value,
@@ -244,7 +244,7 @@ function FieldValue({
   );
 }
 
-// ─── Info row ─────────────────────────────────────────────────────────────────
+// --- Info row -----------------------------------------------------------------
 
 function InfoRow({
   label,
@@ -262,7 +262,7 @@ function InfoRow({
   );
 }
 
-// ─── Divider ─────────────────────────────────────────────────────────────────
+// --- Divider -----------------------------------------------------------------
 
 function Divider() {
   return (
@@ -277,7 +277,7 @@ function Divider() {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// --- Main component -----------------------------------------------------------
 
 export default function TripContextPanel({
   room,
@@ -320,10 +320,10 @@ export default function TripContextPanel({
   // Format travel dates
   const travelDatesValue = React.useMemo(() => {
     if (!travelDates) return null;
-    return `${travelDates.startDate} – ${travelDates.endDate}`;
+    return `${travelDates.startDate} - ${travelDates.endDate}`;
   }, [travelDates]);
 
-  // Format travel vibes — strip any remaining vibe: prefix, capitalise
+  // Format travel vibes - strip any remaining vibe: prefix, capitalise
   const travelVibesValue = React.useMemo(() => {
     if (!travelVibes || travelVibes.length === 0) return null;
     const labels = travelVibes.map((v) =>
@@ -355,12 +355,12 @@ export default function TripContextPanel({
     : null;
 
   // Mobile visibility: hidden when not open (on screens < 1024px)
-  // On desktop (≥ 1024px) always visible via CSS
+  // On desktop (>= 1024px) always visible via CSS
   const mobileHiddenClass = isOpen ? "" : "hidden lg:block";
 
   return (
     <aside
-      aria-label="Trip context — decisions and member status"
+      aria-label="Trip context - decisions and member status"
       className={mobileHiddenClass}
       style={{
         width: "100%",
@@ -371,7 +371,7 @@ export default function TripContextPanel({
         fontFamily: "'Courier New', Courier, monospace",
       }}
     >
-      {/* ── Top section: stage label + room code ── */}
+      {/* -- Top section: stage label + room code -- */}
       <div
         style={{
           padding: "16px 16px 12px",
@@ -432,7 +432,7 @@ export default function TripContextPanel({
         </div>
       </div>
 
-      {/* ── Members section ── */}
+      {/* -- Members section -- */}
       <div
         style={{
           padding: "12px 16px",
@@ -553,7 +553,7 @@ export default function TripContextPanel({
         </div>
       </div>
 
-      {/* ── Running budget bar (progressive: fills as flight/activities/itinerary costs are added) ── */}
+      {/* -- Running budget bar (progressive: fills as flight/activities/itinerary costs are added) -- */}
       {runningSpend !== null && (
         <div
           style={{
@@ -569,7 +569,7 @@ export default function TripContextPanel({
         </div>
       )}
 
-      {/* ── Budget status badge (always shown; "missing data" when not available) ── */}
+      {/* -- Budget status badge (always shown; "missing data" when not available) -- */}
       <div
         style={{
           padding: "12px 16px",
@@ -612,7 +612,7 @@ export default function TripContextPanel({
         )}
       </div>
 
-      {/* ── Trip decisions summary ── */}
+      {/* -- Trip decisions summary -- */}
       <div
         style={{
           padding: "12px 16px 20px",

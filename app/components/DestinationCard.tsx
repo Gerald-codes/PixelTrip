@@ -34,11 +34,11 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
         : null;
 
   return (
-    <article className="w-full max-w-full overflow-hidden border-4 border-[#1E3A5F] bg-[#FEF3C7] shadow-[4px_4px_0px_#1E3A5F]">
+    <article className="w-full max-w-full overflow-hidden border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] shadow-pixel-card">
 
       {/* ── Header: name + fit score ── */}
-      <header className="flex flex-wrap items-center gap-3 border-b-4 border-[#1E3A5F] bg-[#38BDF8] px-4 py-3">
-        <h3 className="min-w-0 flex-1 break-words text-lg font-bold text-[#1E3A5F]">
+      <header className="flex flex-wrap items-center gap-3 border-b-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-4 py-3">
+        <h3 className="min-w-0 flex-1 break-words text-lg font-bold text-pt-text-primary">
           📍 {suggestion.destinationName}
         </h3>
         <FitBadge score={suggestion.fitScore} />
@@ -47,7 +47,7 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
       <div className="flex flex-col gap-3 px-4 py-3">
 
         {/* ── Short reason ── */}
-        <p className="break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+        <p className="break-words text-sm font-semibold leading-relaxed text-pt-text-primary">
           {shortReason}
         </p>
 
@@ -61,10 +61,10 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
         {/* ── First trade-off — always visible ── */}
         {suggestion.downsides.length > 0 && (
           <div className="border-l-4 border-[#FB923C] pl-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+            <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
               Trade-off
             </p>
-            <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">
+            <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">
               {suggestion.downsides[0]}
             </p>
           </div>
@@ -72,15 +72,15 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
 
         {/* ── Expanded details ── */}
         {expanded && (
-          <div className="flex flex-col gap-4 border-t-2 border-[#1E3A5F] pt-3">
+          <div className="flex flex-col gap-4 border-t-2 border-pt-text-primary border-opacity-20 pt-3">
 
             {/* Full recommendation reason */}
             {suggestion.recommendationReason !== shortReason && (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+                <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
                   Full recommendation
                 </p>
-                <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+                <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-pt-text-primary">
                   {suggestion.recommendationReason}
                 </p>
               </div>
@@ -95,7 +95,7 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
             {/* Best activities */}
             {suggestion.bestActivities.length > 0 && (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+                <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
                   Best activities
                 </p>
                 <ul className="mt-1 flex flex-wrap gap-2">
@@ -111,12 +111,12 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
             {/* All trade-offs */}
             {suggestion.downsides.length > 0 && (
               <div className="border-l-4 border-[#FB923C] pl-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+                <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary">
                   All trade-offs
                 </p>
                 <ul className="mt-1 flex flex-col gap-1">
                   {suggestion.downsides.map((d, i) => (
-                    <li key={i} className="flex min-w-0 items-start gap-2 text-sm font-semibold text-[#1E3A5F]">
+                    <li key={i} className="flex min-w-0 items-start gap-2 text-sm font-semibold text-pt-text-primary">
                       <span aria-hidden="true" className="select-none">•</span>
                       <span className="break-words">{d}</span>
                     </li>
@@ -128,10 +128,10 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
             {/* Persona fit */}
             {suggestion.personaFitSummary && (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-60">
+                <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-60">
                   Fit for this group
                 </p>
-                <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-[#1E3A5F]">
+                <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-pt-text-primary">
                   {suggestion.personaFitSummary}
                 </p>
               </div>
@@ -144,7 +144,7 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
           type="button"
           onClick={() => setExpanded((p) => !p)}
           aria-expanded={expanded}
-          className="self-start border-2 border-[#1E3A5F] bg-[#38BDF8] px-3 py-1 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="self-start border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-3 py-1 text-xs font-bold text-pt-text-primary shadow-pixel-sm hover:bg-[#0ea5e9] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
         >
           {expanded ? "▲ Less" : "▼ Why this fits"}
         </button>
@@ -164,7 +164,7 @@ function FitBadge({ score }: { score: number }) {
   return (
     <span
       aria-label={`Fit score ${r} out of 100`}
-      className={`inline-flex flex-none items-center gap-1 border-2 border-[#1E3A5F] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[2px_2px_0px_#1E3A5F] ${cls}`}
+      className={`inline-flex flex-none items-center gap-1 border-2 border-pt-text-primary border-opacity-20 px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-sm ${cls}`}
     >
       <span className="opacity-70">Fit</span>
       <span>{r}</span>
@@ -174,7 +174,7 @@ function FitBadge({ score }: { score: number }) {
 
 function Chip({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center border-2 border-[#1E3A5F] bg-[#FEF3C7] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[1px_1px_0px_#1E3A5F]">
+    <span className="inline-flex items-center border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble">
       {label}
     </span>
   );
@@ -183,7 +183,7 @@ function Chip({ label }: { label: string }) {
 const PRICE_CFG = {
   budget:   { label: "💸 Budget",    cls: "bg-[#4ADE80]" },
   moderate: { label: "💸 Mid-range", cls: "bg-[#38BDF8]" },
-  premium:  { label: "💸 Premium",   cls: "bg-[#A855F7] text-white" },
+  premium:  { label: "💸 Premium",   cls: "bg-[var(--pt-agent-atlas)] text-white" },
 } as const;
 
 const CROWD_CFG = {
@@ -195,7 +195,7 @@ const CROWD_CFG = {
 function PriceChip({ level }: { level: keyof typeof PRICE_CFG }) {
   const { label, cls } = PRICE_CFG[level];
   return (
-    <span className={`inline-flex items-center border-2 border-[#1E3A5F] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[1px_1px_0px_#1E3A5F] ${cls}`}>
+    <span className={`inline-flex items-center border-2 border-pt-text-primary border-opacity-20 px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble ${cls}`}>
       {label}
     </span>
   );
@@ -204,7 +204,7 @@ function PriceChip({ level }: { level: keyof typeof PRICE_CFG }) {
 function CrowdChip({ level }: { level: keyof typeof CROWD_CFG }) {
   const { label, cls } = CROWD_CFG[level];
   return (
-    <span className={`inline-flex items-center border-2 border-[#1E3A5F] px-2 py-0.5 text-xs font-bold text-[#1E3A5F] shadow-[1px_1px_0px_#1E3A5F] ${cls}`}>
+    <span className={`inline-flex items-center border-2 border-pt-text-primary border-opacity-20 px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble ${cls}`}>
       {label}
     </span>
   );
@@ -213,11 +213,11 @@ function CrowdChip({ level }: { level: keyof typeof CROWD_CFG }) {
 function InfoTile({ label, body, colour }: { label: string; body: string; colour: string }) {
   return (
     <div
-      className="border-2 border-[#1E3A5F] px-3 py-2"
+      className="border-2 border-pt-text-primary border-opacity-20 px-3 py-2"
       style={{ backgroundColor: colour }}
     >
-      <p className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F] opacity-70">{label}</p>
-      <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-[#1E3A5F]">{body}</p>
+      <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-70">{label}</p>
+      <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">{body}</p>
     </div>
   );
 }

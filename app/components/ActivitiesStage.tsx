@@ -15,10 +15,10 @@ type Priority = "must_have" | "optional";
 
 /** Pixel-art badge bg (+ optional text override) per activity type. */
 const TYPE_BADGE: Record<ActivityType, string> = {
-  activity: "bg-[#38BDF8] text-[#1E3A5F]",
-  food: "bg-[#FB923C] text-[#1E3A5F]",
-  sight: "bg-[#4ADE80] text-[#1E3A5F]",
-  experience: "bg-[#A855F7] text-white",
+  activity: "bg-[#38BDF8] text-pt-text-primary",
+  food: "bg-[#FB923C] text-pt-text-primary",
+  sight: "bg-[#4ADE80] text-pt-text-primary",
+  experience: "bg-[var(--pt-agent-atlas)] text-white",
   avoid: "bg-red-400 text-white",
 };
 
@@ -228,28 +228,28 @@ export default function ActivitiesStage({
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       {/* Stage header */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <p className="text-sm font-bold uppercase tracking-wide text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <p className="text-sm font-bold uppercase tracking-wide text-pt-text-primary">
           Current stage
         </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1E3A5F]">
+        <h2 className="mt-1 text-2xl font-bold text-pt-text-primary">
           Activity wishlist
         </h2>
-        <p className="mt-2 text-[#1E3A5F]">
+        <p className="mt-2 text-pt-text-primary">
           Add the things you want to do, eat, see, or avoid on this trip. The
           AI will use everyone&apos;s wishlist to build a fair itinerary.
         </p>
       </div>
 
       {loadError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-[4px_4px_0px_#1E3A5F]">
+        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
           {loadError}
         </div>
       )}
 
       {/* Add form */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <h3 className="mb-4 text-lg font-bold text-pt-text-primary">
           Add to your wishlist
         </h3>
         <form onSubmit={(e) => void handleAdd(e)} className="flex flex-col gap-4">
@@ -257,7 +257,7 @@ export default function ActivitiesStage({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="activity-title"
-              className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]"
+              className="text-xs font-bold uppercase tracking-wide text-pt-text-primary"
             >
               Title <span aria-hidden="true">*</span>
             </label>
@@ -268,7 +268,7 @@ export default function ActivitiesStage({
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="e.g. Ramen at a local spot"
-              className="border-2 border-[#1E3A5F] bg-white px-3 py-2 text-sm font-semibold text-[#1E3A5F] placeholder-[#1E3A5F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+              className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card px-3 py-2 text-sm font-semibold text-pt-text-primary placeholder-[var(--pt-bg-card)]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
             />
           </div>
 
@@ -276,7 +276,7 @@ export default function ActivitiesStage({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="activity-type"
-              className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]"
+              className="text-xs font-bold uppercase tracking-wide text-pt-text-primary"
             >
               Type
             </label>
@@ -284,7 +284,7 @@ export default function ActivitiesStage({
               id="activity-type"
               value={newType}
               onChange={(e) => setNewType(e.target.value as ActivityType)}
-              className="border-2 border-[#1E3A5F] bg-white px-3 py-2 text-sm font-semibold text-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+              className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card px-3 py-2 text-sm font-semibold text-pt-text-primary focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
             >
               <option value="activity">🏃 Activity</option>
               <option value="food">🍜 Food</option>
@@ -296,17 +296,17 @@ export default function ActivitiesStage({
 
           {/* Priority toggle */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+            <span className="text-xs font-bold uppercase tracking-wide text-pt-text-primary">
               Priority
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setNewPriority("must_have")}
-                className={`border-2 border-[#1E3A5F] px-4 py-1.5 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
+                className={`border-2 border-pt-text-primary border-opacity-20 px-4 py-1.5 text-sm font-bold shadow-[3px_3px_0px_var(--pt-bg-card)] transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
                   newPriority === "must_have"
-                    ? "bg-[#4ADE80] text-[#1E3A5F]"
-                    : "bg-white text-[#1E3A5F] hover:bg-[#4ADE80]/20"
+                    ? "bg-[#4ADE80] text-pt-text-primary"
+                    : "bg-pt-card text-pt-text-primary hover:bg-[#4ADE80]/20"
                 }`}
               >
                 ★ Must have
@@ -314,10 +314,10 @@ export default function ActivitiesStage({
               <button
                 type="button"
                 onClick={() => setNewPriority("optional")}
-                className={`border-2 border-[#1E3A5F] px-4 py-1.5 text-sm font-bold shadow-[3px_3px_0px_#1E3A5F] transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
+                className={`border-2 border-pt-text-primary border-opacity-20 px-4 py-1.5 text-sm font-bold shadow-[3px_3px_0px_var(--pt-bg-card)] transition-colors active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
                   newPriority === "optional"
-                    ? "bg-[#38BDF8] text-[#1E3A5F]"
-                    : "bg-white text-[#1E3A5F] hover:bg-[#38BDF8]/20"
+                    ? "bg-[#38BDF8] text-pt-text-primary"
+                    : "bg-pt-card text-pt-text-primary hover:bg-[#38BDF8]/20"
                 }`}
               >
                 Optional
@@ -329,10 +329,10 @@ export default function ActivitiesStage({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="activity-notes"
-              className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]"
+              className="text-xs font-bold uppercase tracking-wide text-pt-text-primary"
             >
               Notes{" "}
-              <span className="font-normal normal-case tracking-normal text-[#1E3A5F]/60">
+              <span className="font-normal normal-case tracking-normal text-pt-text-primary/60">
                 (optional)
               </span>
             </label>
@@ -342,7 +342,7 @@ export default function ActivitiesStage({
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
               placeholder="Any details or context…"
-              className="border-2 border-[#1E3A5F] bg-white px-3 py-2 text-sm font-semibold text-[#1E3A5F] placeholder-[#1E3A5F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+              className="border-2 border-pt-text-primary border-opacity-20 bg-pt-card px-3 py-2 text-sm font-semibold text-pt-text-primary placeholder-[var(--pt-bg-card)]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
             />
           </div>
 
@@ -350,15 +350,15 @@ export default function ActivitiesStage({
           <div className="flex flex-col gap-1">
             <label
               htmlFor="activity-cost"
-              className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]"
+              className="text-xs font-bold uppercase tracking-wide text-pt-text-primary"
             >
               Estimated cost per person{" "}
-              <span className="font-normal normal-case tracking-normal text-[#1E3A5F]/60">
+              <span className="font-normal normal-case tracking-normal text-pt-text-primary/60">
                 (optional, USD)
               </span>
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[#1E3A5F]">$</span>
+              <span className="text-sm font-bold text-pt-text-primary">$</span>
               <input
                 id="activity-cost"
                 type="number"
@@ -368,9 +368,9 @@ export default function ActivitiesStage({
                 value={newCost}
                 onChange={(e) => setNewCost(e.target.value)}
                 placeholder="0"
-                className="w-28 border-2 border-[#1E3A5F] bg-white px-3 py-2 text-sm font-semibold text-[#1E3A5F] placeholder-[#1E3A5F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+                className="w-28 border-2 border-pt-text-primary border-opacity-20 bg-pt-card px-3 py-2 text-sm font-semibold text-pt-text-primary placeholder-[var(--pt-bg-card)]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
               />
-              <span className="text-xs font-semibold text-[#1E3A5F]/60">
+              <span className="text-xs font-semibold text-pt-text-primary/60">
                 Feeds the group budget bar
               </span>
             </div>
@@ -383,7 +383,7 @@ export default function ActivitiesStage({
           <button
             type="submit"
             disabled={submitting || !newTitle.trim()}
-            className="self-start border-4 border-[#1E3A5F] bg-[#38BDF8] px-5 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-5 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#0ea5e9] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Adding…" : "Add to wishlist"}
           </button>
@@ -391,15 +391,15 @@ export default function ActivitiesStage({
       </div>
 
       {/* My wishlist */}
-      <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-        <h3 className="mb-3 text-lg font-bold text-[#1E3A5F]">
+      <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+        <h3 className="mb-3 text-lg font-bold text-pt-text-primary">
           Your wishlist{" "}
-          <span className="text-sm font-semibold text-[#1E3A5F]/70">
+          <span className="text-sm font-semibold text-pt-text-primary/70">
             ({myPreferences.length})
           </span>
         </h3>
         {myPreferences.length === 0 ? (
-          <p className="text-sm font-semibold text-[#1E3A5F]/60">
+          <p className="text-sm font-semibold text-pt-text-primary/60">
             Nothing added yet — use the form above to get started.
           </p>
         ) : (
@@ -418,8 +418,8 @@ export default function ActivitiesStage({
 
       {/* Others' wishlists */}
       {Object.keys(othersByUser).length > 0 && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-6 shadow-[4px_4px_0px_#1E3A5F]">
-          <h3 className="mb-4 text-lg font-bold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-6 shadow-pixel-card">
+          <h3 className="mb-4 text-lg font-bold text-pt-text-primary">
             Group wishlist
           </h3>
           <div className="flex flex-col gap-4">
@@ -428,7 +428,7 @@ export default function ActivitiesStage({
               const name = member?.displayName ?? "A member";
               return (
                 <div key={userId}>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[#1E3A5F]">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-pt-text-primary">
                     {name}
                   </p>
                   <ul className="flex flex-col gap-2">
@@ -449,8 +449,8 @@ export default function ActivitiesStage({
 
       {/* Host info panel */}
       {isHost && (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-bold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+          <p className="text-sm font-bold text-pt-text-primary">
             <span className="text-lg">{membersWithPreferences.size}</span>
             {" / "}
             <span className="text-lg">{members.length}</span>{" "}
@@ -467,7 +467,7 @@ export default function ActivitiesStage({
             type="button"
             onClick={() => void handleAdvance()}
             disabled={advancing}
-            className="border-4 border-[#1E3A5F] bg-[#FB923C] px-4 py-2 font-bold text-[#1E3A5F] shadow-[4px_4px_0px_#1E3A5F] hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? "Advancing…" : "Advance to itinerary"}
           </button>
@@ -476,8 +476,8 @@ export default function ActivitiesStage({
           )}
         </div>
       ) : (
-        <div className="border-4 border-[#1E3A5F] bg-[#FEF3C7] p-4 shadow-[4px_4px_0px_#1E3A5F]">
-          <p className="text-sm font-semibold text-[#1E3A5F]">
+        <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+          <p className="text-sm font-semibold text-pt-text-primary">
             Waiting for the host to advance to the itinerary stage…
           </p>
         </div>
@@ -495,38 +495,38 @@ interface PreferenceRowProps {
 }
 
 function PreferenceRow({ preference, canDelete, onDelete }: PreferenceRowProps) {
-  const typeCls = TYPE_BADGE[preference.type as ActivityType] ?? "bg-gray-200 text-[#1E3A5F]";
+  const typeCls = TYPE_BADGE[preference.type as ActivityType] ?? "bg-gray-200 text-pt-text-primary";
   const typeLabel = TYPE_LABELS[preference.type as ActivityType] ?? preference.type;
 
   return (
-    <li className="flex items-start justify-between gap-3 border-2 border-[#1E3A5F] bg-white p-3 shadow-[2px_2px_0px_#1E3A5F]">
+    <li className="flex items-start justify-between gap-3 border-2 border-pt-text-primary border-opacity-20 bg-pt-card p-3 shadow-pixel-sm">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-1.5">
           {/* Priority badge */}
           {preference.priority === "must_have" && (
-            <span className="border border-[#4ADE80] bg-[#4ADE80]/20 px-1.5 py-0.5 text-xs font-bold text-[#1E3A5F]">
+            <span className="border border-[#4ADE80] bg-[#4ADE80]/20 px-1.5 py-0.5 text-xs font-bold text-pt-text-primary">
               ★ Must have
             </span>
           )}
           {/* Type badge */}
           <span
-            className={`border border-[#1E3A5F] px-1.5 py-0.5 text-xs font-bold shadow-[1px_1px_0px_#1E3A5F] ${typeCls}`}
+            className={`border border-pt-text-primary border-opacity-20 px-1.5 py-0.5 text-xs font-bold shadow-pixel-bubble ${typeCls}`}
           >
             {typeLabel}
           </span>
           {/* Title */}
-          <span className="text-sm font-bold text-[#1E3A5F]">
+          <span className="text-sm font-bold text-pt-text-primary">
             {preference.title}
           </span>
           {/* Cost badge */}
           {preference.estimatedCost !== null && (
-            <span className="border border-[#FB923C] bg-[#FB923C]/20 px-1.5 py-0.5 text-xs font-bold text-[#1E3A5F]">
+            <span className="border border-[#FB923C] bg-[#FB923C]/20 px-1.5 py-0.5 text-xs font-bold text-pt-text-primary">
               ${preference.estimatedCost}
             </span>
           )}
         </div>
         {preference.notes && (
-          <p className="text-xs font-semibold text-[#1E3A5F]/70">
+          <p className="text-xs font-semibold text-pt-text-primary/70">
             {preference.notes}
           </p>
         )}
@@ -537,7 +537,7 @@ function PreferenceRow({ preference, canDelete, onDelete }: PreferenceRowProps) 
           type="button"
           onClick={onDelete}
           aria-label={`Remove "${preference.title}"`}
-          className="shrink-0 border-2 border-[#1E3A5F] bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 shadow-[2px_2px_0px_#1E3A5F] hover:bg-red-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="shrink-0 border-2 border-pt-text-primary border-opacity-20 bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 shadow-pixel-sm hover:bg-red-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
         >
           ×
         </button>
