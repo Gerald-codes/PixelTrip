@@ -95,6 +95,7 @@ Output a single JSON object with EXACTLY these fields:
 
 Rules:
 - Use plain, friendly language. No jargon.
+- When the vote involves destinations, ALWAYS use the destination NAME (city/country) in your descriptions, NEVER use the raw UUID/ID.
 - Every option must have a meaningful trade-off — not just "it's cheaper" but who it helps and who it doesn't.
 - If a "Best Value" or middle-ground option exists, you may include it as a compromise.
 - Never leave proposedOptions empty or with only one item.
@@ -191,14 +192,44 @@ export async function POST(request: Request) {
     );
     voteContext = `Tied flight options: ${tiedDescriptions.join(" | ")}. ${room.selected_destination ? `Destination: ${room.selected_destination}.` : ""}`;
   } else if (voteType === "destination") {
-    voteContext = `Tied destinations: ${(tiedOptions as string[]).join(", ")}.`;
+    // Resolve destination IDs to human-readable names from the DB.
+    const destIds = tiedOptions as string[];
+    const { data: destRows } = await supabase
+      .from("destination_suggestions")
+      .select("id, destination_name")
+      .in("id", destIds);
+
+    const nameMap = new Map<string, string>(
+      ((destRows ?? []) as Array<{ id: string; destination_name: string }>).map(
+        (r) => [r.id, r.destination_name],
+      ),
+    );
+    const tiedNames = destIds.map((id) => nameMap.get(id) ?? id);
+    voteContext = `Tied destinations: ${tiedNames.join(", ")}. Use the destination NAMES (not IDs) in your descriptions.`;
   } else {
     voteContext = `Tied options: ${(tiedOptions as string[]).join(", ")}.`;
+  }
+
+  // For destination ties, include an ID→name mapping so the agent uses human
+  // readable names and the client can map back to IDs for resolution.
+  let optionNames: Record<string, string> | undefined;
+  if (voteType === "destination") {
+    const destIds = tiedOptions as string[];
+    const { data: destRows2 } = await supabase
+      .from("destination_suggestions")
+      .select("id, destination_name")
+      .in("id", destIds);
+    optionNames = Object.fromEntries(
+      ((destRows2 ?? []) as Array<{ id: string; destination_name: string }>).map(
+        (r) => [r.id, r.destination_name],
+      ),
+    );
   }
 
   const userPrompt = JSON.stringify({
     voteType,
     tiedOptions,
+    optionNames, // maps IDs → names for destination votes
     tally,
     voteContext,
     travelWindow,

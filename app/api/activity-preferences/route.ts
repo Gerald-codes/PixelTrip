@@ -24,6 +24,7 @@ interface ActivityPreferenceRow {
   type: ActivityType;
   priority: ActivityPriority;
   notes: string | null;
+  estimated_cost: number | null;
 }
 
 /** Map a snake_case DB row to the camelCase {@link ActivityPreference} shape. */
@@ -36,6 +37,7 @@ function mapRow(row: ActivityPreferenceRow): ActivityPreference {
     type: row.type,
     priority: row.priority,
     notes: row.notes,
+    estimatedCost: row.estimated_cost,
   };
 }
 
@@ -54,6 +56,7 @@ interface PostBody {
   type?: unknown;
   priority?: unknown;
   notes?: unknown;
+  estimatedCost?: unknown;
 }
 
 /**
@@ -72,7 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { roomId, userId, title, type, priority, notes } = body;
+  const { roomId, userId, title, type, priority, notes, estimatedCost } = body;
 
   if (typeof roomId !== "string" || roomId.trim() === "") {
     return NextResponse.json({ error: "roomId is required" }, { status: 400 });
@@ -104,6 +107,20 @@ export async function POST(request: Request) {
   const notesValue: string | null =
     typeof notes === "string" && notes.trim() !== "" ? notes.trim() : null;
 
+  // estimatedCost is optional; must be a non-negative finite number when provided
+  let estimatedCostValue: number | null = null;
+  if (estimatedCost !== undefined && estimatedCost !== null && estimatedCost !== "") {
+    const parsed =
+      typeof estimatedCost === "number" ? estimatedCost : Number(estimatedCost);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return NextResponse.json(
+        { error: "estimatedCost must be a non-negative number" },
+        { status: 400 },
+      );
+    }
+    estimatedCostValue = parsed;
+  }
+
   const supabase = getServiceSupabase();
 
   const { data, error } = await supabase
@@ -115,13 +132,27 @@ export async function POST(request: Request) {
       type,
       priority,
       notes: notesValue,
+      estimated_cost: estimatedCostValue,
     })
     .select()
     .single();
 
   if (error || !data) {
+    console.log("[activity-preferences] insert failed:", error?.message, error?.code);
+    // 42703 = undefined_column — the estimated_cost column is missing because
+    // supabase/schema.sql hasn't been re-run against this database yet.
+    if (error?.code === "42703") {
+      return NextResponse.json(
+        {
+          error:
+            "Database setup incomplete: run supabase/schema.sql in the Supabase SQL editor to add the estimated_cost column.",
+          retryable: false,
+        },
+        { status: 500 },
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to save activity preference" },
+      { error: error?.message ?? "Failed to save activity preference" },
       { status: 500 },
     );
   }
@@ -148,12 +179,23 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from("activity_preferences")
-    .select("id, room_id, user_id, title, type, priority, notes")
+    .select("id, room_id, user_id, title, type, priority, notes, estimated_cost")
     .eq("room_id", roomId);
 
   if (error) {
+    console.log("[activity-preferences] select failed:", error.message, error.code);
+    if (error.code === "42703") {
+      return NextResponse.json(
+        {
+          error:
+            "Database setup incomplete: run supabase/schema.sql in the Supabase SQL editor to add the estimated_cost column.",
+          retryable: false,
+        },
+        { status: 500 },
+      );
+    }
     return NextResponse.json(
-      { error: "Failed to load activity preferences" },
+      { error: error.message ?? "Failed to load activity preferences" },
       { status: 500 },
     );
   }

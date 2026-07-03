@@ -125,15 +125,16 @@ create table votes (
 create index votes_room_type_idx on votes (room_id, vote_type);
 
 -- activity_preferences -----------------------------------------------------
--- Maps to ActivityPreference. notes is nullable.
+-- Maps to ActivityPreference. notes + estimated_cost are nullable.
 create table activity_preferences (
-  id        uuid primary key default gen_random_uuid(),
-  room_id   uuid not null references trip_rooms (id) on delete cascade,
-  user_id   uuid not null,
-  title     text not null,
-  type      text not null check (type in ('activity', 'food', 'sight', 'experience', 'avoid')),
-  priority  text not null check (priority in ('must_have', 'optional')),
-  notes     text
+  id              uuid primary key default gen_random_uuid(),
+  room_id         uuid not null references trip_rooms (id) on delete cascade,
+  user_id         uuid not null,
+  title           text not null,
+  type            text not null check (type in ('activity', 'food', 'sight', 'experience', 'avoid')),
+  priority        text not null check (priority in ('must_have', 'optional')),
+  notes           text,
+  estimated_cost  numeric check (estimated_cost >= 0)
 );
 
 create index activity_preferences_room_id_idx on activity_preferences (room_id);

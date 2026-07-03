@@ -31,6 +31,15 @@ interface UserRow {
   selected_persona_id: string | null;
 }
 
+/** Minimal shape of a `character_profiles` row as returned by Supabase. */
+interface CharacterProfileRow {
+  user_id: string;
+  budget_level: "low" | "medium" | "high";
+  travel_style: string;
+  trip_interests: string[];
+  generated_persona_name: string;
+}
+
 interface PersonaRow {
   id: string;
   name: string;
@@ -130,6 +139,13 @@ const SYSTEM_PROMPT = [
   "",
   "Rules:",
   "- Use the precomputed travelWindow from the input verbatim; do not invent dates.",
+  "- Each member has an `effectiveBudgetLevel` field (\"low\" | \"medium\" | \"high\" | null) — this is the",
+  "  authoritative budget signal. When present, `characterProfile.budgetLevel` is the source of truth;",
+  "  only fall back to the legacy `persona.budgetLevel` when `characterProfile` is null.",
+  "- NEVER describe budgetRange as \"unspecified\" if at least one member has a non-null effectiveBudgetLevel.",
+  "  Summarise the actual spread of effectiveBudgetLevel values across the group (e.g. all 'medium' → \"medium/mid-range across the group\";",
+  "  mixed low+high → \"budget to premium, with a split between low- and high-budget members\").",
+  "- Only describe budgetRange as unspecified/unknown when EVERY member has effectiveBudgetLevel === null.",
   "- Keep budgetRange and each tensionPoint short and specific. No filler.",
   "- Deduplicate commonInterests (case-insensitive) and prefer the friendliest phrasing.",
   "- Surface 1–4 tensionPoints when budget, pace, flexibility, or interests clash; use [] if none.",
@@ -138,6 +154,17 @@ const SYSTEM_PROMPT = [
 
 interface AgentMember {
   displayName: string;
+  /**
+   * Character profile from the current CharacterCreator flow — authoritative
+   * when present. Falls back to `persona` (legacy) when a member has not yet
+   * created a character profile for this room.
+   */
+  characterProfile: {
+    generatedPersonaName: string;
+    budgetLevel: "low" | "medium" | "high";
+    travelStyle: string;
+    tripInterests: string[];
+  } | null;
   persona: {
     name: string;
     budgetLevel: Persona["budgetLevel"];
@@ -147,6 +174,8 @@ interface AgentMember {
     interests: string[];
     description: string;
   } | null;
+  /** Effective budget level used for tension detection — characterProfile wins. */
+  effectiveBudgetLevel: "low" | "medium" | "high" | null;
   availability: DateRange[];
   destinationInterests: string[];
 }
@@ -163,24 +192,28 @@ interface AgentContext {
  */
 function detectObviousTensions(members: AgentMember[]): string[] {
   const tensions: string[] = [];
-  const personas = members
-    .map((m) => m.persona)
-    .filter((p): p is NonNullable<AgentMember["persona"]> => p !== null);
 
-  const hasLow = personas.some((p) => p.budgetLevel === "low");
-  const hasHigh = personas.some((p) => p.budgetLevel === "high");
+  // Budget mismatch — use effectiveBudgetLevel (characterProfile > persona).
+  const withBudget = members.filter((m) => m.effectiveBudgetLevel !== null);
+  const hasLow = withBudget.some((m) => m.effectiveBudgetLevel === "low");
+  const hasHigh = withBudget.some((m) => m.effectiveBudgetLevel === "high");
   if (hasLow && hasHigh) {
-    const lowNames = personas
-      .filter((p) => p.budgetLevel === "low")
-      .map((p) => p.name);
-    const highNames = personas
-      .filter((p) => p.budgetLevel === "high")
-      .map((p) => p.name);
+    const lowNames = withBudget
+      .filter((m) => m.effectiveBudgetLevel === "low")
+      .map((m) => m.displayName);
+    const highNames = withBudget
+      .filter((m) => m.effectiveBudgetLevel === "high")
+      .map((m) => m.displayName);
     tensions.push(
       `Budget mismatch: ${lowNames.join(", ")} (low) vs. ${highNames.join(", ")} (high)`,
     );
   }
 
+  // Pace mismatch — only available from legacy persona data (no travelPace
+  // equivalent in character_profiles yet).
+  const personas = members
+    .map((m) => m.persona)
+    .filter((p): p is NonNullable<AgentMember["persona"]> => p !== null);
   const hasSlow = personas.some((p) => p.travelPace === "slow");
   const hasFast = personas.some((p) => p.travelPace === "fast");
   if (hasSlow && hasFast) {
@@ -193,6 +226,7 @@ function detectObviousTensions(members: AgentMember[]): string[] {
 function buildAgentContext(
   users: User[],
   personasById: Map<string, Persona>,
+  characterProfilesByUser: Map<string, CharacterProfileRow>,
   availabilityByUser: Map<string, DateRange[]>,
   destinationInterestsByUser: Map<string, string[]>,
   travelWindow: DateRange | null,
@@ -202,8 +236,24 @@ function buildAgentContext(
       user.selectedPersonaId !== null
         ? personasById.get(user.selectedPersonaId) ?? null
         : null;
+    const cp = characterProfilesByUser.get(user.id) ?? null;
+
+    const characterProfile = cp
+      ? {
+          generatedPersonaName: cp.generated_persona_name,
+          budgetLevel: cp.budget_level,
+          travelStyle: cp.travel_style,
+          tripInterests: cp.trip_interests ?? [],
+        }
+      : null;
+
+    // characterProfile is authoritative; fall back to legacy persona budget.
+    const effectiveBudgetLevel: "low" | "medium" | "high" | null =
+      characterProfile?.budgetLevel ?? persona?.budgetLevel ?? null;
+
     return {
       displayName: user.displayName,
+      characterProfile,
       persona: persona
         ? {
             name: persona.name,
@@ -215,6 +265,7 @@ function buildAgentContext(
             description: persona.description,
           }
         : null,
+      effectiveBudgetLevel,
       availability: availabilityByUser.get(user.id) ?? [],
       destinationInterests: destinationInterestsByUser.get(user.id) ?? [],
     };
@@ -335,26 +386,35 @@ export async function POST(request: Request) {
   }
 
   // 2. Load context in parallel.
-  const [usersResult, personasResult, availabilityResult, preferencesResult] =
-    await Promise.all([
-      supabase
-        .from("users")
-        .select("id, display_name, room_id, selected_persona_id")
-        .eq("room_id", roomId),
-      supabase
-        .from("personas")
-        .select(
-          "id, name, avatar_image, budget_level, travel_pace, interests, flexibility, decision_style, description, planning_weight",
-        ),
-      supabase
-        .from("availability")
-        .select("id, user_id, room_id, start_date, end_date")
-        .eq("room_id", roomId),
-      supabase
-        .from("destination_preferences")
-        .select("id, user_id, room_id, country_or_city")
-        .eq("room_id", roomId),
-    ]);
+  const [
+    usersResult,
+    personasResult,
+    availabilityResult,
+    preferencesResult,
+    characterProfilesResult,
+  ] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, display_name, room_id, selected_persona_id")
+      .eq("room_id", roomId),
+    supabase
+      .from("personas")
+      .select(
+        "id, name, avatar_image, budget_level, travel_pace, interests, flexibility, decision_style, description, planning_weight",
+      ),
+    supabase
+      .from("availability")
+      .select("id, user_id, room_id, start_date, end_date")
+      .eq("room_id", roomId),
+    supabase
+      .from("destination_preferences")
+      .select("id, user_id, room_id, country_or_city")
+      .eq("room_id", roomId),
+    supabase
+      .from("character_profiles")
+      .select("user_id, budget_level, travel_style, trip_interests, generated_persona_name")
+      .eq("room_id", roomId),
+  ]);
 
   if (
     usersResult.error ||
@@ -368,6 +428,21 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // character_profiles query failure is non-fatal — fall back to persona-only
+  // (mirrors the destinations agent's graceful-degradation behaviour).
+  let characterProfiles: CharacterProfileRow[] = [];
+  if (characterProfilesResult.error) {
+    console.log(
+      "[agent/group-profile] character_profiles unavailable (falling back to persona-only):",
+      characterProfilesResult.error.message,
+    );
+  } else {
+    characterProfiles = (characterProfilesResult.data as CharacterProfileRow[]) ?? [];
+  }
+  const characterProfilesByUser = new Map<string, CharacterProfileRow>(
+    characterProfiles.map((cp) => [cp.user_id, cp]),
+  );
 
   const users = (usersResult.data as UserRow[]).map(mapUserRow);
   if (users.length === 0) {
@@ -420,6 +495,7 @@ export async function POST(request: Request) {
   const context = buildAgentContext(
     users,
     personasById,
+    characterProfilesByUser,
     availabilityByUser,
     destinationInterestsByUser,
     travelWindow,

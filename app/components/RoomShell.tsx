@@ -42,7 +42,7 @@ import type { Identity } from "@/app/components/StageRouter";
 import { createAnonSupabase } from "@/lib/supabase";
 import { STAGE_ORDER } from "@/lib/stageOrder";
 import { roomChanged } from "@/lib/roomUtils";
-import { computeBudgetEstimate } from "@/lib/budgetEstimate";
+import { computeBudgetEstimate, computeRunningBudgetEstimate, FLIGHT_COSTS, type RunningBudgetEstimate } from "@/lib/budgetEstimate";
 import type { BudgetEstimate, BudgetLevel, CharacterProfile, DestinationSuggestion, TripRoom, User } from "@/lib/types";
 import { RoomStage } from "@/lib/types";
 
@@ -86,6 +86,17 @@ interface RoomShellProps {
    * Defaults to 7 when not provided.
    */
   tripLengthDays?: number;
+  /**
+   * Per-person cost estimates from activity_preferences.estimatedCost across
+   * the room (null/missing values already filtered out by the caller).
+   * Feeds the progressive running-spend budget bar.
+   */
+  activityCosts?: number[];
+  /**
+   * Per-person cost estimates from every ItineraryItem.estimatedCost in the
+   * current itinerary version. Feeds the progressive running-spend budget bar.
+   */
+  itineraryCosts?: number[];
 }
 
 // ─── Dev flag ─────────────────────────────────────────────────────────────────
@@ -126,6 +137,8 @@ export default function RoomShell({
   destinationShortlist = null,
   selectedDestinationSuggestion = null,
   tripLengthDays = 7,
+  activityCosts = [],
+  itineraryCosts = [],
 }: RoomShellProps) {
   // ── Local state ─────────────────────────────────────────────────────────────
   const [copied, setCopied] = useState(false);
@@ -189,6 +202,34 @@ export default function RoomShell({
     characterProfiles,
     tripLengthDays,
   ]);
+
+  /**
+   * Progressive "money committed so far" running spend. Unlike budgetEstimate
+   * (a forecast that only appears once destination + flight are both known),
+   * this starts at $0 and fills incrementally:
+   *   - flight cost is added the moment room.selectedFlightOption is set
+   *   - activity costs are added as members fill in estimatedCost on wishlist items
+   *   - itinerary costs are added once the AI assigns per-item estimatedCost
+   * Always computed (never null) so the bar is visible from the start of the trip.
+   */
+  const runningSpend = useMemo((): RunningBudgetEstimate => {
+    const ORDER: BudgetLevel[] = ["low", "medium", "high"];
+    const levels = characterProfiles.map((cp) => cp.budgetLevel);
+    const conservativeBudgetLevel: BudgetLevel =
+      levels.length > 0
+        ? ORDER[Math.min(...levels.map((l) => ORDER.indexOf(l)))]
+        : "medium";
+    const flightCost = room.selectedFlightOption
+      ? FLIGHT_COSTS[room.selectedFlightOption]
+      : 0;
+    return computeRunningBudgetEstimate(
+      conservativeBudgetLevel,
+      tripLengthDays,
+      flightCost,
+      activityCosts,
+      itineraryCosts,
+    );
+  }, [room.selectedFlightOption, characterProfiles, activityCosts, itineraryCosts, tripLengthDays]);
 
   const inviteLink = useMemo(() => {
     if (typeof window === "undefined") return `/?join=${room.roomCode}`;
@@ -579,6 +620,7 @@ export default function RoomShell({
           )}
           <TripContextPanel
             room={room}
+            runningSpend={runningSpend}
             members={members}
             characterProfiles={characterProfiles}
             currentStage={room.currentStage}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import FairnessSummary from "@/app/components/FairnessSummary";
 import ItineraryDay from "@/app/components/ItineraryDay";
@@ -32,6 +32,16 @@ export default function ItineraryStage({
   // ── Finalise state ────────────────────────────────────────────────────────
   const [finalising, setFinalising] = useState(false);
   const [advanceError, setAdvanceError] = useState<string | null>(null);
+
+  /**
+   * Guards against duplicate auto-generation calls. Refs (not state) are used
+   * because React StrictMode double-invokes effects in development, and
+   * because state updates inside the mount effect's async callback can race
+   * with a second mount before the first fetch resolves. This ref persists
+   * across the double-invoke and across remounts triggered by parent
+   * re-renders within the same browser session tab.
+   */
+  const autoGenerateAttemptedRef = useRef(false);
 
   // ── Fetch helpers ─────────────────────────────────────────────────────────
 
@@ -71,13 +81,20 @@ export default function ItineraryStage({
   }, [room.id]);
 
   // ── On mount: load latest + all versions; auto-generate if empty ─────────
+  //
+  // autoGenerateAttemptedRef ensures we only ever fire ONE auto-generate call
+  // per component lifetime, regardless of StrictMode double-invocation or
+  // rapid remounts. Without this guard, two (or more) concurrent POSTs could
+  // each observe "no itinerary yet" and each insert a new version row,
+  // producing several versions from what should be a single generation.
   useEffect(() => {
     setLoading(true);
     void Promise.all([fetchLatestItinerary(), fetchAllVersions()]).then(() => {
       setLoading(false);
-      // Auto-generate if no itinerary exists yet (host only, once per mount).
+      // Auto-generate if no itinerary exists yet (host only, once ever).
       setItinerary((current) => {
-        if (!current && isHost) {
+        if (!current && isHost && !autoGenerateAttemptedRef.current) {
+          autoGenerateAttemptedRef.current = true;
           void handleGenerate();
         }
         return current;

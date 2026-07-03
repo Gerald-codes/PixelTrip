@@ -40,6 +40,8 @@ import type {
 } from "@/lib/types";
 import ReadyBadge from "./ReadyBadge";
 import BudgetStatusBadge from "./BudgetStatusBadge";
+import RunningBudgetBar from "./RunningBudgetBar";
+import type { RunningBudgetEstimate } from "@/lib/budgetEstimate";
 import PixelAvatar from "./PixelAvatar";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -102,6 +104,12 @@ export interface TripContextPanelProps {
   submittedUserIds: string[];
   /** Computed budget estimate, or null when not available. */
   budgetEstimate: BudgetEstimate | null;
+  /**
+   * Progressive "money committed so far" running spend — starts at $0 and
+   * fills up as flight, activities, and itinerary items add cost. Always
+   * present (never null) so the bar is visible from the start of the trip.
+   */
+  runningSpend?: RunningBudgetEstimate | null;
   /**
    * Whether the panel is open on mobile.
    * When false (and screen < 1024px), the panel is hidden.
@@ -278,6 +286,7 @@ export default function TripContextPanel({
   currentStage,
   submittedUserIds,
   budgetEstimate,
+  runningSpend = null,
   isOpen = false,
   travelDates = null,
   travelVibes = null,
@@ -544,6 +553,22 @@ export default function TripContextPanel({
         </div>
       </div>
 
+      {/* ── Running budget bar (progressive: fills as flight/activities/itinerary costs are added) ── */}
+      {runningSpend !== null && (
+        <div
+          style={{
+            padding: "12px 16px",
+            borderBottom: `2px solid ${SAND_CREAM}20`,
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
+          <SectionLabel>Budget committed so far</SectionLabel>
+          <RunningBudgetBar estimate={runningSpend} />
+        </div>
+      )}
+
       {/* ── Budget status badge (always shown; "missing data" when not available) ── */}
       <div
         style={{
@@ -554,7 +579,7 @@ export default function TripContextPanel({
           gap: 6,
         }}
       >
-        <SectionLabel>Budget estimate</SectionLabel>
+        <SectionLabel>Budget forecast</SectionLabel>
         {budgetEstimate !== null ? (
           <BudgetStatusBadge estimate={budgetEstimate} />
         ) : (

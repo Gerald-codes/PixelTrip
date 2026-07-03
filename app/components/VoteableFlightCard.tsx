@@ -1,20 +1,25 @@
 "use client";
 
 /**
- * VoteableFlightCard — scannable flight option card with voting.
+ * VoteableFlightCard — scannable flight option card for voting.
  *
  * Collapsed (default) — shows everything needed to decide:
- *   Accent header:  ✈ [Style name]          [vote count badge]
+ *   Accent header:  ✈ [Style name]
  *   Chip row:       [price] [duration] [stops] [budget impact?]
  *   Impact line:    one short sentence from itineraryImpact
- *   CTA:            Vote / Voted ✓ / Change vote button
+ *   CTA:            Select / Selected ✓ button
  *
  * Expanded (toggle) — adds full explanation text.
  *
- * Vote behaviour is unchanged — optimistic + server reconciliation.
+ * Selection model — matches VoteableDestinationCard: clicking the card only
+ * toggles a local `isSelected` flag (single-select across the flight option
+ * list, enforced by the parent). No network call happens until the parent's
+ * "Submit vote" button is clicked, at which point every card becomes
+ * `isLocked`. Vote counts are never shown on this card — results are only
+ * revealed once everyone has submitted.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
@@ -68,9 +73,12 @@ interface VoteableFlightCardProps {
   budgetImpact?: "within" | "near" | "over" | null;
   /** Full itinerary impact paragraph — shown in the "Why?" expanded section. */
   itineraryComfort?: string | null;
-  hasVoted: boolean;
-  voteCount: number;
-  onVote: (category: string) => Promise<void>;
+  /** Whether this option is currently selected (local draft, not yet submitted). */
+  isSelected: boolean;
+  /** True once the current user has submitted their vote — locks the card. */
+  isLocked: boolean;
+  /** Toggle this option's selection. Purely local — no network call. */
+  onToggle: (category: string) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -82,44 +90,15 @@ export default function VoteableFlightCard({
   stops,
   budgetImpact,
   itineraryComfort,
-  hasVoted,
-  voteCount,
-  onVote,
+  isSelected,
+  isLocked,
+  onToggle,
 }: VoteableFlightCardProps) {
-  const [displayedCount, setDisplayedCount] = useState(voteCount);
-  const [localHasVoted, setLocalHasVoted] = useState(hasVoted);
-  const [voteError, setVoteError] = useState<string | null>(null);
-  const [isVoting, setIsVoting] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    if (voteCount >= displayedCount) setDisplayedCount(voteCount);
-    setLocalHasVoted(hasVoted);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voteCount, hasVoted]);
-
-  async function handleVoteClick() {
-    if (isVoting) return;
-    if (localHasVoted && category === category) return; // clicking own vote = no-op handled by parent
-
-    const previousCount = displayedCount;
-    const wasVoted = localHasVoted;
-    if (!localHasVoted) setDisplayedCount((p) => p + 1);
-    setLocalHasVoted(true);
-    setVoteError(null);
-    setIsVoting(true);
-    try {
-      await onVote(category);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (!msg.includes("409")) {
-        setDisplayedCount(previousCount);
-        setLocalHasVoted(wasVoted);
-        setVoteError("Vote failed — please try again");
-      }
-    } finally {
-      setIsVoting(false);
-    }
+  function handleToggleClick() {
+    if (isLocked) return;
+    onToggle(category);
   }
 
   const label = CATEGORY_LABEL[category];
@@ -129,7 +108,7 @@ export default function VoteableFlightCard({
 
   return (
     <article
-      aria-label={`${label} — ${displayedCount} vote${displayedCount !== 1 ? "s" : ""}`}
+      aria-label={`${label}${isSelected ? ", selected" : ""}`}
       style={{
         fontFamily: "'Courier New', Courier, monospace",
         backgroundColor: SAND_CREAM,
@@ -141,7 +120,7 @@ export default function VoteableFlightCard({
         minWidth: 0,
       }}
     >
-      {/* ── Header ── */}
+      {/* ── Header — vote counts never shown ── */}
       <header
         style={{
           backgroundColor: accent,
@@ -156,21 +135,22 @@ export default function VoteableFlightCard({
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: DEEP_NAVY }}>
           ✈ {label}
         </h3>
-        {/* Vote count */}
-        <span
-          aria-label={`${displayedCount} vote${displayedCount !== 1 ? "s" : ""}`}
-          style={{
-            backgroundColor: SAND_CREAM,
-            border: `2px solid ${DEEP_NAVY}`,
-            padding: "1px 8px",
-            fontSize: 12,
-            fontWeight: 700,
-            color: DEEP_NAVY,
-            whiteSpace: "nowrap",
-          }}
-        >
-          🗳 {displayedCount}
-        </span>
+        {isSelected && (
+          <span
+            aria-hidden="true"
+            style={{
+              backgroundColor: GRASS_GREEN,
+              border: `2px solid ${DEEP_NAVY}`,
+              padding: "1px 8px",
+              fontSize: 12,
+              fontWeight: 700,
+              color: DEEP_NAVY,
+              whiteSpace: "nowrap",
+            }}
+          >
+            ✓ Selected
+          </span>
+        )}
       </header>
 
       {/* ── Chip row ── */}
@@ -250,13 +230,21 @@ export default function VoteableFlightCard({
           marginTop: 4,
         }}
       >
-        {/* Vote / Voted button */}
+        {/* Select / Selected button — purely local toggle; no vote counts shown */}
         <button
           type="button"
-          onClick={() => void handleVoteClick()}
-          disabled={isVoting}
-          aria-label={localHasVoted ? `Change vote from ${label}` : `Vote for ${label}`}
-          aria-pressed={localHasVoted}
+          onClick={handleToggleClick}
+          disabled={isLocked}
+          aria-label={
+            isLocked
+              ? isSelected
+                ? `${label} was submitted as your vote`
+                : `${label} — vote submitted`
+              : isSelected
+                ? `Deselect ${label}`
+                : `Select ${label}`
+          }
+          aria-pressed={isSelected}
           className="voteable-flight-card__vote-btn"
           style={{
             display: "inline-flex",
@@ -265,18 +253,18 @@ export default function VoteableFlightCard({
             padding: "7px 16px",
             fontSize: 13,
             fontWeight: 700,
-            color: isVoting ? SAND_CREAM : DEEP_NAVY,
-            backgroundColor: localHasVoted ? GRASS_GREEN : isVoting ? DEEP_NAVY : SUNSET_ORANGE,
+            color: DEEP_NAVY,
+            backgroundColor: isSelected ? GRASS_GREEN : isLocked ? DEEP_NAVY : SUNSET_ORANGE,
             border: `3px solid ${DEEP_NAVY}`,
             borderRadius: 0,
-            boxShadow: isVoting ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
-            cursor: isVoting ? "not-allowed" : "pointer",
-            opacity: isVoting ? 0.65 : 1,
+            boxShadow: isLocked && !isSelected ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
+            cursor: isLocked ? "not-allowed" : "pointer",
+            opacity: isLocked && !isSelected ? 0.65 : 1,
             outline: "none",
             transition: "background-color 0.1s",
           }}
         >
-          🗳 {isVoting ? "Saving…" : localHasVoted ? "Voted ✓" : "Vote"}
+          {isSelected ? "✓ Selected" : "🗳 Select"}
         </button>
 
         {/* Why? toggle */}
@@ -305,11 +293,7 @@ export default function VoteableFlightCard({
           </button>
         )}
 
-        {voteError && (
-          <p role="alert" style={{ margin: 0, fontSize: 11, fontWeight: 600, color: RED }}>
-            ⚠ {voteError}
-          </p>
-        )}
+
       </div>
     </article>
   );

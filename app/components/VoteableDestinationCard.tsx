@@ -1,11 +1,23 @@
 "use client";
 
 /**
- * VoteableDestinationCard — enriched destination suggestion card with voting.
+ * VoteableDestinationCard — enriched destination suggestion card for voting.
  *
  * Used in the DESTINATIONS and DESTINATION_VOTE stages inside TripAgentChat's
- * InteractiveSlot. Each card represents one AI-generated destination and lets
- * the current user cast a single vote.
+ * InteractiveSlot. Each card represents one AI-generated destination that the
+ * current user can select (toggleable) before submitting their full ballot.
+ *
+ * Selection model — deliberately simple to avoid the previous bugs where
+ * clicking a card instantly cast an irreversible server-side vote:
+ *   - Clicking the card toggles `isSelected` — purely local state managed by
+ *     the parent (TripAgentChat). No network call happens on click.
+ *   - The user can select/deselect any number of cards freely.
+ *   - Once the parent's "Submit votes" button is clicked, all selected cards
+ *     become `isLocked` — no further toggling, and the selection is final.
+ *   - Vote counts are NEVER shown on this card, before or after submission.
+ *     Results are revealed only via the tiebreak panel or the winner
+ *     announcement once everyone has submitted, so no one can see how the
+ *     group is leaning mid-vote.
  *
  * Collapsed (default) view shows:
  *   - Destination name + fit score badge
@@ -13,7 +25,7 @@
  *   - Price level badge   (green=budget, amber=moderate, red=premium)
  *   - Crowd level badge   (green=low, amber=moderate, red=high)
  *   - Best season/weather badge
- *   - Vote button + vote count
+ *   - Select button (toggles selection)
  *   - "View full details" toggle (collapsed)
  *
  * Expanded view (toggled) additionally shows:
@@ -22,17 +34,7 @@
  *   - Best activities list
  *   - personaFitSummary
  *
- * Optimistic vote pattern (Req 7.5):
- *   1. Click Vote → increment displayedCount immediately, set localHasVoted=true
- *   2. POST /api/votes via onVote callback
- *   3a. 2xx   → retain optimistic state
- *   3b. 409   → retain optimistic state (vote already registered in DB)
- *   3c. 5xx/network error → revert count, revert localHasVoted, set voteError
- *
- * Server reconciliation: when `voteCount` prop from server ≥ displayedCount,
- * accept server value (prevents double-increment if optimistic + poll overlap).
- *
- * Vote button: label "🗳 Vote", disabled + visually distinct when user has voted.
+ * Select button: label "🗳 Select" / "✓ Selected", locked once submitted.
  * "View full details" toggle: `expanded` state, collapsed by default.
  *
  * Visual rules (pixel-art, Req 12.5):
@@ -60,7 +62,7 @@
  * Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 12.3, 12.4, 12.5, 12.7
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import type { DestinationSuggestion } from "@/lib/types";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -106,12 +108,25 @@ interface VoteableDestinationCardProps {
   suggestion: DestinationSuggestion;
   /** The current user's ID — used for aria labelling. */
   currentUserId: string;
-  /** Whether the current user has already voted for this destination. */
-  hasVoted: boolean;
-  /** Server-authoritative vote count for this destination. */
-  voteCount: number;
-  /** Async callback that triggers POST /api/votes for this destination. */
-  onVote: (destinationId: string) => Promise<void>;
+  /**
+   * Whether this destination is currently selected by the current user
+   * (toggleable — a local draft, not yet submitted to the server).
+   */
+  isSelected: boolean;
+  /**
+   * True once the current user has submitted their votes for this round.
+   * When true, the card is locked (read-only) and shows its final selected
+   * state — no further toggling is possible.
+   */
+  isLocked: boolean;
+  /**
+   * Toggle this destination's selection on/off. Purely local state — no
+   * network call happens until the parent's "Submit votes" button is clicked.
+   * Vote counts are intentionally never shown on this card: results are only
+   * revealed once everyone has submitted (via the tiebreak panel or the
+   * winner announcement), so no one can see how others are leaning mid-vote.
+   */
+  onToggle: (destinationId: string) => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -178,68 +193,21 @@ function PixelBadge({ label, bg, textColor = DEEP_NAVY }: BadgeProps) {
 export default function VoteableDestinationCard({
   suggestion,
   currentUserId: _currentUserId, // retained in props for API parity; unused in rendering
-  hasVoted,
-  voteCount,
-  onVote,
+  isSelected,
+  isLocked,
+  onToggle,
 }: VoteableDestinationCardProps) {
-  // ── Optimistic vote state ──────────────────────────────────────────────────
-  const [displayedCount, setDisplayedCount] = useState(voteCount);
-  const [localHasVoted, setLocalHasVoted] = useState(hasVoted);
-  const [voteError, setVoteError] = useState<string | null>(null);
-  const [isVoting, setIsVoting] = useState(false);
-
   // ── Expanded / collapsed detail toggle ────────────────────────────────────
   const [expanded, setExpanded] = useState(false);
 
-  // ── Server reconciliation ──────────────────────────────────────────────────
-  // When the parent polls and passes a fresher voteCount prop, accept it if
-  // it's ≥ our optimistic local count (prevents double-increment on poll overlap).
-  useEffect(() => {
-    if (voteCount >= displayedCount) {
-      setDisplayedCount(voteCount);
-    }
-    // Sync hasVoted from server only when it becomes true (can't un-vote server-side).
-    if (hasVoted) {
-      setLocalHasVoted(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voteCount, hasVoted]);
-
-  // ── Vote handler ───────────────────────────────────────────────────────────
-  async function handleVoteClick() {
-    if (localHasVoted || isVoting) return;
-
-    const previousCount = displayedCount;
-
-    // Step 1: Optimistic update — immediate, < 100ms
-    setDisplayedCount((prev) => prev + 1);
-    setLocalHasVoted(true);
-    setVoteError(null);
-    setIsVoting(true);
-
-    try {
-      // Step 2: Delegate POST /api/votes to parent callback
-      await onVote(suggestion.id);
-      // Step 3a: 2xx — retain optimistic state (already applied)
-    } catch (err: unknown) {
-      // onVote is expected to throw an Error whose message contains the HTTP
-      // status code on server errors. "409" = duplicate vote → retain optimistic.
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("409")) {
-        // Step 3b: Duplicate vote — vote was already counted; retain optimistic.
-      } else {
-        // Step 3c: 5xx or network error — revert
-        setDisplayedCount(previousCount);
-        setLocalHasVoted(false);
-        setVoteError("Vote failed — please try again");
-      }
-    } finally {
-      setIsVoting(false);
-    }
+  // ── Toggle handler — purely local; no network call happens here ──────────
+  function handleToggleClick() {
+    if (isLocked) return;
+    onToggle(suggestion.id);
   }
 
   // ── Derived display values ─────────────────────────────────────────────────
-  const isDisabled = localHasVoted || isVoting;
+  const isDisabled = isLocked;
   const fitScore = Math.round(suggestion.fitScore);
   const fitBg = fitScoreColour(fitScore);
 
@@ -266,7 +234,7 @@ export default function VoteableDestinationCard({
       `}</style>
 
       <article
-        aria-label={`${suggestion.destinationName} — ${fitScore}/100 fit, ${displayedCount} vote${displayedCount !== 1 ? "s" : ""}`}
+        aria-label={`${suggestion.destinationName} — ${fitScore}/100 fit${isSelected ? ", selected" : ""}`}
         style={{
           fontFamily: "'Courier New', Courier, monospace",
           backgroundColor: SAND_CREAM,
@@ -634,7 +602,7 @@ export default function VoteableDestinationCard({
             gap: 8,
           }}
         >
-          {/* Vote button row */}
+          {/* Select button row — purely local toggle; no vote counts shown */}
           <div
             style={{
               display: "flex",
@@ -643,17 +611,20 @@ export default function VoteableDestinationCard({
               flexWrap: "wrap",
             }}
           >
-            {/* Vote button */}
             <button
               type="button"
-              onClick={() => void handleVoteClick()}
+              onClick={handleToggleClick}
               disabled={isDisabled}
               aria-label={
-                localHasVoted
-                  ? `You have already voted for ${suggestion.destinationName}`
-                  : `Vote for ${suggestion.destinationName}`
+                isLocked
+                  ? isSelected
+                    ? `${suggestion.destinationName} was submitted as one of your choices`
+                    : `${suggestion.destinationName} — votes submitted`
+                  : isSelected
+                    ? `Deselect ${suggestion.destinationName}`
+                    : `Select ${suggestion.destinationName}`
               }
-              aria-pressed={localHasVoted}
+              aria-pressed={isSelected}
               className="vdc-vote-btn"
               style={{
                 display: "inline-flex",
@@ -663,58 +634,20 @@ export default function VoteableDestinationCard({
                 fontFamily: "'Courier New', Courier, monospace",
                 fontSize: 14,
                 fontWeight: 700,
-                color: isDisabled ? SAND_CREAM : DEEP_NAVY,
-                backgroundColor: isDisabled ? DEEP_NAVY : SUNSET_ORANGE,
+                color: isSelected ? DEEP_NAVY : isDisabled ? SAND_CREAM : DEEP_NAVY,
+                backgroundColor: isSelected ? GRASS_GREEN : isDisabled ? DEEP_NAVY : SUNSET_ORANGE,
                 border: `3px solid ${DEEP_NAVY}`,
                 borderRadius: 0,
-                boxShadow: isDisabled ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
+                boxShadow: isDisabled && !isSelected ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
                 cursor: isDisabled ? "not-allowed" : "pointer",
-                opacity: isDisabled ? 0.65 : 1,
+                opacity: isDisabled && !isSelected ? 0.65 : 1,
                 outline: "none",
                 transition: "background-color 0.1s, box-shadow 0.1s",
               }}
             >
-              🗳 {localHasVoted ? "Voted" : "Vote"}
+              {isSelected ? "✓ Selected" : "🗳 Select"}
             </button>
-
-            {/* Vote count badge */}
-            <span
-              aria-label={`${displayedCount} vote${displayedCount !== 1 ? "s" : ""}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                backgroundColor: NEON_PURPLE,
-                border: `2px solid ${DEEP_NAVY}`,
-                borderRadius: 0,
-                boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
-                padding: "3px 10px",
-                fontSize: 13,
-                fontWeight: 700,
-                color: SAND_CREAM,
-                fontFamily: "'Courier New', Courier, monospace",
-                whiteSpace: "nowrap",
-              }}
-            >
-              🗳 {displayedCount}
-            </span>
           </div>
-
-          {/* Inline vote error */}
-          {voteError != null && (
-            <p
-              role="alert"
-              style={{
-                margin: 0,
-                fontSize: 12,
-                fontWeight: 600,
-                color: RED,
-                fontFamily: "'Courier New', Courier, monospace",
-              }}
-            >
-              ⚠ {voteError}
-            </p>
-          )}
 
           {/* "View full details" toggle */}
           <button

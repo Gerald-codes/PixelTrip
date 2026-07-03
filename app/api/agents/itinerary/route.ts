@@ -91,6 +91,7 @@ interface ActivityPreferenceRow {
   type: string;
   priority: string;
   notes: string | null;
+  estimated_cost: number | null;
 }
 
 interface CharacterProfileRow {
@@ -133,6 +134,10 @@ function isItineraryItem(value: unknown): value is ItineraryItem {
   // personaBenefits must be a string array (may be empty for rest/travel items)
   if (!isStringArray(v.personaBenefits)) return false;
   if (typeof v.reason !== "string") return false;
+  // estimatedCost is required — 0 for free items, never omitted.
+  if (typeof v.estimatedCost !== "number" || !Number.isFinite(v.estimatedCost) || v.estimatedCost < 0) {
+    return false;
+  }
   return true;
 }
 
@@ -282,6 +287,9 @@ Each ItineraryItem must have:
 - type: string (e.g. "food", "sight", "activity", "rest")
 - personaBenefits: string[] — MUST NOT be empty. List the persona names who specifically benefit.
 - reason: string — why this item is included
+- estimatedCost: number — REQUIRED on every item. Realistic per-person cost in USD for this specific
+  item at this destination (entry fee, meal price, activity fee, transport, etc). Use 0 for free items
+  (e.g. a scenic walk, a free viewpoint, a rest period). Never omit this field.
 
 FairnessSummary must have:
 - perPersona: Record<personaName, string> — one entry per member
@@ -290,12 +298,16 @@ FairnessSummary must have:
 
 Non-negotiable rules:
 1. Every ItineraryItem.personaBenefits MUST be non-empty.
-2. Honor all must_have activity preferences.
-3. Respect avoid items.
-4. Balance pace for chill/slow personas.
-5. Balance budget for low-budget personas.
-6. The fairnessSummary must cover every member.
-7. Return only valid JSON. No preamble, no markdown, no commentary.`;
+2. Every ItineraryItem.estimatedCost MUST be present and >= 0.
+3. Honor all must_have activity preferences. If a preference includes an estimatedCost hint from the
+   user, use it as a strong signal for that item's estimatedCost.
+4. Respect avoid items.
+5. Balance pace for chill/slow personas.
+6. Balance budget for low-budget personas — keep the SUM of estimatedCost across all days reasonable
+   for the group's dominant budget level (given in the input context). Flag in fairnessSummary.warnings
+   if the total cost skews high for low-budget members.
+7. The fairnessSummary must cover every member.
+8. Return only valid JSON. No preamble, no markdown, no commentary.`;
 
 // ─── POST: run the agent and persist itinerary ────────────────────────────
 
@@ -414,7 +426,7 @@ export async function POST(request: Request) {
         .eq("room_id", roomId),
       supabase
         .from("activity_preferences")
-        .select("user_id, title, type, priority, notes")
+        .select("user_id, title, type, priority, notes, estimated_cost")
         .eq("room_id", roomId),
       supabase
         .from("users")
@@ -516,7 +528,22 @@ export async function POST(request: Request) {
       type: ap.type,
       priority: ap.priority,
       notes: ap.notes,
+      // User's own rough per-person cost estimate, if provided — a strong
+      // signal for this item's estimatedCost in the generated itinerary.
+      estimatedCostHint: ap.estimated_cost,
     })),
+    // The most budget-conscious level across all members — the agent should
+    // keep the itinerary's total estimatedCost reasonable for this level.
+    conservativeBudgetLevel: (() => {
+      const levels = usersData.map((u) => {
+        const cp = cpByUser.get(u.id);
+        return cp?.budget_level ?? u.personas?.budget_level ?? null;
+      });
+      if (levels.includes("low")) return "low";
+      if (levels.includes("medium")) return "medium";
+      if (levels.includes("high")) return "high";
+      return "medium";
+    })(),
   };
 
   const userPrompt = JSON.stringify(userPromptContext);

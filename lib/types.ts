@@ -145,6 +145,12 @@ export interface ActivityPreference {
   type: "activity" | "food" | "sight" | "experience" | "avoid";
   priority: "must_have" | "optional";
   notes: string | null;
+  /**
+   * User's own rough per-person cost estimate in USD for this item, if they
+   * provided one. Optional — null when not supplied. Feeds the running
+   * budget bar in TripContextPanel alongside flight + itinerary item costs.
+   */
+  estimatedCost: number | null;
 }
 
 /** A single item scheduled within a part of a day. */
@@ -154,6 +160,12 @@ export interface ItineraryItem {
   type: string;
   personaBenefits: string[]; // persona names who benefit
   reason: string;
+  /**
+   * Estimated per-person cost in USD for this item, as assigned by the
+   * itinerary agent. 0 for free items (e.g. a scenic walk). Required so the
+   * running budget bar can sum costs across the whole itinerary.
+   */
+  estimatedCost: number;
 }
 
 /** A single day of the itinerary, split into parts of the day. */

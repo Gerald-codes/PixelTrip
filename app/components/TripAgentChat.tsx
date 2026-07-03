@@ -77,7 +77,11 @@ function buildSubmittedSelections(
   stage: RoomStage,
   identity: Identity,
   characterProfiles: CharacterProfile[],
-  availabilitySummaryText?: string
+  availabilitySummaryText?: string,
+  /** For DESTINATION_VOTE: names of destinations the user voted for. */
+  votedDestinationNames?: string[],
+  /** For FLIGHT_VOTE: the flight category the user voted for. */
+  votedFlightCategory?: string | null,
 ): React.ReactNode {
   const myProfile = characterProfiles.find((p) => p.userId === identity.userId);
 
@@ -120,6 +124,33 @@ function buildSubmittedSelections(
             <strong>{myProfile.tripInterests.join(", ")}</strong>
           </div>
         )}
+      </div>
+    );
+  }
+
+  // DESTINATION_VOTE — show what the user voted for
+  if (
+    (stage === RoomStage.DESTINATIONS || stage === RoomStage.DESTINATION_VOTE) &&
+    votedDestinationNames && votedDestinationNames.length > 0
+  ) {
+    return (
+      <div style={{ fontSize: 13, fontFamily: "'Courier New', Courier, monospace", color: SAND_CREAM }}>
+        <span style={{ opacity: 0.7 }}>Voted for: </span>
+        <strong>{votedDestinationNames.join(", ")}</strong>
+      </div>
+    );
+  }
+
+  // FLIGHT_VOTE — show the flight category voted for
+  if (
+    (stage === RoomStage.FLIGHTS || stage === RoomStage.FLIGHT_VOTE) &&
+    votedFlightCategory
+  ) {
+    const LABELS: Record<string, string> = { budget: "Budget", best_value: "Best Value", comfort: "Comfort" };
+    return (
+      <div style={{ fontSize: 13, fontFamily: "'Courier New', Courier, monospace", color: SAND_CREAM }}>
+        <span style={{ opacity: 0.7 }}>Voted for: </span>
+        <strong>{LABELS[votedFlightCategory] ?? votedFlightCategory}</strong>
       </div>
     );
   }
@@ -205,6 +236,14 @@ export default function TripAgentChat({
   // ── Flight votes state ─────────────────────────────────────────────────────
   const [flightVotes, setFlightVotes] = useState<Vote[]>([]);
 
+  // ── Flight single-select vote state (select-then-submit, matches destinations) ──
+  // Tracks the current user's locally selected flight category (not yet submitted).
+  const [selectedFlightCategory, setSelectedFlightCategory] = useState<string | null>(null);
+  const [submittingFlightVote, setSubmittingFlightVote] = useState(false);
+  const [flightVoteSubmitError, setFlightVoteSubmitError] = useState<string | null>(null);
+  // Tracks which user IDs have submitted flight votes (derived from flightVotes poll).
+  const flightVoteSubmittedUserIds = [...new Set(flightVotes.map((v) => v.userId))];
+
   // ── Availability submitted user IDs (task 11.8) ──────────────────────────────
   //
   // For AVAILABILITY stage we derive submitted users by polling the actual
@@ -259,15 +298,6 @@ export default function TripAgentChat({
    */
   const everyoneReadyAppendedRef = useRef<boolean>(false);
 
-  /**
-   * Tracks which flight category we've already appended a plurality
-   * confirmation message for. Stores the winning category string (e.g.
-   * "budget") or null when no confirmation has been appended yet.
-   * Reset to null on every stage change so a fresh vote cycle in a future
-   * FLIGHT_VOTE stage can fire again.
-   * (Task 11.6 — Req 8.6)
-   */
-  const flightPluralityAppendedRef = useRef<string | null>(null);
   /**
    * Guards auto-generation of destinations — fires once per stage entry.
    * Reset on stage change so re-entering DESTINATIONS can trigger again.
@@ -418,11 +448,23 @@ export default function TripAgentChat({
   //
   // For PERSONA/LOBBY: a user is "submitted" when a CharacterProfile exists.
   // For AVAILABILITY: use the polled availability API submitted user IDs.
+  // For DESTINATION_VOTE: use destVoteSubmittedUserIds (populated by vote polling).
+  // For FLIGHT_VOTE: derive from flightVotes (distinct user_ids who have a vote row).
   // For other stages: use characterProfiles as a proxy (MVP simplification).
-  const submittedUserIds =
-    room.currentStage === RoomStage.AVAILABILITY
-      ? availabilitySubmittedUserIds
-      : characterProfiles.map((p) => p.userId);
+  const submittedUserIds = (() => {
+    switch (room.currentStage) {
+      case RoomStage.AVAILABILITY:
+        return availabilitySubmittedUserIds;
+      case RoomStage.DESTINATIONS:
+      case RoomStage.DESTINATION_VOTE:
+        return destVoteSubmittedUserIds;
+      case RoomStage.FLIGHTS:
+      case RoomStage.FLIGHT_VOTE:
+        return [...new Set(flightVotes.map((v) => v.userId))];
+      default:
+        return characterProfiles.map((p) => p.userId);
+    }
+  })();
 
   /**
    * Per-member submission status array passed to WaitingState / ReadyBadge.
@@ -473,15 +515,18 @@ export default function TripAgentChat({
         // At least one suggestion must have been generated
         return destinationSuggestions.length > 0;
       case RoomStage.DESTINATION_VOTE:
-        // At least one vote must have been cast
-        return destinationVotes.length > 0;
+        // Advancement happens automatically via /api/votes/submit once
+        // everyone has submitted (or via the tiebreak panel) — the manual
+        // "Move to next step" button is hidden for this stage entirely.
+        return false;
       case RoomStage.FLIGHTS:
         // Flight options must be loaded (MOCK_FLIGHT_OPTIONS always available)
         return MOCK_FLIGHT_OPTIONS.length > 0;
       case RoomStage.FLIGHT_VOTE:
-        // All members must have cast a flight vote before the host can advance.
-        // This ensures the tally is complete and the winner can be determined.
-        return flightVotes.length >= members.length && members.length > 0;
+        // Advancement happens automatically via /api/votes/submit once
+        // everyone has submitted (or via the tiebreak panel) — the manual
+        // "Move to next step" button is hidden for this stage entirely.
+        return false;
       default:
         // No blocking condition for other stages
         return true;
@@ -498,58 +543,11 @@ export default function TripAgentChat({
     if (advancingStage || !canAdvanceStage()) return;
     setAdvancingStage(true);
     try {
-      // For FLIGHT_VOTE: determine the winner from the tally and persist
-      // selected_flight_option before advancing. This is required because the
-      // stage prereq check for FLIGHT_VOTE → ACTIVITIES verifies that
-      // selected_flight_option is non-null.
-      if (room.currentStage === RoomStage.FLIGHT_VOTE) {
-        // Compute tally
-        const tally: Record<string, number> = {};
-        for (const v of flightVotes) {
-          tally[v.selectedOption] = (tally[v.selectedOption] ?? 0) + 1;
-        }
-        let maxCount = 0;
-        let winner: string | null = null;
-        let tied = false;
-        for (const [option, count] of Object.entries(tally)) {
-          if (count > maxCount) { maxCount = count; winner = option; tied = false; }
-          else if (count === maxCount) { tied = true; winner = null; }
-        }
-
-        if (tied || !winner) {
-          // Tie — surface the tie-break UI inline under the flight cards.
-          const tiedOpts = Object.entries(tally)
-            .filter(([, count]) => count === maxCount)
-            .map(([opt]) => opt);
-          setTiedFlightOptions(tiedOpts);
-          appendSystemMessage(
-            `⚖️ It's a tie between ${tiedOpts.join(" and ")}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
-            "system"
-          );
-          setAdvancingStage(false);
-          return;
-        }
-
-        // Persist the winning flight option.
-        const flightRes = await fetch(`/api/rooms/${room.roomCode}/flight`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            selectedFlightOption: winner,
-            requestingUserId: identity.userId,
-          }),
-        });
-        if (!flightRes.ok) {
-          const b = (await flightRes.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(b?.error ?? "Failed to save flight option");
-        }
-        const roomWithFlight = (await flightRes.json()) as TripRoom;
-        onRoomUpdated(roomWithFlight);
-        appendSystemMessage(
-          `✅ ${winner === "best_value" ? "Best Value" : winner.charAt(0).toUpperCase() + winner.slice(1)} flights selected! Moving to activities…`,
-          "confirmation"
-        );
-      }
+      // Note: DESTINATION_VOTE and FLIGHT_VOTE never reach this function via
+      // the manual "Move to next step" button — that button is hidden for
+      // both stages. Advancement for votes happens automatically through
+      // /api/votes/submit (handleSubmitDestinationVotes / handleSubmitFlightVote)
+      // once every member has submitted, or via the tiebreak panel.
 
       const res = await fetch(`/api/rooms/${room.roomCode}/stage`, {
         method: "PATCH",
@@ -655,13 +653,22 @@ export default function TripAgentChat({
     // Reset per-stage tracking on every stage change (task 11.3)
     prevSubmittedCountRef.current = 0;
     everyoneReadyAppendedRef.current = false;
-    // Reset flight plurality guard so a new stage cycle can fire again (task 11.6)
-    flightPluralityAppendedRef.current = null;
     // Reset destination auto-generation guard for the new stage
     destinationAutoGeneratedRef.current = false;
     // Reset availability submitted IDs when leaving/entering AVAILABILITY stage
     if (room.currentStage !== RoomStage.AVAILABILITY) {
       setAvailabilitySubmittedUserIds([]);
+    }
+    // Reset local draft selections + tie state for a fresh vote round
+    if (room.currentStage !== RoomStage.DESTINATIONS && room.currentStage !== RoomStage.DESTINATION_VOTE) {
+      setSelectedDestinationIds([]);
+      setTiedDestinationIds(null);
+      destTieResolvedRef.current = false;
+    }
+    if (room.currentStage !== RoomStage.FLIGHTS && room.currentStage !== RoomStage.FLIGHT_VOTE) {
+      setSelectedFlightCategory(null);
+      setTiedFlightOptions(null);
+      flightTieResolvedRef.current = false;
     }
     appendIntroMessage(room.currentStage);
   }, [room.currentStage, appendIntroMessage]);
@@ -779,6 +786,96 @@ export default function TripAgentChat({
     }
   }, [room.id]);
 
+  // ── Keep destVoteSubmittedUserIds in sync with polled destinationVotes ──────
+  // This ensures per-member ReadyBadge status updates for OTHER users when
+  // they submit, without revealing WHAT they voted for (counts remain hidden).
+  useEffect(() => {
+    const ids = [...new Set(destinationVotes.map((v) => v.userId))];
+    setDestVoteSubmittedUserIds(ids);
+  }, [destinationVotes]);
+
+  // ── Detect destination vote tie from polled data (for non-last-submitters) ──
+  //
+  // The tie response from /api/votes/submit only reaches the LAST user who
+  // submits. Everyone else (including the host who likely submitted first)
+  // only sees the waiting state. This effect checks whether all members have
+  // voted AND there's a tie — if so, it sets tiedDestinationIds so the
+  // tiebreak panel appears for the host.
+  //
+  // destTieResolvedRef prevents re-detection after the host resolves the tie.
+  const destTieResolvedRef = useRef(false);
+  useEffect(() => {
+    // Only run in the vote stage and when we have poll data
+    if (room.currentStage !== RoomStage.DESTINATION_VOTE && room.currentStage !== RoomStage.DESTINATIONS) return;
+    if (tiedDestinationIds) return; // already showing
+    if (destTieResolvedRef.current) return; // already resolved — don't re-detect
+    if (members.length === 0) return;
+
+    const voterIds = [...new Set(destinationVotes.map((v) => v.userId))];
+    if (voterIds.length < members.length) return; // not everyone has voted yet
+
+    // Tally votes
+    const tally: Record<string, number> = {};
+    for (const v of destinationVotes) {
+      tally[v.selectedOption] = (tally[v.selectedOption] ?? 0) + 1;
+    }
+    let maxCount = 0;
+    for (const count of Object.values(tally)) {
+      if (count > maxCount) maxCount = count;
+    }
+    const topOptions = Object.entries(tally)
+      .filter(([, count]) => count === maxCount)
+      .map(([opt]) => opt);
+
+    if (topOptions.length > 1) {
+      // Tie detected — show tiebreak panel
+      setTiedDestinationIds(topOptions);
+      const tiedNames = topOptions
+        .map((id) => destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id)
+        .join(", ");
+      appendSystemMessage(
+        `⚖️ It's a tie between: ${tiedNames}. ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+        "system"
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destinationVotes, members.length, room.currentStage, tiedDestinationIds]);
+
+  // ── Detect flight vote tie from polled data (for non-last-submitters) ──────
+  const flightTieResolvedRef = useRef(false);
+  useEffect(() => {
+    if (room.currentStage !== RoomStage.FLIGHT_VOTE && room.currentStage !== RoomStage.FLIGHTS) return;
+    if (tiedFlightOptions) return; // already showing
+    if (flightTieResolvedRef.current) return; // already resolved — don't re-detect
+    if (members.length === 0) return;
+
+    const voterIds = [...new Set(flightVotes.map((v) => v.userId))];
+    if (voterIds.length < members.length) return; // not everyone has voted yet
+
+    const tally: Record<string, number> = {};
+    for (const v of flightVotes) {
+      tally[v.selectedOption] = (tally[v.selectedOption] ?? 0) + 1;
+    }
+    let maxCount = 0;
+    for (const count of Object.values(tally)) {
+      if (count > maxCount) maxCount = count;
+    }
+    const topOptions = Object.entries(tally)
+      .filter(([, count]) => count === maxCount)
+      .map(([opt]) => opt);
+
+    if (topOptions.length > 1) {
+      setTiedFlightOptions(topOptions);
+      const LABELS: Record<string, string> = { budget: "Budget", best_value: "Best Value", comfort: "Comfort" };
+      const tiedNames = topOptions.map((opt) => LABELS[opt] ?? opt).join(" and ");
+      appendSystemMessage(
+        `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+        "system"
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flightVotes, members.length, room.currentStage, tiedFlightOptions]);
+
   // ── Fetch flight votes ─────────────────────────────────────────────────────
 
   const fetchFlightVotes = useCallback(async () => {
@@ -873,59 +970,13 @@ export default function TripAgentChat({
 
   // ── Effect: append flight vote plurality confirmation message ─────────────
   //
-  // Runs after each poll cycle while in FLIGHT_VOTE stage. Counts votes per
-  // category, finds the category with the most votes, and appends a
-  // "confirmation" AgentMessage when there is a clear winner (no tie).
-  //
-  // A ref guard (`flightPluralityAppendedRef`) prevents duplicate messages if
-  // the same winner persists across multiple poll cycles. The ref is reset on
-  // every stage change so a future FLIGHT_VOTE stage works correctly.
-  //
-  // Requirements: 8.6
-
-  useEffect(() => {
-    if (room.currentStage !== RoomStage.FLIGHT_VOTE) return;
-    if (flightVotes.length === 0) return;
-
-    // Count votes per category
-    const counts: Record<string, number> = {};
-    for (const vote of flightVotes) {
-      counts[vote.selectedOption] = (counts[vote.selectedOption] ?? 0) + 1;
-    }
-
-    // Find the category with the most votes; detect ties
-    let maxCount = 0;
-    let winner: string | null = null;
-    let tied = false;
-    for (const [category, count] of Object.entries(counts)) {
-      if (count > maxCount) {
-        maxCount = count;
-        winner = category;
-        tied = false;
-      } else if (count === maxCount) {
-        tied = true;
-      }
-    }
-
-    // Only append confirmation if there is a clear winner and we haven't already
-    if (winner && !tied && flightPluralityAppendedRef.current !== winner) {
-      flightPluralityAppendedRef.current = winner;
-      const labelMap: Record<string, string> = {
-        budget: "Budget Flights",
-        best_value: "Best Value",
-        comfort: "Comfort",
-      };
-      const label = labelMap[winner] ?? winner;
-      const confirmMsg: AgentMessage = {
-        id: crypto.randomUUID(),
-        stage: room.currentStage,
-        text: `The group is leaning towards ${label}. The host can confirm and move forward.`,
-        timestamp: Date.now(),
-        type: "confirmation",
-      };
-      setMessages((prev) => [...prev, confirmMsg]);
-    }
-  }, [flightVotes, room.currentStage]);
+  // Note: a live "the group is leaning towards X" plurality effect used to
+  // run here, appending a message as soon as any category took a lead. That
+  // revealed partial vote results mid-round (before everyone had submitted),
+  // which is exactly what select-then-submit voting is meant to prevent —
+  // removed. Results are now only ever revealed via the winner announcement
+  // in handleSubmitFlightVote (once everyone has submitted) or the
+  // TiebreakPanel tally (once a tie is detected).
 
   // ── Vote handlers ──────────────────────────────────────────────────────────
 
@@ -952,25 +1003,72 @@ export default function TripAgentChat({
   }
 
   /**
-   * Called by VoteableFlightCard. POSTs /api/votes with voteType "flight".
-   * Throws on 5xx so the card can revert its optimistic state.
+   * Submit the current user's single flight selection.
+   * POSTs to /api/votes/submit which handles tallying and auto-advancing the
+   * stage when all members have voted. Mirrors handleSubmitDestinationVotes
+   * so both voting stages behave identically (select, then submit, then wait).
    */
-  async function handleFlightVote(category: string): Promise<void> {
-    const res = await fetch("/api/votes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roomId: room.id,
-        userId: identity.userId,
-        voteType: "flight",
-        selectedOption: category,
-      }),
-    });
-    if (!res.ok) {
-      throw new Error(String(res.status));
+  async function handleSubmitFlightVote(): Promise<void> {
+    if (submittingFlightVote || !selectedFlightCategory) return;
+    setFlightVoteSubmitError(null);
+    setSubmittingFlightVote(true);
+    try {
+      const res = await fetch("/api/votes/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: room.id,
+          userId: identity.userId,
+          voteType: "flight",
+          selectedOptions: [selectedFlightCategory],
+        }),
+      });
+      const data = (await res.json()) as {
+        allVoted?: boolean;
+        tied?: boolean;
+        tiedOptions?: string[];
+        winner?: string;
+        roomAdvanced?: boolean;
+        updatedRoom?: TripRoom;
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(data.error ?? `HTTP ${res.status}`);
+      }
+      // Mark as submitted
+      setSubmittedStages((prev) => new Set([...prev, room.currentStage]));
+      void fetchFlightVotes();
+
+      const LABELS: Record<string, string> = {
+        budget: "Budget",
+        best_value: "Best Value",
+        comfort: "Comfort",
+      };
+
+      if (data.roomAdvanced && data.updatedRoom) {
+        appendSystemMessage(
+          `✅ ${LABELS[data.winner ?? ""] ?? data.winner ?? "A flight option"} selected! Moving to activities…`,
+          "confirmation"
+        );
+        void broadcastStageChange();
+        onRoomUpdated(data.updatedRoom);
+      } else if (data.tied && data.tiedOptions && data.tiedOptions.length > 0) {
+        setTiedFlightOptions(data.tiedOptions);
+        const tiedNames = data.tiedOptions.map((opt) => LABELS[opt] ?? opt).join(" and ");
+        appendSystemMessage(
+          `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+          "system"
+        );
+      } else if (data.allVoted) {
+        appendSystemMessage("Everyone has voted! Tallying results…", "system");
+      }
+    } catch (err) {
+      setFlightVoteSubmitError(
+        err instanceof Error ? err.message : "Failed to submit vote. Please try again."
+      );
+    } finally {
+      setSubmittingFlightVote(false);
     }
-    // Refresh vote counts after a successful cast
-    void fetchFlightVotes();
   }
 
   /**
@@ -1079,6 +1177,7 @@ export default function TripAgentChat({
         "confirmation"
       );
       setTiedDestinationIds(null);
+      destTieResolvedRef.current = true;
       void broadcastStageChange();
       onRoomUpdated(updatedRoom);
     } catch (err) {
@@ -1121,6 +1220,7 @@ export default function TripAgentChat({
       const updatedRoom = (await stageRes.json()) as TripRoom;
       appendSystemMessage(`✅ ${LABELS[winner] ?? winner} selected as the group's flight. Moving on…`, "confirmation");
       setTiedFlightOptions(null);
+      flightTieResolvedRef.current = true;
       void broadcastStageChange();
       onRoomUpdated(updatedRoom);
     } catch (err) {
@@ -1340,11 +1440,12 @@ export default function TripAgentChat({
         );
       }
 
-      // Check if current user has already submitted votes
-      const myVotedIds = destinationVotes
-        .filter((v) => v.userId === identity.userId)
-        .map((v) => v.selectedOption);
-      const hasSubmittedVotes = submittedStages.has(stage) || myVotedIds.length > 0;
+      // Whether the current user has already submitted their ballot for this
+      // round. This is tracked purely via local state (submittedStages) set
+      // by handleSubmitDestinationVotes on success — we deliberately do NOT
+      // derive this from destinationVotes, since that would require reading
+      // other members' vote rows and could leak who voted for what mid-round.
+      const hasSubmittedVotes = submittedStages.has(stage);
 
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1355,27 +1456,23 @@ export default function TripAgentChat({
             color: SAND_CREAM,
             opacity: 0.8,
           }}>
-            Select one or more destinations you&apos;d like, then click Submit.
+            {hasSubmittedVotes
+              ? "Your votes are locked in — waiting for the rest of the group."
+              : "Select one or more destinations you'd like, then click Submit."}
           </p>
 
           {destinationSuggestions.map((suggestion) => {
-            const voteCount = destinationVotes.filter(
-              (v) => v.selectedOption === suggestion.id
-            ).length;
-            const isSelected = hasSubmittedVotes
-              ? myVotedIds.includes(suggestion.id)
-              : selectedDestinationIds.includes(suggestion.id);
+            const isSelected = selectedDestinationIds.includes(suggestion.id);
 
             return (
               <VoteableDestinationCard
                 key={suggestion.id}
                 suggestion={suggestion}
                 currentUserId={identity.userId}
-                hasVoted={isSelected}
-                voteCount={voteCount}
-                onVote={async (id) => {
+                isSelected={isSelected}
+                isLocked={hasSubmittedVotes}
+                onToggle={(id) => {
                   if (hasSubmittedVotes) return;
-                  // Toggle selection instead of immediate submit
                   setSelectedDestinationIds((prev) =>
                     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
                   );
@@ -1429,18 +1526,32 @@ export default function TripAgentChat({
             </div>
           )}
 
-          {hasSubmittedVotes && (
-            <div style={{
-              border: `2px solid #4ADE80`,
-              backgroundColor: "#FEF3C7",
-              padding: "10px 16px",
-              fontFamily: "'Courier New', Courier, monospace",
-              fontSize: 13,
-              fontWeight: 700,
-              color: DEEP_NAVY,
-            }}>
-              ✓ Votes submitted! Waiting for others…
-            </div>
+          {hasSubmittedVotes && !tiedDestinationIds && (
+            <WaitingState
+              submittedSelections={
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                  fontSize: 13,
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: "#FEF3C7",
+                }}>
+                  <span style={{ opacity: 0.7 }}>You voted for:</span>
+                  {selectedDestinationIds.map((id) => {
+                    const name = destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id;
+                    return (
+                      <span key={id} style={{ fontWeight: 700 }}>📍 {name}</span>
+                    );
+                  })}
+                </div>
+              }
+              memberStatuses={members.map((m) => ({
+                userId: m.id,
+                displayName: m.displayName,
+                submitted: destVoteSubmittedUserIds.includes(m.id),
+              }))}
+            />
           )}
 
           {/* ── Tiebreaker: destination tie → TiebreakPanel ── */}
@@ -1487,6 +1598,11 @@ export default function TripAgentChat({
         );
       }
 
+      // Whether the current user has already submitted their flight vote —
+      // tracked purely via local state (submittedStages), same as destinations.
+      // Never derived from flightVotes so we don't leak how others voted.
+      const hasSubmittedFlightVote = submittedStages.has(stage);
+
       return (
         <div
           style={{
@@ -1495,31 +1611,107 @@ export default function TripAgentChat({
             gap: 12,
           }}
         >
-          {MOCK_FLIGHT_OPTIONS.map((option) => {
-            const myVote = flightVotes.find(
-              (v) => v.userId === identity.userId && v.selectedOption === option.value
-            );
-            const voteCount = flightVotes.filter(
-              (v) => v.selectedOption === option.value
-            ).length;
+          <p style={{
+            margin: 0,
+            fontSize: 12,
+            fontFamily: "'Courier New', Courier, monospace",
+            color: SAND_CREAM,
+            opacity: 0.8,
+          }}>
+            {hasSubmittedFlightVote
+              ? "Your vote is locked in — waiting for the rest of the group."
+              : "Select one flight option, then click Submit."}
+          </p>
 
-            return (
-              <VoteableFlightCard
-                key={option.value}
-                category={option.value}
-                priceRange={option.priceRange}
-                estimatedDuration={option.duration}
-                stops={option.stops}
-                budgetImpact={null}
-                itineraryComfort={option.itineraryImpact}
-                hasVoted={!!myVote}
-                voteCount={voteCount}
-                onVote={handleFlightVote}
-              />
-            );
-          })}
+          {MOCK_FLIGHT_OPTIONS.map((option) => (
+            <VoteableFlightCard
+              key={option.value}
+              category={option.value}
+              priceRange={option.priceRange}
+              estimatedDuration={option.duration}
+              stops={option.stops}
+              budgetImpact={null}
+              itineraryComfort={option.itineraryImpact}
+              isSelected={selectedFlightCategory === option.value}
+              isLocked={hasSubmittedFlightVote}
+              onToggle={(category) => {
+                if (hasSubmittedFlightVote) return;
+                setSelectedFlightCategory((prev) => (prev === category ? null : category));
+              }}
+            />
+          ))}
 
-          {/* ── Flight tiebreaker: TiebreakPanel ── */}
+          {/* Submit vote button */}
+          {!hasSubmittedFlightVote && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start", marginTop: 4 }}>
+              <button
+                type="button"
+                onClick={() => void handleSubmitFlightVote()}
+                disabled={submittingFlightVote || !selectedFlightCategory}
+                aria-label="Submit your flight vote"
+                style={{
+                  border: `3px solid ${DEEP_NAVY}`,
+                  borderRadius: 0,
+                  backgroundColor: (submittingFlightVote || !selectedFlightCategory) ? "#9CA3AF" : "#4ADE80",
+                  color: DEEP_NAVY,
+                  padding: "10px 24px",
+                  fontFamily: "'Courier New', Courier, monospace",
+                  fontWeight: 700,
+                  fontSize: "0.9rem",
+                  cursor: (submittingFlightVote || !selectedFlightCategory) ? "not-allowed" : "pointer",
+                  opacity: (submittingFlightVote || !selectedFlightCategory) ? 0.6 : 1,
+                  boxShadow: (submittingFlightVote || !selectedFlightCategory) ? "none" : `4px 4px 0 ${DEEP_NAVY}`,
+                }}
+              >
+                {submittingFlightVote
+                  ? "Submitting…"
+                  : !selectedFlightCategory
+                    ? "🗳 Select a flight option to vote"
+                    : "🗳 Submit vote"
+                }
+              </button>
+              {flightVoteSubmitError && (
+                <p style={{
+                  fontSize: "0.8rem",
+                  color: "#FB923C",
+                  fontFamily: "'Courier New', Courier, monospace",
+                  fontWeight: 700,
+                  border: `2px solid #FB923C`,
+                  padding: "6px 10px",
+                  backgroundColor: "#FEF3C7",
+                }}>
+                  ⚠ {flightVoteSubmitError}
+                </p>
+              )}
+            </div>
+          )}
+
+          {hasSubmittedFlightVote && !tiedFlightOptions && (
+            <WaitingState
+              submittedSelections={
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                  fontSize: 13,
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: "#FEF3C7",
+                }}>
+                  <span style={{ opacity: 0.7 }}>You voted for:</span>
+                  <span style={{ fontWeight: 700 }}>
+                    ✈ {selectedFlightCategory === "best_value" ? "Best Value" : selectedFlightCategory ? selectedFlightCategory.charAt(0).toUpperCase() + selectedFlightCategory.slice(1) : "—"}
+                  </span>
+                </div>
+              }
+              memberStatuses={members.map((m) => ({
+                userId: m.id,
+                displayName: m.displayName,
+                submitted: flightVoteSubmittedUserIds.includes(m.id),
+              }))}
+            />
+          )}
+
+          {/* ── Flight tiebreaker: TiebreakPanel — counts revealed only now ── */}
           {tiedFlightOptions && tiedFlightOptions.length > 0 && (
             <TiebreakPanel
               roomId={room.id}
@@ -1656,7 +1848,14 @@ export default function TripAgentChat({
                   (Task 11.3 — Req 4.6, 11.1)
               */}
               {isLastMessage && (
-                currentUserSubmitted ? (
+                currentUserSubmitted &&
+                // For vote stages, the slot content itself handles the waiting
+                // state + tiebreak panel — DO NOT replace it with the generic
+                // outer WaitingState, or the tiebreak panel will never render.
+                room.currentStage !== RoomStage.DESTINATIONS &&
+                room.currentStage !== RoomStage.DESTINATION_VOTE &&
+                room.currentStage !== RoomStage.FLIGHTS &&
+                room.currentStage !== RoomStage.FLIGHT_VOTE ? (
                   /*
                    * ── WaitingState ────────────────────────────────────────
                    * memberStatuses is re-derived on every render so ReadyBadge
@@ -1757,7 +1956,16 @@ export default function TripAgentChat({
             </button>
           )}
 
-          {/* Advance stage button — all stages, host only (Req 13.1, 13.2, 13.3) */}
+          {/*
+            Advance stage button — hidden entirely for DESTINATION_VOTE and
+            FLIGHT_VOTE. Those stages advance automatically once everyone has
+            submitted their ballot via /api/votes/submit (or via the tiebreak
+            panel), so there is no manual "Move to next step" action for the
+            host to take mid-vote — this avoids the host accidentally
+            advancing before the vote is settled.
+          */}
+          {room.currentStage !== RoomStage.DESTINATION_VOTE &&
+            room.currentStage !== RoomStage.FLIGHT_VOTE && (
           <div style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
             {/* Inline reason when blocked — gives user a clear next action */}
             {advanceBlockedReason() && (
@@ -1820,6 +2028,7 @@ export default function TripAgentChat({
               {advanceButtonLabel()}
             </button>
           </div>
+          )}
         </div>
       )}
     </main>

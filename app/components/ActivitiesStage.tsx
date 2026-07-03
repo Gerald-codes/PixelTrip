@@ -113,12 +113,25 @@ export default function ActivitiesStage({
   const [newType, setNewType] = useState<ActivityType>("activity");
   const [newPriority, setNewPriority] = useState<Priority>("optional");
   const [newNotes, setNewNotes] = useState("");
+  const [newCost, setNewCost] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!newTitle.trim() || submitting) return;
+
+    // Validate cost if provided
+    let costValue: number | undefined;
+    if (newCost.trim() !== "") {
+      const parsed = Number(newCost.trim());
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        setAddError("Estimated cost must be a positive number");
+        return;
+      }
+      costValue = parsed;
+    }
+
     setSubmitting(true);
     setAddError(null);
     try {
@@ -132,6 +145,7 @@ export default function ActivitiesStage({
           type: newType,
           priority: newPriority,
           notes: newNotes.trim() || undefined,
+          estimatedCost: costValue,
         }),
       });
       if (!res.ok) {
@@ -147,6 +161,7 @@ export default function ActivitiesStage({
       setNewType("activity");
       setNewPriority("optional");
       setNewNotes("");
+      setNewCost("");
     } catch (err) {
       setAddError(
         err instanceof Error ? err.message : "Failed to add preference",
@@ -331,6 +346,36 @@ export default function ActivitiesStage({
             />
           </div>
 
+          {/* Estimated cost */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="activity-cost"
+              className="text-xs font-bold uppercase tracking-wide text-[#1E3A5F]"
+            >
+              Estimated cost per person{" "}
+              <span className="font-normal normal-case tracking-normal text-[#1E3A5F]/60">
+                (optional, USD)
+              </span>
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-[#1E3A5F]">$</span>
+              <input
+                id="activity-cost"
+                type="number"
+                min="0"
+                step="1"
+                inputMode="decimal"
+                value={newCost}
+                onChange={(e) => setNewCost(e.target.value)}
+                placeholder="0"
+                className="w-28 border-2 border-[#1E3A5F] bg-white px-3 py-2 text-sm font-semibold text-[#1E3A5F] placeholder-[#1E3A5F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]"
+              />
+              <span className="text-xs font-semibold text-[#1E3A5F]/60">
+                Feeds the group budget bar
+              </span>
+            </div>
+          </div>
+
           {addError && (
             <p className="text-sm font-semibold text-red-600">{addError}</p>
           )}
@@ -473,6 +518,12 @@ function PreferenceRow({ preference, canDelete, onDelete }: PreferenceRowProps) 
           <span className="text-sm font-bold text-[#1E3A5F]">
             {preference.title}
           </span>
+          {/* Cost badge */}
+          {preference.estimatedCost !== null && (
+            <span className="border border-[#FB923C] bg-[#FB923C]/20 px-1.5 py-0.5 text-xs font-bold text-[#1E3A5F]">
+              ${preference.estimatedCost}
+            </span>
+          )}
         </div>
         {preference.notes && (
           <p className="text-xs font-semibold text-[#1E3A5F]/70">

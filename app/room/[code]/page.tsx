@@ -205,6 +205,73 @@ export default function RoomPage({ params }: RoomPageProps) {
     }
   }, [travelDates]);
 
+  // ── Running budget spend: activity + itinerary item costs ────────────────
+  //
+  // Distinct from the forecasted BudgetEstimate (flight + destination price
+  // level). This tallies REAL committed costs so the budget bar in
+  // TripContextPanel starts at $0 and fills up as the group adds costed
+  // activities and the itinerary agent assigns per-item costs.
+  const [activityCosts, setActivityCosts] = useState<number[]>([]);
+  const [itineraryCosts, setItineraryCosts] = useState<number[]>([]);
+
+  const fetchActivityCosts = useCallback(async () => {
+    if (!room?.id) return;
+    try {
+      const res = await fetch(
+        `/api/activity-preferences?roomId=${encodeURIComponent(room.id)}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) return;
+      const data = (await res.json()) as Array<{ estimatedCost: number | null }>;
+      setActivityCosts(
+        data
+          .map((p) => p.estimatedCost)
+          .filter((c): c is number => typeof c === "number"),
+      );
+    } catch { /* silent */ }
+  }, [room?.id]);
+
+  const fetchItineraryCosts = useCallback(async () => {
+    if (!room?.id) return;
+    try {
+      const res = await fetch(
+        `/api/agents/itinerary?roomId=${encodeURIComponent(room.id)}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) {
+        setItineraryCosts([]);
+        return;
+      }
+      const data = (await res.json()) as {
+        days: Array<{
+          morning?: Array<{ estimatedCost?: number }>;
+          afternoon?: Array<{ estimatedCost?: number }>;
+          evening?: Array<{ estimatedCost?: number }>;
+          night?: Array<{ estimatedCost?: number }>;
+        }>;
+      };
+      const costs: number[] = [];
+      for (const day of data.days ?? []) {
+        for (const section of [day.morning, day.afternoon, day.evening, day.night]) {
+          for (const item of section ?? []) {
+            if (typeof item.estimatedCost === "number") costs.push(item.estimatedCost);
+          }
+        }
+      }
+      setItineraryCosts(costs);
+    } catch { /* silent */ }
+  }, [room?.id]);
+
+  useEffect(() => {
+    void fetchActivityCosts();
+    void fetchItineraryCosts();
+    const interval = setInterval(() => {
+      void fetchActivityCosts();
+      void fetchItineraryCosts();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [fetchActivityCosts, fetchItineraryCosts]);
+
   // Poll availability every 10s to keep panel fresh after members submit
   useEffect(() => {
     if (!room?.id) return;
@@ -367,6 +434,8 @@ export default function RoomPage({ params }: RoomPageProps) {
       destinationShortlist={destinationShortlist}
       selectedDestinationSuggestion={selectedDestinationSuggestion}
       tripLengthDays={tripLengthDays}
+      activityCosts={activityCosts}
+      itineraryCosts={itineraryCosts}
     />
   );
 }
