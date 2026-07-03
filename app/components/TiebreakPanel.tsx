@@ -28,8 +28,10 @@ import React, { useEffect, useRef, useState } from "react";
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const NAVY = "var(--pt-bg-card)";
-const CREAM = "var(--pt-bg-card)";
+/** Dark text for use on all light-coloured surfaces. */
+const NAVY = "#0F1B2E";
+/** Light card background for resolution option cards. */
+const CREAM = "#F0F4F8";
 const ORANGE = "#FB923C";
 const GREEN = "#4ADE80";
 const PURPLE = "var(--pt-agent-atlas)";
@@ -102,7 +104,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
         textTransform: "uppercase",
         letterSpacing: "0.1em",
         color: NAVY,
-        opacity: 0.55,
+        opacity: 0.7,
         fontFamily: "monospace",
       }}
     >

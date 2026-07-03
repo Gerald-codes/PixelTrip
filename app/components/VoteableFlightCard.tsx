@@ -24,7 +24,8 @@ import React, { useState } from "react";
 // ─── Palette ─────────────────────────────────────────────────────────────────
 
 const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
-const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
+/** Light card body background — text on this must be dark. */
+const CARD_BG = "#E8F0F8";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
@@ -111,7 +112,7 @@ export default function VoteableFlightCard({
       aria-label={`${label}${isSelected ? ", selected" : ""}`}
       style={{
         fontFamily: "'Courier New', Courier, monospace",
-        backgroundColor: SAND_CREAM,
+        backgroundColor: CARD_BG,
         border: `4px solid ${DEEP_NAVY}`,
         borderRadius: 8,
         boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
@@ -253,13 +254,13 @@ export default function VoteableFlightCard({
             padding: "7px 16px",
             fontSize: 13,
             fontWeight: 700,
-            color: DEEP_NAVY,
-            backgroundColor: isSelected ? GRASS_GREEN : isLocked ? DEEP_NAVY : SUNSET_ORANGE,
+            color: isSelected ? DEEP_NAVY : isLocked ? "#AFC5E6" : DEEP_NAVY,
+            backgroundColor: isSelected ? GRASS_GREEN : isLocked ? "#2A4A6B" : SUNSET_ORANGE,
             border: `3px solid ${DEEP_NAVY}`,
             borderRadius: 8,
             boxShadow: isLocked && !isSelected ? "none" : `3px 3px 0 ${DEEP_NAVY}`,
             cursor: isLocked ? "not-allowed" : "pointer",
-            opacity: isLocked && !isSelected ? 0.65 : 1,
+            opacity: isLocked && !isSelected ? 0.8 : 1,
             outline: "none",
             transition: "background-color 0.1s",
           }}
@@ -301,7 +302,7 @@ export default function VoteableFlightCard({
 
 // ─── Chip ────────────────────────────────────────────────────────────────────
 
-function Chip({ label, bg = SAND_CREAM }: { label: string; bg?: string }) {
+function Chip({ label, bg = CARD_BG }: { label: string; bg?: string }) {
   return (
     <span
       style={{

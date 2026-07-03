@@ -31,11 +31,15 @@ import type { BudgetEstimate } from "@/lib/types";
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "var(--pt-bg-card)";
+/** Text/border on all coloured surfaces — must be dark for contrast. */
+const DEEP_NAVY = "#0F1B2E";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
-const SAND_CREAM = "var(--pt-bg-card)";
+/** Used for the progress bar track and the "over budget" % badge background. */
+const SAND_CREAM = "#FEF3C7";
+/** Text colour on dark (card) backgrounds. */
+const LIGHT_TEXT = "var(--pt-text-primary, #EAF2FF)";
 
 // ─── Prop types ───────────────────────────────────────────────────────────────
 
@@ -136,13 +140,13 @@ export default function BudgetStatusBadge({ estimate }: BudgetStatusBadgeProps) 
           style={{
             fontSize: 12,
             fontWeight: 700,
-            color: SAND_CREAM,
+            color: LIGHT_TEXT,
             wordBreak: "break-word",
             minWidth: 0,
           }}
         >
           {formatUSD(totalPerPerson)}{" "}
-          <span style={{ fontWeight: 400, opacity: 0.7 }}>
+          <span style={{ fontWeight: 400, opacity: 0.8 }}>
             / {formatUSD(budgetLimitPerPerson)} per person
           </span>
         </span>
@@ -177,8 +181,8 @@ export default function BudgetStatusBadge({ estimate }: BudgetStatusBadgeProps) 
         style={{
           width: "100%",
           height: 14,
-          backgroundColor: `${SAND_CREAM}30`,
-          border: `2px solid ${SAND_CREAM}50`,
+          backgroundColor: "rgba(255,255,255,0.12)",
+          border: `2px solid rgba(255,255,255,0.2)`,
           boxSizing: "border-box",
           position: "relative",
           overflow: "hidden",
@@ -220,8 +224,8 @@ export default function BudgetStatusBadge({ estimate }: BudgetStatusBadgeProps) 
           style={{
             margin: 0,
             fontSize: 11,
-            color: SAND_CREAM,
-            opacity: 0.7,
+            color: LIGHT_TEXT,
+            opacity: 0.75,
             lineHeight: 1.4,
             wordBreak: "break-word",
           }}
