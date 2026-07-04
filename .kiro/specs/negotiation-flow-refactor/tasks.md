@@ -230,9 +230,9 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Preservation: nav buttons (back to itinerary, another round of feedback) remain unchanged_
     - _Requirements: 2.3, 2.4, 2.5_
 
-- [ ] 7. Fix app/api/agents/negotiation/route.ts — update PostBody to accept conflicts array
+- [x] 7. Fix app/api/agents/negotiation/route.ts — update PostBody to accept conflicts array
 
-  - [~] 7.1 Update the `PostBody` interface
+  - [x] 7.1 Update the `PostBody` interface
     - In `app/api/agents/negotiation/route.ts`, replace the existing `PostBody` interface:
       ```typescript
       // BEFORE
@@ -250,7 +250,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       ```
     - _Requirements: 2.3_
 
-  - [~] 7.2 Update body destructuring and validation
+  - [x] 7.2 Update body destructuring and validation
     - Replace `const { roomId, conflictId, selectedResolution } = body;` with `const { roomId, conflicts } = body;`
     - Remove the individual `conflictId` and `selectedResolution` string validation blocks
     - Add validation for the `conflicts` array:
@@ -259,15 +259,15 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - Define a typed alias: `const conflictEntries = conflicts as Array<{ conflictId: string; selectedResolution: string }>;`
     - _Requirements: 2.3_
 
-  - [~] 7.3 Update the JSDoc comment on the `POST` function
+  - [x] 7.3 Update the JSDoc comment on the `POST` function
     - Update the `@param` body description to reflect the new contract:
       `Body: { roomId: string; conflicts: Array<{ conflictId: string; selectedResolution: string }> }`
     - Remove references to `conflictId` and `selectedResolution` as top-level fields
     - _Requirements: 2.3_
 
-- [ ] 8. Fix app/api/agents/negotiation/route.ts — load all conflicts, call agent once, bulk-resolve
+- [x] 8. Fix app/api/agents/negotiation/route.ts — load all conflicts, call agent once, bulk-resolve
 
-  - [~] 8.1 Replace single-conflict DB load with bulk conflict load
+  - [x] 8.1 Replace single-conflict DB load with bulk conflict load
     - Replace the single `.eq("id", conflictId).single()` query with a bulk fetch:
       ```typescript
       const conflictIds = conflictEntries.map(e => e.conflictId);
@@ -281,7 +281,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - For each entry in `conflictEntries`, validate that the `selectedResolution` is present in that conflict's `proposedOptions` array — return 400 if any chosen option is not found
     - _Requirements: 2.3, 2.4_
 
-  - [~] 8.2 Build combined agent context from all conflicts
+  - [x] 8.2 Build combined agent context from all conflicts
     - Replace the single-conflict `userPromptContext` object with a multi-conflict shape:
       ```typescript
       const userPromptContext = {
@@ -302,7 +302,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       ```
     - _Requirements: 2.4_
 
-  - [~] 8.3 Replace single-conflict resolve with bulk resolve
+  - [x] 8.3 Replace single-conflict resolve with bulk resolve
     - Replace the single `.eq("id", conflictId)` update with:
       ```typescript
       const { error: resolveConflictsError } = await supabase
@@ -316,7 +316,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       `[agent/negotiation] room ${room.room_code} revised itinerary to v${nextVersion} (${conflictIds.length} conflicts resolved)`
     - _Requirements: 2.4_
 
-  - [~] 8.4 Include the new itinerary and updated room data in the response
+  - [x] 8.4 Include the new itinerary and updated room data in the response
     - Add `updatedRoom` to the 201 response body so the client can call `onRoomUpdated`:
       ```typescript
       return NextResponse.json(
@@ -328,9 +328,9 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - Update the `NegotiationResult` interface on the client side (in `NegotiationStage.tsx`) to add `updatedRoom?: TripRoom`
     - _Requirements: 2.7_
 
-- [ ] 9. Fix app/api/agents/negotiation/route.ts — auto-advance room stage after successful revision
+- [x] 9. Fix app/api/agents/negotiation/route.ts — auto-advance room stage after successful revision
 
-  - [~] 9.1 Add stage-advance query after persisting the new itinerary
+  - [x] 9.1 Add stage-advance query after persisting the new itinerary
     - After updating `current_itinerary_id` and before the bulk-resolve step (Task 8.3), add:
       ```typescript
       const { data: updatedRoomData, error: stageAdvanceError } = await supabase
@@ -345,15 +345,15 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Expected_Behavior: auto-advance room stage so the host does not need a separate action_
     - _Requirements: 2.7_
 
-  - [~] 9.2 Broadcast stage-change on the room channel after advancing
+  - [x] 9.2 Broadcast stage-change on the room channel after advancing
     - After the stage advance, call `broadcastStageChange(roomId)` (or replicate the broadcast pattern from the client-side helper using the service Supabase client) so non-host clients advance their view automatically
     - Keep this non-fatal (wrap in try/catch, log on failure)
     - _Preservation: stage broadcast behavior consistent with existing patterns (Requirement 3.2)_
     - _Requirements: 2.7_
 
-- [ ] 10. Fix app/api/agents/negotiation/route.ts — update SYSTEM_PROMPT for multiple conflicts
+- [x] 10. Fix app/api/agents/negotiation/route.ts — update SYSTEM_PROMPT for multiple conflicts
 
-  - [~] 10.1 Rewrite the SYSTEM_PROMPT to handle a conflicts array
+  - [x] 10.1 Rewrite the SYSTEM_PROMPT to handle a conflicts array
     - Replace the existing `SYSTEM_PROMPT` constant with a version that:
       - Instructs the agent that it will receive a `conflicts` array (not a single conflict)
       - States it must incorporate ALL chosen resolutions from the provided list in one pass
@@ -365,9 +365,9 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Preservation: output shape, validation logic, and retry behavior all unchanged_
     - _Requirements: 2.4_
 
-- [ ] 11. Verify bug condition exploration test now passes (after fix)
+- [x] 11. Verify bug condition exploration test now passes (after fix)
 
-  - [~] 11.1 Verify Property 1: non-host cannot mutate selection state
+  - [x] 11.1 Verify Property 1: non-host cannot mutate selection state
     - **Property 1: Expected Behavior** - Non-host option click is a no-op
     - **IMPORTANT**: Re-run the SAME test from Task 1, Scenario A — do NOT write a new test
     - The test from Task 1 encodes the expected behavior (no PATCH fired, no state change)
@@ -376,7 +376,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - **EXPECTED OUTCOME**: Test PASSES (confirms non-host mutation bug is fixed)
     - _Requirements: 2.1, 2.6_
 
-  - [~] 11.2 Verify Property 1: single agent call for all conflicts on submission
+  - [x] 11.2 Verify Property 1: single agent call for all conflicts on submission
     - **Property 1: Expected Behavior** - handleSubmitAll fires exactly one POST with all conflicts
     - **IMPORTANT**: Re-run the SAME test from Task 1, Scenarios B and C — do NOT write a new test
     - When this test passes, it confirms the per-conflict N-calls bug is fixed
@@ -384,7 +384,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - **EXPECTED OUTCOME**: Tests PASS (confirms single-agent-call behavior)
     - _Requirements: 2.3, 2.4_
 
-- [~] 12. Verify preservation tests still pass (after fix)
+- [x] 12. Verify preservation tests still pass (after fix)
   - **Property 2: Preservation** - All baseline behaviors unchanged after the refactor
   - **IMPORTANT**: Re-run the SAME tests from Task 2 — do NOT write new tests
   - Run all preservation property tests on FIXED code
@@ -398,7 +398,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - `selectedResolutions` still pre-populated from resolved conflicts on mount
   - Confirm no preservation tests are newly failing after the fix
 
-- [~] 13. Checkpoint — build clean
+- [x] 13. Checkpoint — build clean
   - Run `npm run build` and confirm zero TypeScript errors
   - Run `npm run lint` and confirm zero lint errors
   - Verify the following assertions hold end-to-end:

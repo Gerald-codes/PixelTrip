@@ -211,40 +211,40 @@ async function broadcastItineraryUpdated(
 // ─── System prompt ────────────────────────────────────────────────────────
 
 const SYSTEM_PROMPT = `You are PixelTrip's itinerary revision expert.
-A group of friends voted on a conflict resolution option. Revise the existing itinerary to incorporate the chosen resolution, preserving as many unchanged items as possible.
+A group of friends resolved multiple conflicts. Revise the existing itinerary to incorporate ALL chosen resolutions from the provided conflicts list in a single pass. Preserve as many unchanged items as possible.
 
 Output a single JSON object with EXACTLY these fields:
 - days: ItineraryDay[] — the full revised itinerary days
 - fairnessSummary: FairnessSummary — regenerated to reflect the revised plan
-- diffSummary: string — a plain-language 2-4 sentence summary of what changed and why
+- diffSummary: string — a plain-language 2-4 sentence summary of what changed and why, naming the specific items that were updated
 
 Non-negotiable rules:
-1. Only modify days/items directly affected by the chosen resolution.
-2. Every ItineraryItem.personaBenefits MUST remain non-empty.
-3. The diffSummary must specifically name which items changed.
-4. The revised fairnessSummary must cover every persona.
-5. Return only valid JSON. No preamble, no markdown, no commentary.`;
+1. Apply ALL resolutions from the conflicts array in one pass — do not process them one at a time.
+2. Only modify days/items directly affected by the chosen resolutions.
+3. Every ItineraryItem.personaBenefits MUST remain non-empty.
+4. The diffSummary must specifically name which items changed and which conflict each change addresses.
+5. The revised fairnessSummary must cover every persona.
+6. Return only valid JSON. No preamble, no markdown, no commentary.`;
 
 // ─── POST: run the negotiation agent and persist revised itinerary ────────
 
 interface PostBody {
   roomId?: unknown;
-  conflictId?: unknown;
-  selectedResolution?: unknown;
+  conflicts?: unknown; // Array<{ conflictId: string; selectedResolution: string }>
 }
 
 /**
  * POST /api/agents/negotiation
  *
- * Body: { roomId: string; conflictId: string; selectedResolution: string }
+ * Body: { roomId: string; conflicts: Array<{ conflictId: string; selectedResolution: string }> }
  *
  * Runs the negotiation/revision agent, validates the output, persists a new
- * itinerary version, resolves the conflict, broadcasts itinerary-updated, and
+ * itinerary version, resolves all conflicts, broadcasts itinerary-updated, and
  * returns the new Itinerary merged with diffSummary as status 201.
  *
  * Errors:
- *   400 — missing/invalid body or selectedResolution not found in conflict options
- *   404 — room not found or conflict not found
+ *   400 — missing/invalid body, conflicts is not a non-empty array, or a selectedResolution not found in conflict options
+ *   404 — room not found or one or more conflicts not found
  *   409 — room is not in NEGOTIATION stage
  *   412 — current_itinerary_id is missing / no itinerary loaded yet
  *   500 — agent failure or DB failure (with { error, retryable })
@@ -257,20 +257,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { roomId, conflictId, selectedResolution } = body;
+  const { roomId, conflicts } = body;
 
   if (typeof roomId !== "string" || roomId.trim() === "") {
     return NextResponse.json({ error: "roomId is required" }, { status: 400 });
   }
-  if (typeof conflictId !== "string" || conflictId.trim() === "") {
-    return NextResponse.json({ error: "conflictId is required" }, { status: 400 });
-  }
-  if (typeof selectedResolution !== "string" || selectedResolution.trim() === "") {
+  if (!Array.isArray(conflicts) || conflicts.length === 0) {
     return NextResponse.json(
-      { error: "selectedResolution is required" },
+      { error: "conflicts must be a non-empty array" },
       { status: 400 },
     );
   }
+  for (const entry of conflicts as Array<Record<string, unknown>>) {
+    if (typeof entry.conflictId !== "string" || typeof entry.selectedResolution !== "string") {
+      return NextResponse.json(
+        { error: "each conflicts entry must have string conflictId and selectedResolution" },
+        { status: 400 },
+      );
+    }
+  }
+  const conflictEntries = conflicts as Array<{ conflictId: string; selectedResolution: string }>;
 
   const supabase = getServiceSupabase();
 
@@ -343,46 +349,49 @@ export async function POST(request: Request) {
 
   const currentItinerary = mapItineraryRow(itineraryData as ItineraryRow);
 
-  // 3. Load the conflict row.
-  const { data: conflictData, error: conflictError } = await supabase
+  // 3. Bulk-load all conflict rows for the submitted conflict IDs.
+  const conflictIds = conflictEntries.map(e => e.conflictId);
+  const { data: conflictsData, error: conflictsError } = await supabase
     .from("conflict_resolutions")
     .select(
       "id, room_id, itinerary_id, conflict_summary, affected_users, proposed_options, selected_resolution, status",
     )
-    .eq("id", conflictId)
-    .single();
+    .in("id", conflictIds);
 
-  if (conflictError) {
-    if (conflictError.code === NO_ROWS) {
-      return NextResponse.json(
-        { error: "Conflict not found" },
-        { status: 404 },
-      );
-    }
+  if (conflictsError) {
     console.log(
-      `[agent/negotiation] failed to load conflict ${conflictId}:`,
-      conflictError.message,
+      `[agent/negotiation] failed to bulk-load conflicts for room ${room.room_code}:`,
+      conflictsError.message,
     );
     return NextResponse.json(
-      { error: "Failed to load conflict" },
+      { error: "Failed to load conflicts" },
       { status: 500 },
     );
   }
 
-  const conflict = mapConflictRow(conflictData as ConflictRow);
+  const loadedConflicts: ConflictResolution[] = (conflictsData as ConflictRow[]).map(mapConflictRow);
 
-  // 4. Find the chosen option within the conflict's proposedOptions.
-  const chosenOption = conflict.proposedOptions.find(
-    (o) => o.id === selectedResolution,
-  );
-
-  if (!chosenOption) {
+  if (loadedConflicts.length !== conflictIds.length) {
+    const foundIds = new Set(loadedConflicts.map(c => c.id));
+    const missingIds = conflictIds.filter(id => !foundIds.has(id));
     return NextResponse.json(
-      {
-        error: `Resolution option "${selectedResolution}" not found in conflict proposedOptions`,
-      },
-      { status: 400 },
+      { error: `Conflicts not found: ${missingIds.join(", ")}` },
+      { status: 404 },
     );
+  }
+
+  // 4. Validate that each selectedResolution is present in the conflict's proposedOptions.
+  for (const entry of conflictEntries) {
+    const conflict = loadedConflicts.find(c => c.id === entry.conflictId)!;
+    const optionExists = conflict.proposedOptions.some(o => o.id === entry.selectedResolution);
+    if (!optionExists) {
+      return NextResponse.json(
+        {
+          error: `Resolution option "${entry.selectedResolution}" not found in proposedOptions for conflict "${entry.conflictId}"`,
+        },
+        { status: 400 },
+      );
+    }
   }
 
   // 5. Load users for the room.
@@ -445,7 +454,7 @@ export async function POST(request: Request) {
     ]),
   );
 
-  // 7. Build user prompt context.
+  // 7. Build user prompt context (combined for all conflicts).
   const userPromptContext = {
     currentItinerary: {
       destination: currentItinerary.destination,
@@ -454,13 +463,17 @@ export async function POST(request: Request) {
       days: currentItinerary.days,
       fairnessSummary: currentItinerary.fairnessSummary,
     },
-    conflict: {
-      conflictSummary: conflict.conflictSummary,
-      affectedUsers: conflict.affectedUsers,
-      proposedOptions: conflict.proposedOptions,
-    },
-    chosenOptionId: selectedResolution,
-    chosenOptionDescription: chosenOption.description,
+    conflicts: loadedConflicts.map((conflict) => {
+      const entry = conflictEntries.find(e => e.conflictId === conflict.id)!;
+      const chosenOption = conflict.proposedOptions.find(o => o.id === entry.selectedResolution)!;
+      return {
+        conflictSummary: conflict.conflictSummary,
+        affectedUsers: conflict.affectedUsers,
+        proposedOptions: conflict.proposedOptions,
+        chosenOptionId: entry.selectedResolution,
+        chosenOptionDescription: chosenOption.description,
+      };
+    }),
     members: users.map((u) => ({
       userId: u.id,
       displayName: u.display_name,
@@ -471,10 +484,13 @@ export async function POST(request: Request) {
   const userPrompt = JSON.stringify(userPromptContext, null, 2);
 
   // 8. Call the negotiation agent.
+  // The negotiation agent must return a full revised itinerary (all days, all
+  // slots, fairness summary, diff summary). Multi-day itineraries can easily
+  // exceed 4000 tokens, so we use 8000 to avoid truncated/invalid JSON.
   const result = await runAgent<unknown>({
     systemPrompt: SYSTEM_PROMPT,
     userPrompt,
-    maxTokens: 4000,
+    maxTokens: 8000,
   });
 
   if (!result.ok) {
@@ -491,7 +507,8 @@ export async function POST(request: Request) {
   // 9. Validate agent output shape.
   if (!isNegotiationAgentOutput(result.data)) {
     console.log(
-      `[agent/negotiation] invalid agent output shape for room ${room.room_code}`,
+      `[agent/negotiation] invalid agent output shape for room ${room.room_code}:`,
+      JSON.stringify(result.data).slice(0, 500),
     );
     return NextResponse.json(
       { error: "Agent returned an invalid itinerary revision", retryable: true },
@@ -573,21 +590,36 @@ export async function POST(request: Request) {
     );
   }
 
-  // 12. Resolve the conflict.
-  const { error: resolveConflictError } = await supabase
-    .from("conflict_resolutions")
-    .update({
-      status: "resolved",
-      selected_resolution: selectedResolution,
-    })
-    .eq("id", conflictId);
+  // Stage is intentionally NOT advanced here. The host reviews the revised
+  // itinerary and diff summary in NegotiationStage, then manually clicks
+  // "Another round of feedback" to advance to FEEDBACK when ready.
 
-  if (resolveConflictError) {
+  // 12. Bulk-resolve all conflicts and persist each selectedResolution.
+  const { error: resolveConflictsError } = await supabase
+    .from("conflict_resolutions")
+    .update({ status: "resolved" })
+    .in("id", conflictIds);
+
+  if (resolveConflictsError) {
     // Non-fatal: log but don't fail the response — the itinerary was successfully revised.
     console.log(
-      `[agent/negotiation] failed to resolve conflict ${conflictId}:`,
-      resolveConflictError.message,
+      `[agent/negotiation] failed to bulk-resolve conflicts for room ${room.room_code}:`,
+      resolveConflictsError.message,
     );
+  }
+
+  // Also persist each conflict's selectedResolution.
+  for (const entry of conflictEntries) {
+    const { error: selResError } = await supabase
+      .from("conflict_resolutions")
+      .update({ selected_resolution: entry.selectedResolution })
+      .eq("id", entry.conflictId);
+    if (selResError) {
+      console.log(
+        `[agent/negotiation] failed to update selected_resolution for conflict ${entry.conflictId}:`,
+        selResError.message,
+      );
+    }
   }
 
   // 13. Broadcast itinerary-updated on room:{roomId}:itinerary.
@@ -602,7 +634,7 @@ export async function POST(request: Request) {
   }
 
   console.log(
-    `[agent/negotiation] room ${room.room_code} revised itinerary to v${nextVersion} (conflict: ${conflictId}, option: ${selectedResolution})`,
+    `[agent/negotiation] room ${room.room_code} revised itinerary to v${nextVersion} (${conflictIds.length} conflicts resolved)`,
   );
 
   // 14. Return the new itinerary merged with diffSummary (201).

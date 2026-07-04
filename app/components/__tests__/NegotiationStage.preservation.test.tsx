@@ -397,7 +397,7 @@ describe("Preservation: Error state on 500 response", () => {
       expect(screen.getByText("Conflict conflict-err-1")).toBeInTheDocument();
     }, { timeout: 3000 });
 
-    // Select an option first (required to enable the apply button)
+    // Select an option first (required to enable the global apply button)
     const optionButtons = screen.getAllByRole("button").filter(
       btn => btn.getAttribute("aria-pressed") !== null
     );
@@ -406,9 +406,9 @@ describe("Preservation: Error state on 500 response", () => {
     });
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
 
-    // Click "Apply resolution & revise itinerary" button
+    // Click the global "Apply selected resolutions and regenerate itinerary" button
     const applyButton = screen.getAllByRole("button").find(
-      btn => btn.textContent?.includes("Apply resolution & revise itinerary")
+      btn => btn.textContent?.includes("Apply selected resolutions and regenerate itinerary")
     );
     expect(applyButton).toBeTruthy();
 
@@ -423,12 +423,12 @@ describe("Preservation: Error state on 500 response", () => {
       expect(errorElements.length).toBeGreaterThan(0);
     }, { timeout: 5000 });
 
-    // Verify revising is cleared: the apply button should no longer say "Revising itinerary…"
+    // Verify revising is cleared: the apply button should no longer say "Regenerating itinerary…"
     await waitFor(() => {
       const buttons = screen.getAllByRole("button").filter(
-        btn => btn.textContent?.includes("Apply resolution & revise itinerary")
+        btn => btn.textContent?.includes("Apply selected resolutions and regenerate itinerary")
       );
-      // Button should exist again (not stuck in "Revising..." state)
+      // Button should exist again (not stuck in "Regenerating..." state)
       expect(buttons.length).toBeGreaterThan(0);
     }, { timeout: 3000 });
   }, 15000);
@@ -565,9 +565,9 @@ describe("Preservation: Diff summary amber banner", () => {
     });
     await act(async () => { await new Promise(r => setTimeout(r, 50)); });
 
-    // Click "Apply resolution & revise itinerary"
+    // Click the global "Apply selected resolutions and regenerate itinerary"
     const applyButton = screen.getAllByRole("button").find(
-      btn => btn.textContent?.includes("Apply resolution & revise itinerary")
+      btn => btn.textContent?.includes("Apply selected resolutions and regenerate itinerary")
     );
     expect(applyButton).toBeTruthy();
 

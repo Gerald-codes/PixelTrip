@@ -17,7 +17,6 @@ import type {
 /** The negotiation agent returns Itinerary + diffSummary merged together. */
 interface NegotiationResult extends Itinerary {
   diffSummary: string;
-  updatedRoom?: TripRoom;
 }
 
 // ─── NegotiationStage ───────────────────────────────────────────────────────
@@ -163,7 +162,6 @@ export default function NegotiationStage({
       const data = (await res.json()) as NegotiationResult;
       setItinerary(data);
       setDiffSummary(data.diffSummary);
-      if (data.updatedRoom) onRoomUpdated(data.updatedRoom);
       void fetchConflicts();
     } catch (err) {
       setRevisionError(

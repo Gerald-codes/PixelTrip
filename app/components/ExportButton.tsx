@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
 import type { Itinerary, ItineraryDay, ItineraryItem } from "@/lib/types";
 
 // ── Props ───────────────────────────────────────────────────────────────────
@@ -38,6 +37,28 @@ function flightLabel(option: string | null | undefined): string {
     default:
       return option ?? "—";
   }
+}
+
+// ── Filename helpers ─────────────────────────────────────────────────────────
+
+function slugifyDestination(destination: string): string {
+  return destination
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+function computeFilename(
+  destination: string | undefined | null,
+  format: "text" | "markdown"
+): string {
+  const ext = format === "markdown" ? "md" : "txt";
+  const slug = destination ? slugifyDestination(destination) : "";
+  if (!slug) {
+    return `pixeltrip-itinerary.${ext}`;
+  }
+  return `pixeltrip-${slug}-itinerary.${ext}`;
 }
 
 // ── Plain-text formatter ─────────────────────────────────────────────────────
@@ -175,93 +196,42 @@ export default function ExportButton({
   format,
   flightOption,
 }: ExportButtonProps) {
-  const [state, setState] = useState<"idle" | "copying" | "copied" | "fallback">(
-    "idle"
-  );
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const label =
+    format === "text" ? "📄 Download Text File" : "📝 Download Markdown";
 
-  const label = format === "text" ? "📄 Copy as Text" : "📝 Copy as Markdown";
-  const isCopied = state === "copied";
-  const isBusy = state === "copying";
-
-  const getContent = useCallback(
-    () =>
-      format === "text"
-        ? formatAsText(itinerary, flightOption)
-        : formatAsMarkdown(itinerary, flightOption),
-    [format, itinerary, flightOption]
-  );
-
-  const handleClick = useCallback(async () => {
-    if (isBusy || isCopied) return;
-
-    setState("copying");
-
+  function handleDownload(): void {
     try {
-      await navigator.clipboard.writeText(getContent());
-      setState("copied");
-      // Reset after 2 seconds
-      setTimeout(() => setState("idle"), 2000);
-    } catch {
-      // Clipboard API unavailable — show textarea fallback
-      setState("fallback");
-      // Auto-select textarea contents on next render tick
-      setTimeout(() => {
-        textareaRef.current?.select();
-      }, 50);
-    }
-  }, [getContent, isBusy, isCopied]);
+      const content =
+        format === "text"
+          ? formatAsText(itinerary, flightOption)
+          : formatAsMarkdown(itinerary, flightOption);
 
-  // ── Fallback textarea ──────────────────────────────────────────────────────
-  if (state === "fallback") {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-bold text-pt-text-primary">
-          Clipboard not available — select all and copy manually:
-        </p>
-        <textarea
-          ref={textareaRef}
-          readOnly
-          defaultValue={getContent()}
-          rows={12}
-          className="w-full border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-3 font-mono text-xs text-pt-text-primary shadow-pixel-card resize-y focus:outline-none"
-          aria-label={`${format === "text" ? "Plain text" : "Markdown"} itinerary for manual copy`}
-          onFocus={(e) => e.currentTarget.select()}
-        />
-        <button
-          type="button"
-          onClick={() => setState("idle")}
-          className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-        >
-          ✕ Close
-        </button>
-      </div>
-    );
+      const mimeType =
+        format === "markdown"
+          ? "text/markdown;charset=utf-8"
+          : "text/plain;charset=utf-8";
+
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = computeFilename(itinerary.destination, format);
+      a.click();
+
+      URL.revokeObjectURL(url);
+    } catch {
+      // Silent failure — no error state, no visual change
+    }
   }
 
-  // ── Normal button ─────────────────────────────────────────────────────────
   return (
     <button
       type="button"
-      onClick={() => void handleClick()}
-      disabled={isBusy || isCopied}
-      aria-label={isCopied ? "Copied to clipboard" : label}
-      className={[
-        "border-4 border-pt-text-primary border-opacity-20 px-4 py-2 font-bold text-pt-text-primary",
-        "shadow-pixel-card",
-        "transition-colors",
-        // Active / copied state → sky-blue; default → grass-green
-        isCopied ? "bg-[#38BDF8]" : "bg-[#4ADE80]",
-        // Visual press effect
-        !isBusy && !isCopied
-          ? "hover:brightness-95 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-          : "",
-        isBusy || isCopied ? "cursor-not-allowed opacity-80" : "cursor-pointer",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      onClick={handleDownload}
+      className="border-4 border-pt-text-primary border-opacity-20 px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card bg-[#4ADE80] hover:brightness-95 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
     >
-      {isCopied ? "✓ Copied!" : label}
+      {label}
     </button>
   );
 }
