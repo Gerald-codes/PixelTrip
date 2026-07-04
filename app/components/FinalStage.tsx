@@ -435,7 +435,7 @@ function ReplanSection({
             🔄 Replan trip
           </button>
           <p className="text-xs" style={{ color: "var(--pt-text-muted)" }}>
-            Goes back to the itinerary step. Destination, flight, and everyone's characters are kept.
+            Goes back to the itinerary step. Destination, flight, and everyone&apos;s characters are kept.
           </p>
         </div>
       ) : (

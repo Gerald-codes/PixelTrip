@@ -137,7 +137,7 @@ function buildVibeWeightingInstructions(vibes: string[]): string {
     adventure_trip: "destinations offering outdoor adventure activities, hiking, extreme sports, or wilderness exploration",
     shopping_city: "shopping-oriented city destinations with markets, malls, and retail culture",
     hidden_gems: "off-the-beaten-path destinations that are less touristy and offer authentic local experiences",
-    anywhere: "any destination worldwide that best fits the group's profile",
+    anywhere: "any destination worldwide that best fits the group&apos;s profile",
   };
 
   const descriptions = vibes
