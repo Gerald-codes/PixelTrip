@@ -263,20 +263,31 @@ export default function ItineraryStage({
       {/* Diff summary banner */}
       {diffSummary && (
         <div
-          className="flex items-start justify-between gap-4 border-2 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card"
+          className="flex items-start justify-between gap-4 p-4 shadow-pixel-card"
           role="alert"
+          style={{
+            border: "2px solid #92400E",
+            backgroundColor: "#1C0F00",
+          }}
         >
           <div>
-            <p className="font-bold text-pt-text-primary text-sm flex items-center gap-1">
+            <p
+              className="font-bold text-sm flex items-center gap-1"
+              style={{ color: "#FDE68A" }}
+            >
               <span aria-hidden="true">🔄</span> What changed
             </p>
-            <p className="mt-1 text-sm text-pt-text-primary">{diffSummary}</p>
+            <p className="mt-1 text-sm" style={{ color: "#FEF3C7" }}>{diffSummary}</p>
           </div>
           <button
             type="button"
             onClick={() => setDiffSummary(null)}
             aria-label="Dismiss update banner"
-            className="shrink-0 border-2 border-[#FB923C] px-2 py-0.5 text-xs font-bold text-[#FB923C] hover:bg-[#FB923C] hover:text-white active:translate-x-[1px] active:translate-y-[1px]"
+            className="shrink-0 px-2 py-0.5 text-xs font-bold active:translate-x-[1px] active:translate-y-[1px]"
+            style={{
+              border: "2px solid #92400E",
+              color: "#FB923C",
+            }}
           >
             ✕
           </button>
@@ -336,18 +347,27 @@ export default function ItineraryStage({
 
       {/* Generate error */}
       {generateError && !generating && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 shadow-pixel-card">
-          <p className="text-sm font-bold text-red-800">
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-bold" style={{ color: "#FCA5A5" }}>
             Couldn&apos;t generate itinerary
           </p>
-          <p className="mt-1 text-sm font-semibold text-red-700">
+          <p className="mt-1 text-sm font-semibold" style={{ color: "#FCA5A5", opacity: 0.85 }}>
             {generateError}
           </p>
           {isHost && (
             <button
               type="button"
               onClick={() => void handleGenerate()}
-              className="mt-3 border-2 border-red-600 bg-red-600 px-3 py-1.5 text-sm font-bold text-white shadow-[3px_3px_0px_#991B1B] hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              className="mt-3 px-3 py-1.5 text-sm font-bold active:translate-x-[2px] active:translate-y-[2px]"
+              style={{
+                border: "2px solid #B91C1C",
+                backgroundColor: "#B91C1C",
+                color: "#FFF",
+                boxShadow: "3px 3px 0px #7F1D1D",
+              }}
             >
               Retry
             </button>
@@ -380,7 +400,10 @@ export default function ItineraryStage({
             ))}
           </select>
           {selectedVersionId && (
-            <span className="border-2 border-[#FB923C] bg-amber-50 px-2 py-0.5 text-xs font-bold text-pt-text-primary">
+            <span
+              className="px-2 py-0.5 text-xs font-bold text-pt-text-primary"
+              style={{ border: "2px solid #92400E", backgroundColor: "#1C0F00", color: "#FDE68A" }}
+            >
               Read-only
             </span>
           )}
@@ -416,13 +439,20 @@ export default function ItineraryStage({
                 {/* Average satisfaction score */}
                 {viewingItinerary.averageSatisfactionScore !== null && (
                   <span
-                    className={`border-2 border-pt-text-primary border-opacity-20 px-3 py-1 text-xs font-bold text-pt-text-primary uppercase tracking-wide shadow-pixel-sm ${
+                    className={`border-2 border-pt-text-primary border-opacity-20 px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-pixel-sm ${
                       viewingItinerary.averageSatisfactionScore >= 7
-                        ? "bg-[#4ADE80]"
+                        ? "bg-[#4ADE80] text-[#081A33]"
                         : viewingItinerary.averageSatisfactionScore >= 5
-                          ? "bg-amber-200"
-                          : "bg-red-200"
+                          ? "text-[#FDE68A]"
+                          : "text-[#FCA5A5]"
                     }`}
+                    style={
+                      viewingItinerary.averageSatisfactionScore >= 7
+                        ? undefined
+                        : viewingItinerary.averageSatisfactionScore >= 5
+                          ? { backgroundColor: "#1C0F00", borderColor: "#92400E" }
+                          : { backgroundColor: "#1A0000", borderColor: "#B91C1C" }
+                    }
                   >
                     ★ Avg score: {viewingItinerary.averageSatisfactionScore.toFixed(1)}/10
                   </span>
@@ -487,7 +517,10 @@ export default function ItineraryStage({
                 )}
 
                 {isFinalised && (
-                  <span className="border-2 border-[#4ADE80] bg-green-50 px-4 py-2 text-sm font-bold text-pt-text-primary shadow-pixel-sm">
+                  <span
+                    className="px-4 py-2 text-sm font-bold shadow-pixel-sm"
+                    style={{ border: "2px solid #4ADE80", backgroundColor: "#0A2A1A", color: "#4ADE80" }}
+                  >
                     ✓ Itinerary finalised
                   </span>
                 )}

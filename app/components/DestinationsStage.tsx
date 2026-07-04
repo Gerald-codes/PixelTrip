@@ -195,8 +195,11 @@ export default function DestinationsStage({
 
       {/* Load error (separate from agent failure) */}
       {loadError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
-          {loadError}
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{loadError}</p>
         </div>
       )}
 
@@ -242,17 +245,20 @@ export default function DestinationsStage({
 
       {/* Agent error */}
       {agentError && !generating && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 shadow-pixel-card">
-          <p className="text-sm font-bold text-red-800">
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-bold" style={{ color: "#FCA5A5" }}>
             {agentError.needsGroupProfile
               ? "Group profile missing"
               : "Couldn't generate destinations"}
           </p>
-          <p className="mt-1 text-sm font-semibold text-red-700">{agentError.message}</p>
+          <p className="mt-1 text-sm font-semibold" style={{ color: "#FCA5A5", opacity: 0.85 }}>{agentError.message}</p>
 
       {agentError.needsGroupProfile && isHost && (
             <div className="mt-2 flex flex-col gap-2">
-              <p className="text-sm font-semibold text-red-700">
+              <p className="text-sm font-semibold" style={{ color: "#FCA5A5", opacity: 0.85 }}>
                 The group profile must be generated before destinations can be
                 researched. Go back and generate it first.
               </p>
@@ -260,7 +266,8 @@ export default function DestinationsStage({
                 <button
                   type="button"
                   onClick={() => void onGoBack()}
-                  className="self-start border-2 border-red-600 bg-red-50 px-3 py-1.5 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                  className="self-start px-3 py-1.5 text-sm font-bold active:translate-x-[2px] active:translate-y-[2px]"
+                  style={{ border: "2px solid #B91C1C", backgroundColor: "#2A0000", color: "#FCA5A5", boxShadow: "3px 3px 0px #7F1D1D" }}
                 >
                   ← Back to Group Profile
                 </button>
@@ -269,7 +276,7 @@ export default function DestinationsStage({
           )}
 
           {agentError.needsGroupProfile && !isHost && (
-            <p className="mt-2 text-sm font-semibold text-red-700">
+            <p className="mt-2 text-sm font-semibold" style={{ color: "#FCA5A5", opacity: 0.85 }}>
               Waiting for the host to go back and generate the group profile.
             </p>
           )}

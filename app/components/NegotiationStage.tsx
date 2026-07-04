@@ -278,25 +278,32 @@ export default function NegotiationStage({
 
       {/* Load error */}
       {loadError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
-          {loadError}
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{loadError}</p>
         </div>
       )}
 
       {/* Diff summary banner (dismissible amber) */}
       {diffSummary && (
-        <div className="border-2 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card">
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "2px solid #92400E", backgroundColor: "#1C0F00" }}
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-amber-900">
+              <p className="text-sm font-bold" style={{ color: "#FDE68A" }}>
                 ✏️ Itinerary revised
               </p>
-              <p className="mt-1 text-sm text-amber-800">{diffSummary}</p>
+              <p className="mt-1 text-sm" style={{ color: "#FEF3C7" }}>{diffSummary}</p>
             </div>
             <button
               type="button"
               onClick={() => setDiffSummary(null)}
-              className="flex-none border-2 border-[#FB923C] bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900 shadow-[2px_2px_0px_#92400E] hover:bg-amber-200 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+              className="flex-none px-2 py-0.5 text-xs font-bold active:translate-x-[1px] active:translate-y-[1px]"
+              style={{ border: "2px solid #92400E", color: "#FB923C" }}
               aria-label="Dismiss diff summary"
             >
               ✕
@@ -307,8 +314,11 @@ export default function NegotiationStage({
 
       {/* Revision error */}
       {revisionError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
-          {revisionError}
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{revisionError}</p>
         </div>
       )}
 

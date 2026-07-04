@@ -10,52 +10,78 @@ interface ItineraryDayProps {
   defaultOpen?: boolean;
 }
 
-// ── Colour palette ─────────────────────────────────────────────────────────
+// ── Section config ─────────────────────────────────────────────────────────
+//
+// Each time section has:
+//   - a distinct accent colour used for its left border stripe + header text
+//   - a dark background for the header bar (visible against the card)
+//   - a lighter header text colour that has strong contrast on the dark bg
+
 const SECTION_CONFIG = {
   morning: {
     label: "Morning",
     emoji: "🌅",
-    headerBg: "bg-[#38BDF8]",
-    headerText: "text-pt-text-primary",
+    // Dark navy header with sky-blue accent text — clearly readable
+    headerBg: "#0D2238",
+    headerBorder: "#38BDF8",
+    accentColour: "#38BDF8",
+    stripeBg: "rgba(56,189,248,0.08)",
   },
   afternoon: {
     label: "Afternoon",
     emoji: "☀️",
-    headerBg: "bg-[#FB923C]",
-    headerText: "text-pt-text-primary",
+    // Dark amber header with orange accent text
+    headerBg: "#1C0F00",
+    headerBorder: "#FB923C",
+    accentColour: "#FB923C",
+    stripeBg: "rgba(251,146,60,0.06)",
   },
   evening: {
     label: "Evening",
     emoji: "🌆",
-    headerBg: "bg-[var(--pt-agent-atlas)]",
-    headerText: "text-white",
+    // Dark purple header with purple accent text
+    headerBg: "#150A2E",
+    headerBorder: "#A78BFA",
+    accentColour: "#A78BFA",
+    stripeBg: "rgba(167,139,250,0.06)",
   },
   night: {
     label: "Night",
     emoji: "🌙",
-    headerBg: "bg-pt-card",
-    headerText: "text-white",
+    // Very dark header with muted cyan accent text
+    headerBg: "#081820",
+    headerBorder: "#4FD1C5",
+    accentColour: "#4FD1C5",
+    stripeBg: "rgba(79,209,197,0.06)",
   },
 } as const;
 
 type TimeSection = keyof typeof SECTION_CONFIG;
 
-// ── Date formatter ──────────────────────────────────────────────────────────
+// Ordered list so render order is always deterministic
+const TIME_SECTION_ORDER: TimeSection[] = [
+  "morning",
+  "afternoon",
+  "evening",
+  "night",
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
 function formatDate(dateStr: string): string {
   try {
     const [year, month, day] = dateStr.split("-").map(Number);
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
+      weekday: "short",
       month: "short",
-      day: "2-digit",
-      year: "numeric",
+      day: "numeric",
     });
   } catch {
     return dateStr;
   }
 }
 
-// ── Item count helper ───────────────────────────────────────────────────────
 function countItems(day: ItineraryDay): number {
   return (
     (day.morning?.length ?? 0) +
@@ -65,17 +91,72 @@ function countItems(day: ItineraryDay): number {
   );
 }
 
+function getItemsForSection(day: ItineraryDay, section: TimeSection): ItineraryItem[] {
+  return day[section] ?? [];
+}
+
 // ── Item Card ───────────────────────────────────────────────────────────────
-function ItemCard({ item }: { item: ItineraryItem }) {
+
+function ItemCard({
+  item,
+  accentColour,
+}: {
+  item: ItineraryItem;
+  accentColour: string;
+}) {
   return (
-    <article className="border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] shadow-pixel-sm p-4 flex flex-col gap-2">
-      {/* Title + type badge row */}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <h4 className="font-bold text-pt-text-primary text-base leading-tight">
+    <article
+      style={{
+        backgroundColor: "var(--pt-bg-card)",
+        border: "2px solid var(--pt-border-subtle, rgba(47,94,147,0.4))",
+        borderLeft: `3px solid ${accentColour}`,
+        padding: "12px 14px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+      }}
+    >
+      {/* Title row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <h4
+          style={{
+            margin: 0,
+            fontFamily: "'Courier New', Courier, monospace",
+            fontSize: "0.9rem",
+            fontWeight: 700,
+            color: "var(--pt-text-primary, #EAF2FF)",
+            lineHeight: 1.35,
+            flex: 1,
+            minWidth: 0,
+            wordBreak: "break-word",
+          }}
+        >
           {item.title}
         </h4>
         {item.type && (
-          <span className="inline-flex items-center border-2 border-pt-text-primary border-opacity-20 bg-[#38BDF8] px-2 py-0.5 text-xs font-bold text-pt-text-primary uppercase tracking-wide shadow-pixel-bubble whitespace-nowrap flex-none">
+          <span
+            style={{
+              flexShrink: 0,
+              padding: "2px 8px",
+              fontSize: "0.6875rem",
+              fontFamily: "'Courier New', Courier, monospace",
+              fontWeight: 700,
+              color: accentColour,
+              border: `1px solid ${accentColour}`,
+              backgroundColor: "transparent",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
+            }}
+          >
             {item.type}
           </span>
         )}
@@ -83,18 +164,37 @@ function ItemCard({ item }: { item: ItineraryItem }) {
 
       {/* Description */}
       {item.description && (
-        <p className="text-sm text-pt-text-primary leading-relaxed">
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.8125rem",
+            color: "var(--pt-text-secondary, #AFC5E6)",
+            lineHeight: 1.6,
+            wordBreak: "break-word",
+          }}
+        >
           {item.description}
         </p>
       )}
 
-      {/* Persona benefits chips */}
+      {/* Persona benefit chips */}
       {item.personaBenefits && item.personaBenefits.length > 0 && (
-        <div className="flex flex-wrap gap-1.5" aria-label="Benefits for">
+        <div
+          style={{ display: "flex", flexWrap: "wrap", gap: 5 }}
+          aria-label="Good for"
+        >
           {item.personaBenefits.map((persona, i) => (
             <span
               key={i}
-              className="inline-flex items-center border-2 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble"
+              style={{
+                padding: "2px 8px",
+                fontSize: "0.6875rem",
+                fontFamily: "'Courier New', Courier, monospace",
+                fontWeight: 700,
+                color: "#081A33",
+                backgroundColor: "#4ADE80",
+                border: "1px solid #22C55E",
+              }}
             >
               {persona}
             </span>
@@ -102,17 +202,47 @@ function ItemCard({ item }: { item: ItineraryItem }) {
         </div>
       )}
 
-      {/* Reason */}
+      {/* Reason / AI note */}
       {item.reason && (
-        <p className="text-xs text-pt-text-primary italic opacity-70 leading-relaxed">
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.75rem",
+            color: "var(--pt-text-muted, rgba(175,197,230,0.6))",
+            fontStyle: "italic",
+            lineHeight: 1.5,
+            wordBreak: "break-word",
+          }}
+        >
           {item.reason}
+        </p>
+      )}
+
+      {/* Estimated cost */}
+      {typeof item.estimatedCost === "number" && item.estimatedCost > 0 && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.75rem",
+            fontFamily: "'Courier New', Courier, monospace",
+            fontWeight: 700,
+            color: accentColour,
+          }}
+        >
+          ~${item.estimatedCost.toLocaleString("en-US")} / person
         </p>
       )}
     </article>
   );
 }
 
-// ── Time Section ────────────────────────────────────────────────────────────
+// ── Time Section Block ──────────────────────────────────────────────────────
+//
+// Renders a collapsible section (Morning / Afternoon / Evening / Night).
+// The section header is always visible as the toggle — clicking it expands
+// or collapses the list of activity cards below.
+// Empty sections (no items) are hidden entirely — they add no value.
+
 function TimeSectionBlock({
   section,
   items,
@@ -120,125 +250,332 @@ function TimeSectionBlock({
   section: TimeSection;
   items: ItineraryItem[];
 }) {
-  const config = SECTION_CONFIG[section];
+  // Start open — users see activities immediately without extra clicks
   const [open, setOpen] = useState(true);
 
+  // Skip rendering entirely for empty sections
+  if (items.length === 0) return null;
+
+  const cfg = SECTION_CONFIG[section];
+
   return (
-    <section aria-label={config.label}>
-      {/* Section header — acts as toggle */}
+    <div
+      role="region"
+      aria-label={cfg.label}
+      style={{ display: "flex", flexDirection: "column", gap: 0 }}
+    >
+      {/* ── Section header (always visible — acts as toggle) ── */}
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
         aria-expanded={open}
-        className={[
-          "w-full flex items-center justify-between gap-2",
-          "border-2 border-pt-text-primary border-opacity-20",
-          config.headerBg,
-          "px-4 py-2 shadow-pixel-sm",
-          "hover:opacity-90 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pt-agent-atlas)] focus-visible:ring-offset-1",
-          "transition-opacity",
-        ].join(" ")}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          padding: "8px 12px",
+          backgroundColor: cfg.headerBg,
+          border: `2px solid ${cfg.headerBorder}`,
+          borderBottom: open ? `1px solid ${cfg.headerBorder}30` : `2px solid ${cfg.headerBorder}`,
+          cursor: "pointer",
+          textAlign: "left",
+          outline: "none",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.outline = `2px solid ${cfg.accentColour}`;
+          e.currentTarget.style.outlineOffset = "2px";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.outline = "none";
+        }}
       >
-        <span className="flex items-center gap-2">
-          <span aria-hidden="true" className="text-lg">{config.emoji}</span>
-          <span className={`text-sm font-bold uppercase tracking-wide ${config.headerText}`}>
-            {config.label}
+        {/* Left: emoji + label + item count */}
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span aria-hidden="true" style={{ fontSize: "1rem", lineHeight: 1 }}>
+            {cfg.emoji}
           </span>
-          {!open && items.length > 0 && (
-            <span
-              className={`border border-current px-1.5 py-0 text-xs font-bold ${config.headerText} opacity-70`}
-            >
-              {items.length}
-            </span>
-          )}
+          <span
+            style={{
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: cfg.accentColour,
+            }}
+          >
+            {cfg.label}
+          </span>
+          {/* Item count badge — always visible so users know what's inside */}
+          <span
+            style={{
+              fontSize: "0.6875rem",
+              fontFamily: "'Courier New', Courier, monospace",
+              fontWeight: 700,
+              color: cfg.accentColour,
+              border: `1px solid ${cfg.accentColour}50`,
+              padding: "0 6px",
+              opacity: 0.8,
+            }}
+          >
+            {items.length} {items.length === 1 ? "activity" : "activities"}
+          </span>
         </span>
+
+        {/* Right: chevron */}
         <span
           aria-hidden="true"
-          className={`text-xs font-bold ${config.headerText}`}
-          style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+          style={{
+            fontSize: "0.625rem",
+            fontWeight: 700,
+            color: cfg.accentColour,
+            flexShrink: 0,
+            transition: "transform 0.15s",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            display: "inline-block",
+          }}
         >
           ▼
         </span>
       </button>
 
-      {/* Items */}
+      {/* ── Activity list (conditionally rendered) ── */}
       {open && (
-        <div className="mt-3 flex flex-col gap-3">
-          {items.length === 0 ? (
-            <p className="border-2 border-dashed border-pt-text-primary border-opacity-20 px-4 py-3 text-sm text-pt-text-primary opacity-50 italic">
-              Nothing scheduled
-            </p>
-          ) : (
-            items.map((item, i) => <ItemCard key={i} item={item} />)
-          )}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            padding: "8px 0 0 0",
+            backgroundColor: cfg.stripeBg,
+            borderLeft: `2px solid ${cfg.headerBorder}`,
+            borderRight: `2px solid ${cfg.headerBorder}`,
+            borderBottom: `2px solid ${cfg.headerBorder}`,
+          }}
+        >
+          {items.map((item, i) => (
+            <div key={i} style={{ padding: "0 8px", paddingBottom: i === items.length - 1 ? 8 : 0 }}>
+              <ItemCard item={item} accentColour={cfg.accentColour} />
+            </div>
+          ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
 // ── ItineraryDay ────────────────────────────────────────────────────────────
-export default function ItineraryDay({ day, dayNumber, defaultOpen = false }: ItineraryDayProps) {
+
+export default function ItineraryDay({
+  day,
+  dayNumber,
+  defaultOpen = false,
+}: ItineraryDayProps) {
   const [open, setOpen] = useState(defaultOpen);
-  const hasNight = Array.isArray(day.night) && day.night.length > 0;
   const total = countItems(day);
 
+  // Non-empty sections in fixed order — only count sections with items for
+  // the "N activities" chip so it accurately reflects visible content
+  const populatedSections = TIME_SECTION_ORDER.filter(
+    (s) => getItemsForSection(day, s).length > 0
+  );
+
   return (
-    <div className="flex flex-col gap-0">
-      {/* ── Collapsible day header (button) ── */}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0,
+        // Pixel-style card shadow
+        boxShadow: "4px 4px 0 #081A33",
+      }}
+    >
+      {/* ── Day header — collapsible toggle ── */}
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
         aria-expanded={open}
         aria-controls={`itinerary-day-${dayNumber}`}
-        className={[
-          "w-full flex items-center justify-between gap-3",
-          "border-4 border-pt-text-primary border-opacity-20 bg-[#38BDF8]",
-          "px-4 py-3 text-left",
-          "shadow-pixel-card",
-          "hover:bg-[#0ea5e9] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pt-agent-atlas)] focus-visible:ring-offset-1",
-          "transition-colors",
-        ].join(" ")}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "12px 16px",
+          backgroundColor: "#0D2342",
+          border: "3px solid #2F5E93",
+          borderBottom: open ? "1px solid #2F5E93" : "3px solid #2F5E93",
+          cursor: "pointer",
+          textAlign: "left",
+          outline: "none",
+          transition: "background-color 0.1s",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#1B3964";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0D2342";
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.outline = "2px solid #A78BFA";
+          e.currentTarget.style.outlineOffset = "2px";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.outline = "none";
+        }}
       >
-        {/* Left: Day label + date */}
-        <span className="flex items-baseline gap-2 min-w-0">
-          <span className="text-lg font-bold text-pt-text-primary whitespace-nowrap">
+        {/* Left: Day number + date */}
+        <span
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 10,
+            minWidth: 0,
+            flex: 1,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "0.9375rem",
+              fontWeight: 700,
+              color: "#EAF2FF",
+              whiteSpace: "nowrap",
+            }}
+          >
             Day {dayNumber}
           </span>
-          <span className="text-sm font-semibold text-pt-text-primary opacity-70 whitespace-nowrap">
+          <span
+            style={{
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "0.8125rem",
+              color: "#AFC5E6",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
             {formatDate(day.date)}
           </span>
         </span>
 
-        {/* Right: item count chip + chevron */}
-        <span className="flex items-center gap-2 flex-shrink-0">
-          {!open && (
-            <span className="border-2 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-2 py-0.5 text-xs font-bold text-pt-text-primary shadow-pixel-bubble whitespace-nowrap">
-              {total} {total === 1 ? "activity" : "activities"}
+        {/* Right: activity count + time-section pills + chevron */}
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexShrink: 0,
+          }}
+        >
+          {/* Total activity count — always visible */}
+          <span
+            style={{
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "0.6875rem",
+              fontWeight: 700,
+              color: "#38BDF8",
+              border: "1px solid #38BDF850",
+              padding: "2px 8px",
+              whiteSpace: "nowrap",
+              backgroundColor: "rgba(56,189,248,0.08)",
+            }}
+          >
+            {total} {total === 1 ? "activity" : "activities"}
+          </span>
+
+          {/* Section pills — compact indicator of which time slots have content */}
+          {!open && populatedSections.length > 0 && (
+            <span
+              style={{
+                display: "flex",
+                gap: 3,
+              }}
+              aria-hidden="true"
+            >
+              {populatedSections.map((s) => (
+                <span
+                  key={s}
+                  title={SECTION_CONFIG[s].label}
+                  style={{
+                    fontSize: "0.875rem",
+                    lineHeight: 1,
+                  }}
+                >
+                  {SECTION_CONFIG[s].emoji}
+                </span>
+              ))}
             </span>
           )}
+
+          {/* Chevron */}
           <span
             aria-hidden="true"
-            className="text-sm font-bold text-pt-text-primary"
-            style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+            style={{
+              fontSize: "0.625rem",
+              fontWeight: 700,
+              color: "#AFC5E6",
+              transition: "transform 0.15s",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              display: "inline-block",
+              marginLeft: 2,
+            }}
           >
             ▼
           </span>
         </span>
       </button>
 
-      {/* ── Collapsible content ── */}
+      {/* ── Expanded content ── */}
       {open && (
         <div
           id={`itinerary-day-${dayNumber}`}
-          className="flex flex-col gap-5 border-l-4 border-r-4 border-b-4 border-pt-text-primary border-opacity-20 shadow-pixel-card px-4 pt-4 pb-5"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 0,
+            border: "3px solid #2F5E93",
+            borderTop: "none",
+            backgroundColor: "var(--pt-bg-surface, #0D2342)",
+            padding: "12px 12px 14px",
+          }}
         >
-          <TimeSectionBlock section="morning" items={day.morning ?? []} />
-          <TimeSectionBlock section="afternoon" items={day.afternoon ?? []} />
-          <TimeSectionBlock section="evening" items={day.evening ?? []} />
-          {hasNight && <TimeSectionBlock section="night" items={day.night!} />}
+          {/* Time sections in fixed order — empty ones are skipped by TimeSectionBlock */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {TIME_SECTION_ORDER.map((section) => (
+              <TimeSectionBlock
+                key={section}
+                section={section}
+                items={getItemsForSection(day, section)}
+              />
+            ))}
+          </div>
+
+          {/* Fallback when ALL sections are empty (shouldn't happen with real data) */}
+          {total === 0 && (
+            <p
+              style={{
+                margin: 0,
+                padding: "16px",
+                fontSize: "0.8125rem",
+                fontFamily: "'Courier New', Courier, monospace",
+                color: "var(--pt-text-muted, rgba(175,197,230,0.5))",
+                fontStyle: "italic",
+                textAlign: "center",
+              }}
+            >
+              No activities scheduled for this day.
+            </p>
+          )}
         </div>
       )}
     </div>

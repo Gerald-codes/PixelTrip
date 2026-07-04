@@ -37,15 +37,34 @@ export default function FairnessSummary({ summary, members: _members }: Fairness
 
       {/* Warnings */}
       {summary.warnings.length > 0 && (
-        <div className="border-2 border-[#FB923C] bg-amber-50 shadow-pixel-sm p-4">
-          <p className="font-bold text-pt-text-primary text-sm mb-2 flex items-center gap-1">
+        <div
+          className="shadow-pixel-sm p-4"
+          style={{
+            border: "2px solid #92400E",
+            backgroundColor: "#1C0F00",
+          }}
+        >
+          <p
+            className="font-bold text-sm mb-2 flex items-center gap-1"
+            style={{ color: "#FDE68A" }}
+          >
             <span aria-hidden="true">⚠️</span>
             Warnings
           </p>
-          <ul className="flex flex-col gap-1 list-none" role="list">
+          <ul className="flex flex-col gap-1.5 list-none" role="list">
             {summary.warnings.map((warning, i) => (
-              <li key={i} className="text-sm text-pt-text-primary flex items-start gap-2">
-                <span className="mt-0.5 text-[#FB923C] font-bold leading-none" aria-hidden="true">•</span>
+              <li
+                key={i}
+                className="text-sm flex items-start gap-2"
+                style={{ color: "#FEF3C7", lineHeight: 1.6, wordBreak: "break-word" }}
+              >
+                <span
+                  className="mt-0.5 font-bold leading-none flex-shrink-0"
+                  aria-hidden="true"
+                  style={{ color: "#FB923C" }}
+                >
+                  •
+                </span>
                 {warning}
               </li>
             ))}
@@ -55,15 +74,34 @@ export default function FairnessSummary({ summary, members: _members }: Fairness
 
       {/* Recommendations */}
       {summary.recommendations.length > 0 && (
-        <div className="border-2 border-[#38BDF8] bg-[#e0f2fe] shadow-pixel-sm p-4">
-          <p className="font-bold text-pt-text-primary text-sm mb-2 flex items-center gap-1">
+        <div
+          className="shadow-pixel-sm p-4"
+          style={{
+            border: "2px solid #0369A1",
+            backgroundColor: "#071E2E",
+          }}
+        >
+          <p
+            className="font-bold text-sm mb-2 flex items-center gap-1"
+            style={{ color: "#38BDF8" }}
+          >
             <span aria-hidden="true">💡</span>
             Recommendations
           </p>
-          <ul className="flex flex-col gap-1 list-none" role="list">
+          <ul className="flex flex-col gap-1.5 list-none" role="list">
             {summary.recommendations.map((rec, i) => (
-              <li key={i} className="text-sm text-pt-text-primary flex items-start gap-2">
-                <span className="mt-0.5 text-[#38BDF8] font-bold leading-none" aria-hidden="true">•</span>
+              <li
+                key={i}
+                className="text-sm flex items-start gap-2"
+                style={{ color: "#BAE6FD", lineHeight: 1.6, wordBreak: "break-word" }}
+              >
+                <span
+                  className="mt-0.5 font-bold leading-none flex-shrink-0"
+                  aria-hidden="true"
+                  style={{ color: "#38BDF8" }}
+                >
+                  •
+                </span>
                 {rec}
               </li>
             ))}

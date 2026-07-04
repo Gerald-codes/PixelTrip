@@ -28,10 +28,21 @@ import type { Availability, DestinationPreference, TravelVibe } from "@/lib/type
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-const DEEP_NAVY = "var(--pt-bg-deep, #0F1B2E)";
-const SAND_CREAM = "var(--pt-text-primary, #E8ECF1)";
+/** Dark card background — stays consistent with the rest of PixelTrip's dark theme. */
+const CARD_BG = "var(--pt-bg-card, #122A4D)";
+/** Slightly elevated surface for nested elements (date rows, member rows). */
+const CARD_ELEVATED = "var(--pt-bg-elevated, #1B3964)";
+/** Deep navy used for shadows and outlines that need contrast against card bg. */
+const NAVY_SHADOW = "#081A33";
+/** Card border colour. */
+const CARD_BORDER = "var(--pt-border, #2F5E93)";
+/** Primary light text on dark surfaces. */
+const LIGHT_TEXT = "var(--pt-text-primary, #EAF2FF)";
+/** Muted secondary text. */
+const MUTED_TEXT = "var(--pt-text-secondary, #AFC5E6)";
 const GRASS_GREEN = "#4ADE80";
 const SUNSET_ORANGE = "#FB923C";
+const AMBER_WARNING = "#FCD34D";
 const SKY_BLUE = "#38BDF8";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -235,27 +246,27 @@ export default function AvailabilityStage({
   const allDestinations = [...selectedChips, ...customDestinations];
 
   // ── Styles ────────────────────────────────────────────────────────────────
-  function cardStyle(bg: string = SAND_CREAM): React.CSSProperties {
+  function cardStyle(): React.CSSProperties {
     return {
-      border: `3px solid ${DEEP_NAVY}`,
-      boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
-      backgroundColor: bg,
+      border: `3px solid ${CARD_BORDER}`,
+      boxShadow: `4px 4px 0 ${NAVY_SHADOW}`,
+      backgroundColor: CARD_BG,
       padding: "20px",
     };
   }
 
   const submitBtnStyle: React.CSSProperties = {
-    border: `3px solid ${DEEP_NAVY}`,
-    borderRadius: 8,
-    backgroundColor: saving ? DEEP_NAVY : GRASS_GREEN,
-    color: DEEP_NAVY,
+    border: `3px solid ${NAVY_SHADOW}`,
+    borderRadius: 0,
+    backgroundColor: saving ? "#1B3964" : GRASS_GREEN,
+    color: saving ? MUTED_TEXT : NAVY_SHADOW,
     padding: "10px 28px",
     fontFamily: "'Courier New', Courier, monospace",
     fontWeight: 700,
     fontSize: "1rem",
     cursor: saving ? "not-allowed" : "pointer",
     opacity: saving ? 0.6 : 1,
-    boxShadow: saving ? "none" : `4px 4px 0 ${DEEP_NAVY}`,
+    boxShadow: saving ? "none" : `4px 4px 0 ${NAVY_SHADOW}`,
     transition: "opacity 0.1s",
   };
 
@@ -270,10 +281,10 @@ export default function AvailabilityStage({
       }}
     >
       {/* ── Section 1: Date ranges ─────────────────────────────────────────── */}
-      <div style={cardStyle(SAND_CREAM)}>
+      <div style={cardStyle()}>
         <h3
           style={{
-            color: DEEP_NAVY,
+            color: LIGHT_TEXT,
             fontFamily: "'Courier New', Courier, monospace",
             fontSize: "1rem",
             fontWeight: 700,
@@ -300,25 +311,27 @@ export default function AvailabilityStage({
                 display: "flex",
                 gap: 10,
                 alignItems: "flex-end",
-                border: `2px solid ${DEEP_NAVY}`,
-                backgroundColor: SAND_CREAM,
-                padding: "10px",
-                boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
+                border: `2px solid ${CARD_BORDER}`,
+                backgroundColor: CARD_ELEVATED,
+                padding: "12px",
+                boxShadow: `2px 2px 0 ${NAVY_SHADOW}`,
                 flexWrap: "wrap",
               }}
             >
               <label
-                style={{ display: "flex", flexDirection: "column", flex: 1, gap: 4 }}
+                style={{ display: "flex", flexDirection: "column", flex: 1, gap: 6, minWidth: 120 }}
               >
                 <span
                   style={{
-                    color: DEEP_NAVY,
+                    color: MUTED_TEXT,
                     fontFamily: "'Courier New', Courier, monospace",
                     fontWeight: 700,
-                    fontSize: 12,
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
                   }}
                 >
-                  Start
+                  Start date
                 </span>
                 <input
                   type="date"
@@ -326,30 +339,36 @@ export default function AvailabilityStage({
                   onChange={(e) => updateRange(i, { startDate: e.target.value })}
                   disabled={saving || submitted}
                   aria-label={`Start date for range ${i + 1}`}
+                  className="pt-date-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8] focus-visible:ring-offset-1"
                   style={{
-                    border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 8,
-                    backgroundColor: SAND_CREAM,
-                    color: DEEP_NAVY,
-                    padding: "4px 8px",
+                    border: `2px solid ${CARD_BORDER}`,
+                    borderRadius: 0,
+                    backgroundColor: "var(--pt-bg-deep, #081A33)",
+                    color: LIGHT_TEXT,
+                    padding: "8px 10px",
                     fontFamily: "'Courier New', Courier, monospace",
                     fontSize: "0.875rem",
                     outline: "none",
+                    colorScheme: "dark",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 />
               </label>
               <label
-                style={{ display: "flex", flexDirection: "column", flex: 1, gap: 4 }}
+                style={{ display: "flex", flexDirection: "column", flex: 1, gap: 6, minWidth: 120 }}
               >
                 <span
                   style={{
-                    color: DEEP_NAVY,
+                    color: MUTED_TEXT,
                     fontFamily: "'Courier New', Courier, monospace",
                     fontWeight: 700,
-                    fontSize: 12,
+                    fontSize: 11,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
                   }}
                 >
-                  End
+                  End date
                 </span>
                 <input
                   type="date"
@@ -357,15 +376,19 @@ export default function AvailabilityStage({
                   onChange={(e) => updateRange(i, { endDate: e.target.value })}
                   disabled={saving || submitted}
                   aria-label={`End date for range ${i + 1}`}
+                  className="pt-date-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8] focus-visible:ring-offset-1"
                   style={{
-                    border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 8,
-                    backgroundColor: SAND_CREAM,
-                    color: DEEP_NAVY,
-                    padding: "4px 8px",
+                    border: `2px solid ${CARD_BORDER}`,
+                    borderRadius: 0,
+                    backgroundColor: "var(--pt-bg-deep, #081A33)",
+                    color: LIGHT_TEXT,
+                    padding: "8px 10px",
                     fontFamily: "'Courier New', Courier, monospace",
                     fontSize: "0.875rem",
                     outline: "none",
+                    colorScheme: "dark",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 />
               </label>
@@ -376,23 +399,22 @@ export default function AvailabilityStage({
                   disabled={draftRanges.length === 1 || saving}
                   aria-label={`Remove date range ${i + 1}`}
                   style={{
-                    border: `2px solid ${DEEP_NAVY}`,
-                    borderRadius: 8,
-                    backgroundColor:
-                      draftRanges.length === 1 ? SAND_CREAM : SUNSET_ORANGE,
-                    color: DEEP_NAVY,
-                    padding: "4px 12px",
+                    border: `2px solid ${draftRanges.length === 1 ? CARD_BORDER : SUNSET_ORANGE}`,
+                    borderRadius: 0,
+                    backgroundColor: draftRanges.length === 1 ? CARD_ELEVATED : "#3D1400",
+                    color: draftRanges.length === 1 ? MUTED_TEXT : SUNSET_ORANGE,
+                    padding: "8px 14px",
                     fontFamily: "'Courier New', Courier, monospace",
                     fontWeight: 700,
-                    fontSize: "0.875rem",
+                    fontSize: "0.8125rem",
                     cursor: draftRanges.length === 1 ? "not-allowed" : "pointer",
-                    opacity: draftRanges.length === 1 ? 0.5 : 1,
-                    boxShadow:
-                      draftRanges.length === 1 ? "none" : `2px 2px 0 ${DEEP_NAVY}`,
+                    opacity: draftRanges.length === 1 ? 0.45 : 1,
+                    boxShadow: draftRanges.length === 1 ? "none" : `2px 2px 0 ${NAVY_SHADOW}`,
                     whiteSpace: "nowrap",
+                    alignSelf: "flex-end",
                   }}
                 >
-                  Remove
+                  ✕ Remove
                 </button>
               )}
             </li>
@@ -406,16 +428,17 @@ export default function AvailabilityStage({
             disabled={saving}
             aria-label="Add another date range"
             style={{
-              marginTop: 10,
-              border: `2px dashed ${DEEP_NAVY}`,
-              borderRadius: 8,
+              marginTop: 12,
+              border: `2px dashed ${CARD_BORDER}`,
+              borderRadius: 0,
               backgroundColor: "transparent",
-              color: DEEP_NAVY,
-              padding: "6px 16px",
+              color: SKY_BLUE,
+              padding: "7px 16px",
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
               fontSize: "0.875rem",
               cursor: "pointer",
+              letterSpacing: "0.02em",
             }}
           >
             + Add another date range
@@ -424,10 +447,10 @@ export default function AvailabilityStage({
       </div>
 
       {/* ── Section 2: Travel vibes ────────────────────────────────────────── */}
-      <div style={cardStyle(SAND_CREAM)}>
+      <div style={cardStyle()}>
         <h3
           style={{
-            color: DEEP_NAVY,
+            color: LIGHT_TEXT,
             fontFamily: "'Courier New', Courier, monospace",
             fontSize: "1rem",
             fontWeight: 700,
@@ -444,10 +467,10 @@ export default function AvailabilityStage({
       </div>
 
       {/* ── Section 3: Destination chips + custom input ────────────────────── */}
-      <div style={cardStyle(SAND_CREAM)}>
+      <div style={cardStyle()}>
         <h3
           style={{
-            color: DEEP_NAVY,
+            color: LIGHT_TEXT,
             fontFamily: "'Courier New', Courier, monospace",
             fontSize: "1rem",
             fontWeight: 700,
@@ -455,7 +478,7 @@ export default function AvailabilityStage({
           }}
         >
           📍 Pick your destinations{" "}
-          <span style={{ fontWeight: 400, opacity: 0.6, fontSize: "0.875rem" }}>(optional)</span>
+          <span style={{ fontWeight: 400, color: MUTED_TEXT, fontSize: "0.875rem" }}>(optional)</span>
         </h3>
 
         {selectedVibes.length === 0 ? (
@@ -463,8 +486,7 @@ export default function AvailabilityStage({
             style={{
               fontSize: "0.875rem",
               fontFamily: "'Courier New', Courier, monospace",
-              color: DEEP_NAVY,
-              opacity: 0.6,
+              color: MUTED_TEXT,
               fontStyle: "italic",
             }}
           >
@@ -487,16 +509,16 @@ export default function AvailabilityStage({
             aria-expanded={customExpanded}
             disabled={submitted}
             style={{
-              border: `2px dashed ${DEEP_NAVY}`,
-              borderRadius: 8,
+              border: `2px dashed ${CARD_BORDER}`,
+              borderRadius: 0,
               backgroundColor: "transparent",
-              color: DEEP_NAVY,
+              color: SKY_BLUE,
               padding: "6px 14px",
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
               fontSize: "0.875rem",
               cursor: submitted ? "default" : "pointer",
-              opacity: submitted ? 0.5 : 1,
+              opacity: submitted ? 0.45 : 1,
             }}
           >
             {customExpanded ? "▲ Hide custom destination" : "▼ Add a custom destination"}
@@ -518,11 +540,13 @@ export default function AvailabilityStage({
               marginTop: 10,
               fontSize: "0.8125rem",
               fontFamily: "'Courier New', Courier, monospace",
-              color: DEEP_NAVY,
-              opacity: 0.8,
+              color: MUTED_TEXT,
             }}
           >
-            Selected: {allDestinations.join(", ")}
+            Selected:{" "}
+            <span style={{ color: SKY_BLUE, fontWeight: 700 }}>
+              {allDestinations.join(", ")}
+            </span>
           </p>
         )}
       </div>
@@ -550,12 +574,12 @@ export default function AvailabilityStage({
             <p
               style={{
                 fontSize: "0.875rem",
-                color: SUNSET_ORANGE,
+                color: AMBER_WARNING,
                 fontFamily: "'Courier New', Courier, monospace",
                 fontWeight: 700,
                 border: `2px solid ${SUNSET_ORANGE}`,
                 padding: "6px 10px",
-                backgroundColor: SAND_CREAM,
+                backgroundColor: "#1C0F00",
               }}
             >
               ⚠ {submitError}
@@ -566,19 +590,20 @@ export default function AvailabilityStage({
         <div
           style={{
             border: `3px solid ${GRASS_GREEN}`,
-            backgroundColor: SAND_CREAM,
-            boxShadow: `4px 4px 0 ${DEEP_NAVY}`,
+            backgroundColor: "#0A2A1A",
+            boxShadow: `4px 4px 0 ${NAVY_SHADOW}`,
             padding: "12px 20px",
             display: "flex",
             alignItems: "center",
             gap: 10,
+            flexWrap: "wrap",
           }}
         >
           <span
             style={{
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
-              color: DEEP_NAVY,
+              color: GRASS_GREEN,
               fontSize: "0.875rem",
             }}
           >
@@ -588,16 +613,16 @@ export default function AvailabilityStage({
             type="button"
             onClick={() => setSubmitted(false)}
             style={{
-              border: `2px solid ${DEEP_NAVY}`,
-              borderRadius: 8,
-              backgroundColor: SUNSET_ORANGE,
-              color: DEEP_NAVY,
+              border: `2px solid ${CARD_BORDER}`,
+              borderRadius: 0,
+              backgroundColor: CARD_ELEVATED,
+              color: SKY_BLUE,
               padding: "4px 12px",
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
               fontSize: "0.75rem",
               cursor: "pointer",
-              boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
+              boxShadow: `2px 2px 0 ${NAVY_SHADOW}`,
             }}
           >
             ← Edit
@@ -606,10 +631,10 @@ export default function AvailabilityStage({
       )}
 
       {/* ── Per-member submission status ───────────────────────────────────── */}
-      <div style={cardStyle(SAND_CREAM)}>
+      <div style={cardStyle()}>
         <h3
           style={{
-            color: DEEP_NAVY,
+            color: LIGHT_TEXT,
             fontFamily: "'Courier New', Courier, monospace",
             fontSize: "1rem",
             fontWeight: 700,
@@ -622,7 +647,7 @@ export default function AvailabilityStage({
           <p
             style={{
               fontSize: "0.875rem",
-              color: SUNSET_ORANGE,
+              color: AMBER_WARNING,
               fontFamily: "'Courier New', Courier, monospace",
               fontWeight: 700,
             }}
@@ -633,7 +658,7 @@ export default function AvailabilityStage({
           <p
             style={{
               fontSize: "0.875rem",
-              color: DEEP_NAVY,
+              color: MUTED_TEXT,
               fontFamily: "'Courier New', Courier, monospace",
             }}
           >
@@ -660,23 +685,24 @@ export default function AvailabilityStage({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    border: `2px solid ${DEEP_NAVY}`,
-                    backgroundColor: isSelf ? SKY_BLUE : SAND_CREAM,
+                    gap: 8,
+                    border: `2px solid ${isSelf ? SKY_BLUE : CARD_BORDER}`,
+                    backgroundColor: isSelf ? "#0D2A3D" : CARD_ELEVATED,
                     padding: "8px 12px",
-                    boxShadow: `2px 2px 0 ${DEEP_NAVY}`,
+                    boxShadow: isSelf ? `2px 2px 0 ${NAVY_SHADOW}` : "none",
                   }}
                 >
                   <span
                     style={{
                       fontFamily: "'Courier New', Courier, monospace",
                       fontWeight: 700,
-                      color: DEEP_NAVY,
+                      color: isSelf ? SKY_BLUE : LIGHT_TEXT,
                       fontSize: "0.875rem",
                     }}
                   >
                     {member.displayName || "Traveller"}
                     {isSelf && (
-                      <span style={{ marginLeft: 6, fontWeight: 400, opacity: 0.65 }}>
+                      <span style={{ marginLeft: 6, fontWeight: 400, color: MUTED_TEXT, fontSize: "0.8125rem" }}>
                         (you)
                       </span>
                     )}
@@ -686,11 +712,12 @@ export default function AvailabilityStage({
                       style={{
                         fontSize: "0.75rem",
                         fontFamily: "'Courier New', Courier, monospace",
-                        color: DEEP_NAVY,
+                        color: NAVY_SHADOW,
                         fontWeight: 700,
                         border: `1px solid ${GRASS_GREEN}`,
-                        padding: "2px 6px",
+                        padding: "2px 7px",
                         backgroundColor: GRASS_GREEN,
+                        whiteSpace: "nowrap",
                       }}
                     >
                       ✓ Submitted
@@ -703,8 +730,9 @@ export default function AvailabilityStage({
                         color: SUNSET_ORANGE,
                         fontWeight: 700,
                         border: `1px solid ${SUNSET_ORANGE}`,
-                        padding: "2px 6px",
-                        backgroundColor: SAND_CREAM,
+                        padding: "2px 7px",
+                        backgroundColor: "#1C0800",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       … Pending
@@ -724,7 +752,7 @@ export default function AvailabilityStage({
                 style={{
                   fontSize: "0.875rem",
                   fontFamily: "'Courier New', Courier, monospace",
-                  color: DEEP_NAVY,
+                  color: LIGHT_TEXT,
                 }}
               >
                 <span style={{ fontWeight: 700, color: GRASS_GREEN }}>
@@ -732,21 +760,25 @@ export default function AvailabilityStage({
                 </span>
                 <span
                   style={{
-                    backgroundColor: GRASS_GREEN,
-                    border: `2px solid ${DEEP_NAVY}`,
-                    padding: "2px 6px",
+                    backgroundColor: "#0A2A1A",
+                    border: `2px solid ${GRASS_GREEN}`,
+                    padding: "2px 8px",
                     fontWeight: 700,
+                    color: GRASS_GREEN,
+                    fontFamily: "'Courier New', Courier, monospace",
                   }}
                 >
                   {overlap.startDate}
                 </span>
-                {" → "}
+                <span style={{ color: MUTED_TEXT, margin: "0 4px" }}>→</span>
                 <span
                   style={{
-                    backgroundColor: GRASS_GREEN,
-                    border: `2px solid ${DEEP_NAVY}`,
-                    padding: "2px 6px",
+                    backgroundColor: "#0A2A1A",
+                    border: `2px solid ${GRASS_GREEN}`,
+                    padding: "2px 8px",
                     fontWeight: 700,
+                    color: GRASS_GREEN,
+                    fontFamily: "'Courier New', Courier, monospace",
                   }}
                 >
                   {overlap.endDate}
@@ -756,9 +788,12 @@ export default function AvailabilityStage({
               <p
                 style={{
                   fontSize: "0.875rem",
-                  color: SUNSET_ORANGE,
+                  color: AMBER_WARNING,
                   fontFamily: "'Courier New', Courier, monospace",
                   fontWeight: 700,
+                  border: `2px solid ${SUNSET_ORANGE}`,
+                  padding: "8px 12px",
+                  backgroundColor: "#1C0F00",
                 }}
               >
                 ✗ No overlap — adjust dates so the group shares at least one common day.
@@ -772,8 +807,7 @@ export default function AvailabilityStage({
               marginTop: 10,
               fontSize: "0.8125rem",
               fontFamily: "'Courier New', Courier, monospace",
-              color: DEEP_NAVY,
-              opacity: 0.75,
+              color: MUTED_TEXT,
             }}
           >
             ⏳ Waiting on {waitingOnCount}{" "}

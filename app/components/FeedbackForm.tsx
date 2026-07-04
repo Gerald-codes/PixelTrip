@@ -239,7 +239,8 @@ export default function FeedbackForm({
       {error && (
         <div
           role="alert"
-          className="border-2 border-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-pixel-sm"
+          className="border-2 px-4 py-3 text-sm font-medium shadow-pixel-sm"
+          style={{ borderColor: "#B91C1C", backgroundColor: "#1A0000", color: "#FCA5A5" }}
         >
           ⚠️ {error}
         </div>
@@ -370,7 +371,7 @@ export default function FeedbackForm({
                     aria-label={`${isDisliked ? "Remove dislike from" : "Dislike"} ${title}`}
                     aria-pressed={isDisliked}
                     className={`px-2 py-1 text-xs font-bold border-2 border-pt-text-primary border-opacity-20 shadow-pixel-sm transition-colors ${
-                      isDisliked ? "bg-red-400 text-white" : "bg-[var(--pt-bg-card)] text-pt-text-primary hover:bg-red-100"
+                      isDisliked ? "bg-red-400 text-white" : "bg-[var(--pt-bg-card)] text-pt-text-primary hover:bg-[#2A0000]"
                     }`}
                   >
                     👎

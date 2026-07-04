@@ -88,8 +88,8 @@ export default function DestinationCard({ suggestion }: { suggestion: Destinatio
 
             {/* Weather + seasonality */}
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <InfoTile label="Weather" body={suggestion.weatherSummary} colour="#e0f2fe" />
-              <InfoTile label="Best season" body={suggestion.seasonalitySummary} colour="#f0fdf4" />
+              <InfoTile label="Weather" body={suggestion.weatherSummary} bgColour="#071E2E" borderColour="#0369A1" textColour="#BAE6FD" />
+              <InfoTile label="Best season" body={suggestion.seasonalitySummary} bgColour="#0A2A1A" borderColour="#15803D" textColour="#86EFAC" />
             </div>
 
             {/* Best activities */}
@@ -210,14 +210,14 @@ function CrowdChip({ level }: { level: keyof typeof CROWD_CFG }) {
   );
 }
 
-function InfoTile({ label, body, colour }: { label: string; body: string; colour: string }) {
+function InfoTile({ label, body, bgColour, borderColour, textColour }: { label: string; body: string; bgColour: string; borderColour: string; textColour: string }) {
   return (
     <div
-      className="border-2 border-pt-text-primary border-opacity-20 px-3 py-2"
-      style={{ backgroundColor: colour }}
+      className="border-2 px-3 py-2"
+      style={{ backgroundColor: bgColour, borderColor: borderColour }}
     >
-      <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-70">{label}</p>
-      <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">{body}</p>
+      <p className="text-xs font-bold uppercase tracking-wide opacity-70" style={{ color: textColour }}>{label}</p>
+      <p className="mt-1 break-words text-xs font-semibold leading-relaxed" style={{ color: textColour }}>{body}</p>
     </div>
   );
 }

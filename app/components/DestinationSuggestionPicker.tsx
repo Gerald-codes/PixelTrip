@@ -71,27 +71,27 @@ export default function DestinationSuggestionPicker({
               style={{
                 // NO border-radius — 8-bit square
                 borderRadius: 0,
-                // Selected: grass-green bg + deep-navy text + 2px sunset-orange border
-                // Unselected: sand-cream bg + deep-navy text + 2px deep-navy border
-                backgroundColor: isSelected ? "#4ADE80" : "var(--pt-bg-card)",
-                color: "var(--pt-text-primary, #E8ECF1)",
-                border: isSelected ? "2px solid #FB923C" : "2px solid rgba(232, 236, 241, 0.2)",
+                // Selected: dark teal bg + sky-blue text + orange border
+                // Unselected: card bg + muted text + subtle border
+                backgroundColor: isSelected ? "#0D2D3F" : "var(--pt-bg-card)",
+                color: isSelected ? "#38BDF8" : "var(--pt-text-secondary, #AFC5E6)",
+                border: isSelected ? "2px solid #FB923C" : "2px solid var(--pt-border, #2F5E93)",
                 cursor: disabled ? "not-allowed" : "pointer",
-                padding: "6px 12px",
+                padding: "6px 14px",
                 fontFamily: "monospace",
-                fontWeight: 600,
+                fontWeight: isSelected ? 700 : 600,
                 fontSize: "0.875rem",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "4px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                gap: "5px",
+                boxShadow: isSelected ? "2px 2px 0 #081A33" : "none",
                 outline: "none",
                 transition: "background-color 0.1s, border-color 0.1s",
               }}
               className="focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#FB923C]"
             >
               {isSelected && (
-                <span aria-hidden="true" style={{ fontSize: "0.75rem" }}>
+                <span aria-hidden="true" style={{ fontSize: "0.75rem", color: "#FB923C", fontWeight: 900 }}>
                   ✓
                 </span>
               )}

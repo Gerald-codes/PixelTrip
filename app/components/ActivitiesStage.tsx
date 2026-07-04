@@ -242,8 +242,11 @@ export default function ActivitiesStage({
       </div>
 
       {loadError && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
-          {loadError}
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{loadError}</p>
         </div>
       )}
 
@@ -537,7 +540,8 @@ function PreferenceRow({ preference, canDelete, onDelete }: PreferenceRowProps) 
           type="button"
           onClick={onDelete}
           aria-label={`Remove "${preference.title}"`}
-          className="shrink-0 border-2 border-pt-text-primary border-opacity-20 bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 shadow-pixel-sm hover:bg-red-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="shrink-0 border-2 px-2 py-0.5 text-xs font-bold shadow-pixel-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          style={{ borderColor: "#B91C1C", backgroundColor: "#1A0000", color: "#FCA5A5" }}
         >
           ×
         </button>

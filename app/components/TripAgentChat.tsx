@@ -1154,8 +1154,19 @@ export default function TripAgentChat({
         void broadcastStageChange();
         onRoomUpdated(data.updatedRoom);
       } else if (data.tied && data.tiedOptions && data.tiedOptions.length > 0) {
-        // Sync the server mirror — see handleSubmitDestinationVotes for rationale.
+        // Tie — set tiedFlightOptions synchronously in the same batch as
+        // setSubmittedStages so the WaitingState bypass fires immediately,
+        // showing TiebreakPanel without waiting for the next poll cycle.
+        setTiedFlightOptions(data.tiedOptions);
         setFlightServerTiedOptions(data.tiedOptions);
+        // Append tie system message immediately for the submitting client.
+        // The mirror effect deduplicates via its prev-check for polling clients.
+        const LABELS: Record<string, string> = { budget: "Budget", best_value: "Best Value", comfort: "Comfort" };
+        const tiedNames = (data.tiedOptions as string[]).map((opt) => LABELS[opt] ?? opt).join(" and ");
+        appendSystemMessage(
+          `⚖️ It's a tie between ${tiedNames}! ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+          "system"
+        );
         void fetchFlightVotes();
       } else if (data.allVoted) {
         appendSystemMessage("Everyone has voted! Tallying results…", "system");
@@ -1231,12 +1242,22 @@ export default function TripAgentChat({
         void broadcastStageChange();
         onRoomUpdated(data.updatedRoom);
       } else if (data.tied && data.tiedOptions && data.tiedOptions.length > 0) {
-        // Tie — sync the server mirror; the effect watching
-        // destServerTiedOptions will set tiedDestinationIds and append the
-        // system message consistently for every client (submit response here,
-        // polling for everyone else).
+        // Tie — set tiedDestinationIds synchronously in the same batch as
+        // setSubmittedStages so the WaitingState bypass fires immediately on
+        // this render, showing TiebreakPanel without waiting for the next poll.
+        setTiedDestinationIds(data.tiedOptions);
         setDestServerTiedOptions(data.tiedOptions);
-        // Refresh vote counts for tie-break display.
+        // Append tie system message here so it appears immediately for the
+        // submitting client. The mirror effect deduplicates via its prev-check,
+        // so polling clients will also see it exactly once.
+        const tiedNames = (data.tiedOptions as string[])
+          .map((id) => destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id)
+          .join(", ");
+        appendSystemMessage(
+          `⚖️ It's a tie between: ${tiedNames}. ${isHost ? "Pick the winner below." : "Waiting for the host to break the tie…"}`,
+          "system"
+        );
+        // Refresh vote counts for tie-break tally display.
         void fetchDestinationVotes();
       } else if (data.allVoted) {
         appendSystemMessage("Everyone has voted! Tallying results…", "system");
@@ -1349,6 +1370,19 @@ export default function TripAgentChat({
   // Human-readable label for the advance button based on current stage
   function advanceButtonLabel(): string {
     if (advancingStage) return "▶ Advancing…";
+    // Show a specific label when a tie is pending resolution
+    if (
+      (room.currentStage === RoomStage.DESTINATION_VOTE || room.currentStage === RoomStage.DESTINATIONS) &&
+      tiedDestinationIds && tiedDestinationIds.length > 0
+    ) {
+      return "⚖️ Resolve tie first";
+    }
+    if (
+      (room.currentStage === RoomStage.FLIGHT_VOTE || room.currentStage === RoomStage.FLIGHTS) &&
+      tiedFlightOptions && tiedFlightOptions.length > 0
+    ) {
+      return "⚖️ Resolve tie first";
+    }
     const LABELS: Partial<Record<RoomStage, string>> = {
       [RoomStage.LOBBY]: "▶ Start planning",
       [RoomStage.AVAILABILITY]: "▶ Continue to group profile",
@@ -1374,10 +1408,16 @@ export default function TripAgentChat({
       case RoomStage.DESTINATIONS:
         return "Destinations still generating.";
       case RoomStage.DESTINATION_VOTE:
+        if (tiedDestinationIds && tiedDestinationIds.length > 0) {
+          return "Resolve this decision before moving on.";
+        }
         return destServerTotalVoters > 0 && destServerTotalVotes < destServerTotalVoters
           ? `Waiting for ${destServerTotalVoters - destServerTotalVotes} more vote${destServerTotalVoters - destServerTotalVotes === 1 ? "" : "s"}.`
           : null;
       case RoomStage.FLIGHT_VOTE:
+        if (tiedFlightOptions && tiedFlightOptions.length > 0) {
+          return "Resolve this decision before moving on.";
+        }
         return flightServerTotalVoters > 0 && flightServerTotalVotes < flightServerTotalVoters
           ? `Waiting for ${flightServerTotalVoters - flightServerTotalVotes} more vote${flightServerTotalVoters - flightServerTotalVotes === 1 ? "" : "s"}.`
           : null;
@@ -1643,24 +1683,41 @@ export default function TripAgentChat({
 
           {/* ── Tiebreaker: destination tie → TiebreakPanel (bypasses outer WaitingState) ── */}
           {tiedDestinationIds && tiedDestinationIds.length > 0 && (
-            <TiebreakPanel
-              roomId={room.id}
-              voteType="destination"
-              tiedOptions={tiedDestinationIds}
-              tally={Object.fromEntries(
-                tiedDestinationIds.map((id) => [
-                  id,
-                  destinationVotes.filter((v) => v.selectedOption === id).length,
-                ]),
-              )}
-              isHost={isHost}
-              onApply={async (winnerId) => {
-                await handleBreakTie(winnerId);
-              }}
-              optionLabel={(id) =>
-                destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id
-              }
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div
+                style={{
+                  border: "2px solid #92400E",
+                  backgroundColor: "#1C0F00",
+                  padding: "10px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>⚖️</span>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#FDE68A", fontFamily: "monospace" }}>
+                  Your party is split. Resolve this decision before moving on.
+                </p>
+              </div>
+              <TiebreakPanel
+                roomId={room.id}
+                voteType="destination"
+                tiedOptions={tiedDestinationIds}
+                tally={Object.fromEntries(
+                  tiedDestinationIds.map((id) => [
+                    id,
+                    destinationVotes.filter((v) => v.selectedOption === id).length,
+                  ]),
+                )}
+                isHost={isHost}
+                onApply={async (winnerId) => {
+                  await handleBreakTie(winnerId);
+                }}
+                optionLabel={(id) =>
+                  destinationSuggestions.find((s) => s.id === id)?.destinationName ?? id
+                }
+              />
+            </div>
           )}
         </div>
       );
@@ -1775,21 +1832,38 @@ export default function TripAgentChat({
 
           {/* ── Flight tiebreaker: TiebreakPanel — bypasses outer WaitingState ── */}
           {tiedFlightOptions && tiedFlightOptions.length > 0 && (
-            <TiebreakPanel
-              roomId={room.id}
-              voteType="flight"
-              tiedOptions={tiedFlightOptions}
-              tally={Object.fromEntries(
-                tiedFlightOptions.map((opt) => [
-                  opt,
-                  flightVotes.filter((v) => v.selectedOption === opt).length,
-                ]),
-              )}
-              isHost={isHost}
-              onApply={async (winner) => {
-                await handleBreakFlightTie(winner);
-              }}
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div
+                style={{
+                  border: "2px solid #92400E",
+                  backgroundColor: "#1C0F00",
+                  padding: "10px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>⚖️</span>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#FDE68A", fontFamily: "monospace" }}>
+                  Your party is split. Resolve this decision before moving on.
+                </p>
+              </div>
+              <TiebreakPanel
+                roomId={room.id}
+                voteType="flight"
+                tiedOptions={tiedFlightOptions}
+                tally={Object.fromEntries(
+                  tiedFlightOptions.map((opt) => [
+                    opt,
+                    flightVotes.filter((v) => v.selectedOption === opt).length,
+                  ]),
+                )}
+                isHost={isHost}
+                onApply={async (winner) => {
+                  await handleBreakFlightTie(winner);
+                }}
+              />
+            </div>
           )}
         </div>
       );
@@ -1986,65 +2060,95 @@ export default function TripAgentChat({
           )}
 
           {/*
-            Advance stage button — visible for all stages including vote stages.
+            Advance stage button — visible for all stages EXCEPT FINAL.
+            At FINAL stage, there is no next step — the FinalStage component
+            provides export and replan actions directly in the content area.
             For DESTINATION_VOTE and FLIGHT_VOTE, canAdvanceStage() returns true
             only when the server has confirmed a clear winner (all voted), so the
             button is enabled at exactly the right moment.
           */}
-          <div style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-            {/* Inline reason when blocked — gives user a clear next action */}
-            {advanceBlockedReason() && (
+          {room.currentStage !== RoomStage.FINAL ? (
+            <div style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+              {/* Inline reason when blocked — gives user a clear next action */}
+              {advanceBlockedReason() && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontFamily: "var(--pt-font-body)",
+                    color: "var(--pt-warn)",
+                    fontWeight: 500,
+                  }}
+                >
+                  ⏳ {advanceBlockedReason()}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => void advanceStage()}
+                disabled={!canAdvanceStage() || advancingStage}
+                aria-label="Move to next planning step"
+                aria-disabled={!canAdvanceStage() || advancingStage}
+                aria-describedby={advanceBlockedReason() ? "advance-blocked-reason" : undefined}
+                style={{
+                  background:
+                    !canAdvanceStage() || advancingStage
+                      ? "rgba(255,255,255,0.06)"
+                      : "var(--pt-agent-harmony)",
+                  border: "none",
+                  borderRadius: 6,
+                  color:
+                    !canAdvanceStage() || advancingStage
+                      ? "var(--pt-text-muted)"
+                      : "#0F1B2E",
+                  padding: "8px 16px",
+                  fontSize: 12,
+                  fontFamily: "var(--pt-font-body)",
+                  fontWeight: 600,
+                  cursor:
+                    !canAdvanceStage() || advancingStage
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: !canAdvanceStage() || advancingStage ? 0.55 : 1,
+                  transition: "opacity 0.15s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
+                  e.currentTarget.style.outlineOffset = "2px";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.outline = "none";
+                }}
+              >
+                {advanceButtonLabel()}
+              </button>
+            </div>
+          ) : (
+            /* FINAL stage — no advance button, just a completion note */
+            <div
+              style={{
+                marginLeft: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 12px",
+                border: "1px solid rgba(74,222,128,0.3)",
+                borderRadius: 6,
+                backgroundColor: "rgba(74,222,128,0.06)",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>🎉</span>
               <span
                 style={{
                   fontSize: 11,
                   fontFamily: "var(--pt-font-body)",
-                  color: "var(--pt-warn)",
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  color: "#4ADE80",
                 }}
               >
-                ⏳ {advanceBlockedReason()}
+                Trip planning complete
               </span>
-            )}
-            <button
-              type="button"
-              onClick={() => void advanceStage()}
-              disabled={!canAdvanceStage() || advancingStage}
-              aria-label="Move to next planning step"
-              aria-disabled={!canAdvanceStage() || advancingStage}
-              aria-describedby={advanceBlockedReason() ? "advance-blocked-reason" : undefined}
-              style={{
-                background:
-                  !canAdvanceStage() || advancingStage
-                    ? "rgba(255,255,255,0.06)"
-                    : "var(--pt-agent-harmony)",
-                border: "none",
-                borderRadius: 6,
-                color:
-                  !canAdvanceStage() || advancingStage
-                    ? "var(--pt-text-muted)"
-                    : "#0F1B2E",
-                padding: "8px 16px",
-                fontSize: 12,
-                fontFamily: "var(--pt-font-body)",
-                fontWeight: 600,
-                cursor:
-                  !canAdvanceStage() || advancingStage
-                    ? "not-allowed"
-                    : "pointer",
-                opacity: !canAdvanceStage() || advancingStage ? 0.55 : 1,
-                transition: "opacity 0.15s",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.outline = "3px solid var(--pt-agent-atlas)";
-                e.currentTarget.style.outlineOffset = "2px";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.outline = "none";
-              }}
-            >
-              {advanceButtonLabel()}
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
     </main>

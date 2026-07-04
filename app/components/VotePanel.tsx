@@ -132,7 +132,7 @@ export default function VotePanel({
               ? "border-[#38BDF8]"
               : "border-pt-text-primary border-opacity-20";
           const bgClass = isSelected
-            ? "bg-[#e0f2fe]"
+            ? "bg-[#0D2D3F]"
             : isWinner
               ? "bg-pt-card-hover"
               : "bg-[var(--pt-bg-card)]";

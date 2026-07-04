@@ -228,11 +228,20 @@ function FlightOptionCard({ option }: { option: FlightOption }) {
 
         {/* Expanded: full itinerary impact */}
         {expanded && (
-          <div className="border-2 border-[#FB923C] bg-amber-50 px-3 py-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-pt-text-primary opacity-70">
+          <div
+            className="px-3 py-2"
+            style={{ border: "2px solid #92400E", backgroundColor: "#1C0F00" }}
+          >
+            <p
+              className="text-xs font-bold uppercase tracking-wide opacity-70"
+              style={{ color: "#FDE68A" }}
+            >
               Full itinerary impact
             </p>
-            <p className="mt-1 break-words text-xs font-semibold leading-relaxed text-pt-text-primary">
+            <p
+              className="mt-1 break-words text-xs font-semibold leading-relaxed"
+              style={{ color: "#FEF3C7" }}
+            >
               {option.itineraryImpact}
             </p>
           </div>

@@ -456,7 +456,7 @@ export default function TravelVibeSelector({
             ].join(" ")}
             style={{
               border: isSelected ? "2px solid #FB923C" : "2px solid var(--pt-border, #335F91)",
-              backgroundColor: isSelected ? "rgba(56, 189, 248, 0.15)" : "var(--pt-bg-card)",
+              backgroundColor: isSelected ? "#0D2D3F" : "var(--pt-bg-card)",
               boxShadow: isSelected
                 ? "3px 3px 0px #FB923C"
                 : "none",
@@ -474,8 +474,9 @@ export default function TravelVibeSelector({
                   fontFamily: "monospace",
                   fontWeight: 900,
                   fontSize: "14px",
-                  color: "var(--pt-text-primary, #E8ECF1)",
+                  color: "#FB923C",
                   lineHeight: 1,
+                  textShadow: "0 0 4px rgba(251,146,60,0.6)",
                 }}
               >
                 ✓
@@ -493,7 +494,10 @@ export default function TravelVibeSelector({
             {/* Human-readable label — vibe: prefix is NEVER shown */}
             <span
               className="font-bold text-sm text-center leading-tight"
-              style={{ color: "var(--pt-text-primary, #E8ECF1)", fontFamily: "monospace" }}
+              style={{
+                color: isSelected ? "#EAF2FF" : "var(--pt-text-primary, #E8ECF1)",
+                fontFamily: "monospace",
+              }}
             >
               {label}
             </span>
@@ -501,7 +505,10 @@ export default function TravelVibeSelector({
             {/* Tagline */}
             <span
               className="text-xs text-center leading-tight"
-              style={{ color: "var(--pt-text-primary, #E8ECF1)", opacity: isSelected ? 0.8 : 0.65 }}
+              style={{
+                color: isSelected ? "#AFC5E6" : "var(--pt-text-secondary, #AFC5E6)",
+                opacity: 1,
+              }}
             >
               {tagline}
             </span>

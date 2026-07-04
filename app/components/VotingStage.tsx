@@ -266,8 +266,11 @@ export default function VotingStage({
       </div>
 
       {loadError && !results && (
-        <div className="border-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-pixel-card">
-          {loadError}
+        <div
+          className="p-4 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{loadError}</p>
         </div>
       )}
 

@@ -28,15 +28,24 @@ import React, { useEffect, useRef, useState } from "react";
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-/** Dark text for use on all light-coloured surfaces. */
+/** Dark panel backgrounds — all dark-theme safe. */
 const NAVY = "#0F1B2E";
-/** Light card background for resolution option cards. */
-const CREAM = "#F0F4F8";
+/** Dark card background for resolution option cards (dark-theme safe). */
+const CARD_BG = "#122A4D";
+/** Selected card background (slightly lighter navy). */
+const CARD_BG_SEL = "#1B3964";
+/** Primary light text on dark surfaces. */
+const LIGHT_TEXT = "#EAF2FF";
+/** Muted text on dark surfaces. */
+const MUTED_TEXT = "#AFC5E6";
 const ORANGE = "#FB923C";
+const AMBER_BG = "#1C0F00";
+const AMBER_BORDER = "#92400E";
+const AMBER_TEXT = "#FDE68A";
 const GREEN = "#4ADE80";
-const PURPLE = "var(--pt-agent-atlas)";
+const PURPLE = "var(--pt-agent-atlas, #A78BFA)";
 const SKY = "#38BDF8";
-const RED = "#EF4444";
+const RED = "#F87171";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -103,8 +112,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.1em",
-        color: NAVY,
-        opacity: 0.7,
+        color: MUTED_TEXT,
         fontFamily: "monospace",
       }}
     >
@@ -120,13 +128,13 @@ function VoteCountChip({ label, count }: { label: string; count: number }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
-        border: `2px solid ${NAVY}`,
-        backgroundColor: CREAM,
+        border: `2px solid ${ORANGE}`,
+        backgroundColor: CARD_BG,
         padding: "4px 10px",
         fontSize: 12,
         fontWeight: 700,
         fontFamily: "monospace",
-        color: NAVY,
+        color: LIGHT_TEXT,
         boxShadow: `2px 2px 0 ${NAVY}`,
       }}
     >
@@ -137,6 +145,7 @@ function VoteCountChip({ label, count }: { label: string; count: number }) {
           border: `1px solid ${NAVY}`,
           padding: "0 5px",
           fontSize: 11,
+          color: NAVY,
         }}
       >
         {count} vote{count !== 1 ? "s" : ""}
@@ -248,9 +257,9 @@ export default function TiebreakPanel({
   return (
     <div
       style={{
-        border: `2px solid ${ORANGE}`,
-        backgroundColor: "var(--pt-bg-card)",
-        boxShadow: `0 2px 8px rgba(0,0,0,0.35)`,
+        border: `2px solid ${AMBER_BORDER}`,
+        backgroundColor: NAVY,
+        boxShadow: `0 2px 8px rgba(0,0,0,0.5), 4px 4px 0 ${NAVY}`,
         fontFamily: "monospace",
         overflow: "hidden",
       }}
@@ -258,8 +267,8 @@ export default function TiebreakPanel({
       {/* ── Header ── */}
       <div
         style={{
-          backgroundColor: ORANGE,
-          borderBottom: `2px solid ${ORANGE}`,
+          backgroundColor: AMBER_BG,
+          borderBottom: `2px solid ${AMBER_BORDER}`,
           padding: "12px 16px",
           display: "flex",
           alignItems: "center",
@@ -268,11 +277,11 @@ export default function TiebreakPanel({
       >
         <span style={{ fontSize: 20 }}>⚖️</span>
         <div>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: NAVY }}>
-            Decision tie
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: AMBER_TEXT }}>
+            Your Party Is Split
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: NAVY, opacity: 0.75 }}>
-            Your group is equally split. Let the AI analyze the options — the host will break the tie.
+          <p style={{ margin: 0, fontSize: 11, color: "#FCD34D", opacity: 0.85 }}>
+            The votes are tied. The AI will suggest a fair path — the host will make the final call.
           </p>
         </div>
       </div>
@@ -298,7 +307,7 @@ export default function TiebreakPanel({
           <div
             style={{
               border: `2px solid ${SKY}`,
-              backgroundColor: "var(--pt-bg-deep)",
+              backgroundColor: "#081A33",
               padding: "12px 14px",
               display: "flex",
               alignItems: "center",
@@ -307,10 +316,10 @@ export default function TiebreakPanel({
           >
             <span style={{ fontSize: 18, animation: "spin 1s linear infinite" }}>🔄</span>
             <div>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--pt-text-primary)" }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: LIGHT_TEXT }}>
                 The AI is reviewing your group&apos;s situation…
               </p>
-              <p style={{ margin: "3px 0 0", fontSize: 11, color: "var(--pt-text-primary)", opacity: 0.65 }}>
+              <p style={{ margin: "3px 0 0", fontSize: 11, color: MUTED_TEXT }}>
                 It will explain the trade-offs and suggest a fair path forward.
               </p>
             </div>
@@ -319,7 +328,7 @@ export default function TiebreakPanel({
 
         {/* ── Phase: applying ── */}
         {phase === "applying" && (
-          <p style={{ margin: 0, fontSize: 13, color: "var(--pt-text-primary)", fontWeight: 600 }}>
+          <p style={{ margin: 0, fontSize: 13, color: LIGHT_TEXT, fontWeight: 600 }}>
             ⏳ Applying resolution…
           </p>
         )}
@@ -329,7 +338,7 @@ export default function TiebreakPanel({
           <div
             style={{
               border: `2px solid ${RED}`,
-              backgroundColor: "#FEF2F2",
+              backgroundColor: "#1A0000",
               padding: "10px 14px",
               display: "flex",
               flexDirection: "column",
@@ -339,7 +348,7 @@ export default function TiebreakPanel({
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: RED }}>
               ⚠ Couldn&apos;t load AI recommendations
             </p>
-            <p style={{ margin: 0, fontSize: 12, color: NAVY }}>{errorMsg}</p>
+            <p style={{ margin: 0, fontSize: 12, color: MUTED_TEXT }}>{errorMsg}</p>
             {isHost && (
               <button
                 type="button"
@@ -349,9 +358,9 @@ export default function TiebreakPanel({
                 }}
                 style={{
                   alignSelf: "flex-start",
-                  border: `2px solid ${NAVY}`,
-                  backgroundColor: SKY,
-                  color: NAVY,
+                  border: `2px solid ${SKY}`,
+                  backgroundColor: "#081A33",
+                  color: SKY,
                   padding: "5px 14px",
                   fontSize: 12,
                   fontWeight: 700,
@@ -372,12 +381,12 @@ export default function TiebreakPanel({
             <div
               style={{
                 border: `2px solid ${PURPLE}`,
-                backgroundColor: "#FAF5FF",
+                backgroundColor: "#120830",
                 padding: "10px 14px",
               }}
             >
               <SectionLabel>AI analysis</SectionLabel>
-              <p style={{ margin: 0, fontSize: 13, color: NAVY, lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: 13, color: LIGHT_TEXT, lineHeight: 1.55 }}>
                 {conflictSummary}
               </p>
             </div>
@@ -395,17 +404,16 @@ export default function TiebreakPanel({
                     <div
                       key={opt.id}
                       style={{
-                        border: `3px solid ${NAVY}`,
-                        backgroundColor: CREAM,
+                        border: `3px solid #2F5E93`,
+                        backgroundColor: CARD_BG,
                         padding: "12px 14px",
                         display: "flex",
                         flexDirection: "column",
                         gap: 4,
                         boxShadow: `2px 2px 0 ${NAVY}`,
-                        opacity: 0.85,
                       }}
                     >
-                      <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: LIGHT_TEXT }}>
                         {opt.description}
                       </span>
                       {opt.tradeoffs && (
@@ -413,8 +421,7 @@ export default function TiebreakPanel({
                           style={{
                             margin: 0,
                             fontSize: 11,
-                            color: NAVY,
-                            opacity: 0.65,
+                            color: MUTED_TEXT,
                             lineHeight: 1.45,
                           }}
                         >
@@ -432,8 +439,8 @@ export default function TiebreakPanel({
                     disabled={phase === "applying"}
                     aria-pressed={isSel}
                     style={{
-                      border: `3px solid ${isSel ? GREEN : NAVY}`,
-                      backgroundColor: isSel ? "#F0FDF4" : CREAM,
+                      border: `3px solid ${isSel ? GREEN : "#2F5E93"}`,
+                      backgroundColor: isSel ? CARD_BG_SEL : CARD_BG,
                       padding: "12px 14px",
                       textAlign: "left",
                       cursor: phase === "applying" ? "not-allowed" : "pointer",
@@ -448,7 +455,7 @@ export default function TiebreakPanel({
                       {isSel && (
                         <span style={{ color: GREEN, fontWeight: 700, fontSize: 14 }}>✓</span>
                       )}
-                      <span style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: LIGHT_TEXT }}>
                         {opt.description}
                       </span>
                     </div>
@@ -457,8 +464,7 @@ export default function TiebreakPanel({
                         style={{
                           margin: 0,
                           fontSize: 11,
-                          color: NAVY,
-                          opacity: 0.65,
+                          color: MUTED_TEXT,
                           lineHeight: 1.45,
                           paddingLeft: isSel ? 20 : 0,
                         }}
@@ -475,7 +481,7 @@ export default function TiebreakPanel({
             {isHost && (
               <div
                 style={{
-                  borderTop: `2px dashed ${NAVY}`,
+                  borderTop: `2px dashed #2F5E93`,
                   paddingTop: 12,
                   display: "flex",
                   flexDirection: "column",
@@ -488,9 +494,9 @@ export default function TiebreakPanel({
                   disabled={!selected || applying}
                   style={{
                     alignSelf: "flex-start",
-                    border: `3px solid ${NAVY}`,
-                    backgroundColor: selected && !applying ? GREEN : "#9CA3AF",
-                    color: NAVY,
+                    border: `3px solid ${selected && !applying ? GREEN : "#2F5E93"}`,
+                    backgroundColor: selected && !applying ? "#14532D" : "#0D1F35",
+                    color: selected && !applying ? GREEN : MUTED_TEXT,
                     padding: "9px 20px",
                     fontSize: 13,
                     fontWeight: 700,
@@ -502,7 +508,7 @@ export default function TiebreakPanel({
                   {applying ? "Applying…" : "✓ Apply resolution"}
                 </button>
                 {!selected && (
-                  <p style={{ margin: 0, fontSize: 11, color: NAVY, opacity: 0.55 }}>
+                  <p style={{ margin: 0, fontSize: 11, color: MUTED_TEXT }}>
                     Select an option above to continue.
                   </p>
                 )}
@@ -513,8 +519,7 @@ export default function TiebreakPanel({
                     style={{
                       cursor: "pointer",
                       fontSize: 11,
-                      color: NAVY,
-                      opacity: 0.5,
+                      color: MUTED_TEXT,
                       userSelect: "none",
                     }}
                   >
@@ -523,15 +528,15 @@ export default function TiebreakPanel({
                   <div
                     style={{
                       marginTop: 8,
-                      border: `2px solid ${ORANGE}`,
-                      backgroundColor: "var(--pt-bg-card)",
+                      border: `2px solid ${AMBER_BORDER}`,
+                      backgroundColor: AMBER_BG,
                       padding: "10px 12px",
                       display: "flex",
                       flexDirection: "column",
                       gap: 6,
                     }}
                   >
-                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: NAVY, opacity: 0.7 }}>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: AMBER_TEXT }}>
                       ⚠ This overrides the group vote. Use only if the group is stuck.
                     </p>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -542,9 +547,9 @@ export default function TiebreakPanel({
                           onClick={() => void applyOverride(opt)}
                           disabled={applying}
                           style={{
-                            border: `2px solid ${NAVY}`,
-                            backgroundColor: ORANGE,
-                            color: NAVY,
+                            border: `2px solid ${AMBER_BORDER}`,
+                            backgroundColor: "#2D1200",
+                            color: ORANGE,
                             padding: "5px 12px",
                             fontSize: 12,
                             fontWeight: 700,
@@ -566,7 +571,7 @@ export default function TiebreakPanel({
             {!isHost && (
               <div
                 style={{
-                  borderTop: `2px dashed ${NAVY}`,
+                  borderTop: `2px dashed #2F5E93`,
                   paddingTop: 10,
                   display: "flex",
                   alignItems: "center",
@@ -574,7 +579,7 @@ export default function TiebreakPanel({
                 }}
               >
                 <span style={{ fontSize: 16 }}>👑</span>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: NAVY, opacity: 0.7 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: MUTED_TEXT }}>
                   Only the host can break this tie. Waiting for their decision…
                 </p>
               </div>
@@ -593,21 +598,21 @@ export default function TiebreakPanel({
           <div
             style={{
               border: `3px solid ${GREEN}`,
-              backgroundColor: "#F0FDF4",
+              backgroundColor: "#0A2A1A",
               padding: "12px 14px",
               display: "flex",
               flexDirection: "column",
               gap: 6,
             }}
           >
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: NAVY }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: GREEN }}>
               ✅ Decision made: {optionLabel(resolved.value)}
             </p>
-            <p style={{ margin: 0, fontSize: 12, color: NAVY }}>
-              <strong>Why:</strong> {resolved.optionDescription}
+            <p style={{ margin: 0, fontSize: 12, color: LIGHT_TEXT }}>
+              <strong style={{ color: MUTED_TEXT }}>Why:</strong> {resolved.optionDescription}
             </p>
             {resolved.tradeoff && (
-              <p style={{ margin: 0, fontSize: 11, color: NAVY, opacity: 0.7 }}>
+              <p style={{ margin: 0, fontSize: 11, color: MUTED_TEXT, lineHeight: 1.5 }}>
                 <strong>Accepted trade-off:</strong> {resolved.tradeoff}
               </p>
             )}

@@ -227,8 +227,11 @@ export default function FeedbackStage({
   if (itineraryError) {
     return (
       <section className="mx-auto flex max-w-3xl flex-col gap-6">
-        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-pixel-card">
-          <p className="text-sm font-semibold text-red-700">{itineraryError}</p>
+        <div
+          className="p-6 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{itineraryError}</p>
         </div>
       </section>
     );
@@ -271,9 +274,9 @@ export default function FeedbackStage({
       <div className="border-4 border-pt-text-primary border-opacity-20 bg-pt-card p-6 shadow-pixel-card">
         {hasSubmitted && !editing ? (
           <>
-            <div className="mb-4 border-2 border-[#4ADE80] bg-pt-card-hover px-4 py-3 shadow-pixel-sm">
-              <p className="font-bold text-[#166534]">✅ Feedback submitted!</p>
-              <p className="mt-1 text-sm text-[#166534]">
+            <div className="mb-4 border-2 border-[#4ADE80] px-4 py-3 shadow-pixel-sm" style={{ backgroundColor: "#0A2A1A" }}>
+              <p className="font-bold" style={{ color: "#4ADE80" }}>✅ Feedback submitted!</p>
+              <p className="mt-1 text-sm" style={{ color: "#86EFAC" }}>
                 Score: <span className="font-black">{myFeedback!.score} / 10</span>
               </p>
             </div>
@@ -429,9 +432,10 @@ function HostDashboard({
       {averageScore !== null && averageScore < 6 && (
         <div
           role="alert"
-          className="mb-3 border-2 border-[#FB923C] bg-amber-50 px-4 py-3 shadow-pixel-sm"
+          className="mb-3 px-4 py-3 shadow-pixel-sm"
+          style={{ border: "2px solid #92400E", backgroundColor: "#1C0F00" }}
         >
-          <p className="text-sm font-bold text-[#92400e]">
+          <p className="text-sm font-bold" style={{ color: "#FDE68A" }}>
             ⚠️ Low satisfaction — consider triggering a revision
           </p>
         </div>
@@ -445,9 +449,10 @@ function HostDashboard({
           <div
             key={m.id}
             role="alert"
-            className="mb-2 border-2 border-red-500 bg-red-50 px-4 py-2 shadow-pixel-sm"
+            className="mb-2 px-4 py-2 shadow-pixel-sm"
+            style={{ border: "2px solid #B91C1C", backgroundColor: "#1A0000" }}
           >
-            <p className="text-sm font-bold text-red-700">
+            <p className="text-sm font-bold" style={{ color: "#FCA5A5" }}>
               ⚠️ {m.displayName} rated this below 4
             </p>
           </div>
@@ -490,8 +495,11 @@ function AnalysisPanel({
 
       {!requiresNegotiation ? (
         /* ── Happy path ── */
-        <div className="border-4 border-[#4ADE80] bg-pt-card-hover p-6 shadow-pixel-card">
-          <p className="mb-4 font-bold text-[#166534]">
+        <div
+          className="p-6 shadow-pixel-card"
+          style={{ border: "4px solid #4ADE80", backgroundColor: "#0A2A1A" }}
+        >
+          <p className="mb-4 font-bold" style={{ color: "#4ADE80" }}>
             🎉 The group is satisfied!
           </p>
           <div className="flex flex-wrap gap-3">
@@ -521,12 +529,13 @@ function AnalysisPanel({
         <div className="flex flex-col gap-4">
           <div
             role="alert"
-            className="border-4 border-[#FB923C] bg-amber-50 p-4 shadow-pixel-card"
+            className="p-4 shadow-pixel-card"
+            style={{ border: "4px solid #92400E", backgroundColor: "#1C0F00" }}
           >
-            <p className="font-bold text-[#92400e]">
+            <p className="font-bold" style={{ color: "#FDE68A" }}>
               ⚠️ Conflicts detected — negotiation needed
             </p>
-            <p className="mt-1 text-sm text-[#92400e]">
+            <p className="mt-1 text-sm" style={{ color: "#FEF3C7" }}>
               The AI found {conflicts.length} conflict
               {conflicts.length !== 1 ? "s" : ""} that need resolution before
               finalising.

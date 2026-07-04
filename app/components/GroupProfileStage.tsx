@@ -198,12 +198,16 @@ export default function GroupProfileStage({
           <p className="text-sm font-semibold text-pt-text-primary">Loading group profile…</p>
         </div>
       ) : profileLoadError ? (
-        <div className="border-4 border-red-600 bg-red-50 p-6 shadow-pixel-card">
-          <p className="text-sm font-semibold text-red-700">{profileLoadError}</p>
+        <div
+          className="p-6 shadow-pixel-card"
+          style={{ border: "4px solid #B91C1C", backgroundColor: "#1A0000" }}
+        >
+          <p className="text-sm font-semibold" style={{ color: "#FCA5A5" }}>{profileLoadError}</p>
           <button
             type="button"
             onClick={() => void fetchProfile()}
-            className="mt-3 border-2 border-red-600 bg-red-50 px-3 py-1 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+            className="mt-3 px-3 py-1 text-sm font-bold active:translate-x-[2px] active:translate-y-[2px]"
+            style={{ border: "2px solid #B91C1C", backgroundColor: "#2A0000", color: "#FCA5A5", boxShadow: "3px 3px 0px #7F1D1D" }}
           >
             Try again
           </button>
@@ -240,7 +244,8 @@ export default function GroupProfileStage({
                       type="button"
                       onClick={() => void handleGenerate()}
                       disabled={generating}
-                      className="border-2 border-red-600 bg-red-50 px-3 py-1 text-sm font-bold text-red-700 shadow-[3px_3px_0px_#991B1B] hover:bg-red-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                      className="px-3 py-1 text-sm font-bold active:translate-x-[2px] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{ border: "2px solid #B91C1C", backgroundColor: "#2A0000", color: "#FCA5A5", boxShadow: "3px 3px 0px #7F1D1D" }}
                     >
                       {generating ? "Retrying…" : "Retry"}
                     </button>
@@ -347,27 +352,59 @@ function ProfileView({ profile }: { profile: GroupProfile }) {
 
       <div
         role="alert"
-        className="border-4 border-[#FB923C] bg-amber-50 p-6 shadow-pixel-card"
+        style={{
+          border: "4px solid #92400E",
+          backgroundColor: "#1C0F00",
+          padding: "1.5rem",
+          boxShadow: "4px 4px 0 #92400E",
+        }}
       >
         <div className="flex items-center gap-2">
-          <span aria-hidden="true">⚠️</span>
-          <h3 className="text-lg font-bold text-pt-text-primary">
-            Tension points
+          <span aria-hidden="true">🗺️</span>
+          <h3
+            style={{ fontSize: "1.125rem", fontWeight: 700, color: "#FDE68A" }}
+          >
+            Things to Balance
           </h3>
         </div>
-        <p className="mt-1 text-sm font-semibold text-pt-text-primary">
-          Worth flagging before we pick a destination so we can plan around
-          them.
+        <p
+          style={{
+            marginTop: "0.25rem",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            color: "#FCD34D",
+          }}
+        >
+          Your party may need to compromise on these points.
         </p>
         {profile.tensionPoints.length > 0 ? (
-          <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-pt-text-primary">
+          <ul
+            style={{
+              marginTop: "0.75rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.25rem",
+              paddingLeft: "1.25rem",
+              listStyleType: "disc",
+              fontSize: "0.875rem",
+              color: "#FEF3C7",
+              lineHeight: 1.6,
+            }}
+          >
             {profile.tensionPoints.map((point, i) => (
               <li key={`${point}-${i}`}>{point}</li>
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm font-semibold text-pt-text-primary">
-            None — this group is well aligned.
+          <p
+            style={{
+              marginTop: "0.75rem",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              color: "#A7F3D0",
+            }}
+          >
+            ✅ None — this group is well aligned.
           </p>
         )}
       </div>

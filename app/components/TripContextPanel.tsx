@@ -564,7 +564,18 @@ export default function TripContextPanel({
             gap: 6,
           }}
         >
-          <SectionLabel>Budget committed so far</SectionLabel>
+          <SectionLabel>Estimated Trip Cost</SectionLabel>
+          <p
+            style={{
+              margin: "0 0 4px",
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: 10,
+              color: `${SAND_CREAM}70`,
+              lineHeight: 1.5,
+            }}
+          >
+            Based on destination, trip length, flight style, and planned activities.
+          </p>
           <RunningBudgetBar estimate={runningSpend} />
         </div>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import type { StageProps } from "@/app/components/StageRouter";
 import type { VoteOption } from "@/app/components/VotePanel";
@@ -185,20 +185,21 @@ export default function DestinationVoteStage({
 
 function FitScorePill({ score }: { score: number }) {
   const rounded = Math.round(score);
-  const tone =
+  // All use dark backgrounds with appropriate light text for dark-theme safety
+  const style: React.CSSProperties =
     rounded >= 80
-      ? "bg-green-100 text-green-800 border-green-200"
+      ? { backgroundColor: "#0A2A1A", border: "1px solid #15803D", color: "#4ADE80" }
       : rounded >= 60
-        ? "bg-blue-100 text-blue-800 border-blue-200"
+        ? { backgroundColor: "#071E2E", border: "1px solid #0369A1", color: "#38BDF8" }
         : rounded >= 40
-          ? "bg-amber-100 text-amber-800 border-amber-200"
-          : "bg-red-100 text-red-800 border-red-200";
+          ? { backgroundColor: "#1C0F00", border: "1px solid #92400E", color: "#FDE68A" }
+          : { backgroundColor: "#1A0000", border: "1px solid #B91C1C", color: "#FCA5A5" };
   return (
     <span
       aria-label={`Fit score ${rounded} out of 100`}
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${tone}`}
+      style={{ ...style, display: "inline-flex", alignItems: "center", gap: 4, borderRadius: 0, padding: "2px 8px", fontSize: "0.6875rem", fontWeight: 700, fontFamily: "monospace" }}
     >
-      <span className="opacity-70">Fit</span>
+      <span style={{ opacity: 0.7 }}>Fit</span>
       <span>{rounded}</span>
     </span>
   );
