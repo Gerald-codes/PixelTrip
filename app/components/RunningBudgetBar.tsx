@@ -29,7 +29,8 @@ import type { RunningBudgetEstimate } from "@/lib/budgetEstimate";
 const SUNSET_ORANGE = "#FB923C";
 const RED = "#EF4444";
 const GRASS_GREEN = "#4ADE80";
-const SAND_CREAM = "var(--pt-bg-card)";
+/** Light text for use on the dark card background. */
+const LIGHT_TEXT = "var(--pt-text-primary, #EAF2FF)";
 
 const STATUS_FILL: Record<RunningBudgetEstimate["status"], string> = {
   within: GRASS_GREEN,
@@ -71,9 +72,9 @@ export default function RunningBudgetBar({ estimate }: RunningBudgetBarProps) {
           gap: 8,
         }}
       >
-        <span style={{ fontSize: 12, fontWeight: 700, color: SAND_CREAM }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: LIGHT_TEXT }}>
           {formatUSD(totalSpent)}
-          <span style={{ fontWeight: 400, opacity: 0.6 }}>
+          <span style={{ fontWeight: 400, opacity: 0.75 }}>
             {" "}/ {formatUSD(limitPerPerson)}
           </span>
         </span>
@@ -96,8 +97,8 @@ export default function RunningBudgetBar({ estimate }: RunningBudgetBarProps) {
         style={{
           width: "100%",
           height: 14,
-          backgroundColor: `${SAND_CREAM}30`,
-          border: `2px solid ${SAND_CREAM}50`,
+          backgroundColor: "rgba(255,255,255,0.12)",
+          border: `2px solid rgba(255,255,255,0.2)`,
           boxSizing: "border-box",
           position: "relative",
           overflow: "hidden",
@@ -132,8 +133,8 @@ export default function RunningBudgetBar({ estimate }: RunningBudgetBarProps) {
           style={{
             margin: 0,
             fontSize: 10,
-            color: SAND_CREAM,
-            opacity: 0.5,
+            color: LIGHT_TEXT,
+            opacity: 0.65,
           }}
         >
           {usingItineraryCost
