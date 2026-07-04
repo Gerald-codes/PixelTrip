@@ -577,35 +577,7 @@ export default function RoomShell({
         </div>
       </main>
 
-      {/* ── Mobile toggle button (fixed, bottom-right, < 1024px only) ────── */}
-      <button
-        type="button"
-        className="fixed bottom-4 right-4 z-40 lg:hidden"
-        aria-label={
-          isMobileContextOpen
-            ? "Close trip info panel"
-            : "Open trip info panel"
-        }
-        onClick={() => setIsMobileContextOpen((prev) => !prev)}
-        style={{
-          background: "var(--pt-agent-atlas)",
-          border: "none",
-          color: "#fff",
-          padding: "10px 16px",
-          fontSize: 12,
-          fontWeight: 600,
-          cursor: "pointer",
-          fontFamily: "var(--pt-font-body)",
-          borderRadius: 8,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-        }}
-      >
-        <span aria-hidden="true">ℹ️</span>
-        <span>Trip Info</span>
-      </button>
+
 
       {/* ── Sync trouble banner ─── */}
       {showSyncBanner && (
