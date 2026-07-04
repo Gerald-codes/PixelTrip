@@ -103,6 +103,12 @@ export default function AvailabilityStage({
   // Initial fetch + hydration of existing submission
   const hydrateRef = useRef(false);
   useEffect(() => {
+    // Wait until identity.userId is resolved from localStorage before hydrating.
+    // On Vercel/SSR, the first render has userId === "" because localStorage
+    // is only available after hydration. Running with an empty userId would
+    // find no existing submission and set hydrateRef=true, permanently blocking
+    // the real hydration once the userId becomes available.
+    if (!identity.userId) return;
     if (hydrateRef.current) return;
     hydrateRef.current = true;
     void (async () => {
