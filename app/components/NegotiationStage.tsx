@@ -17,6 +17,7 @@ import type {
 /** The negotiation agent returns Itinerary + diffSummary merged together. */
 interface NegotiationResult extends Itinerary {
   diffSummary: string;
+  updatedRoom?: TripRoom;
 }
 
 // ─── NegotiationStage ───────────────────────────────────────────────────────
@@ -127,27 +128,17 @@ export default function NegotiationStage({
     };
   }, [room.id, fetchItinerary]);
 
-  // ── Option selection (any user) ───────────────────────────────────────────
-  async function handleSelectOption(conflictId: string, optionId: string) {
-    // Optimistically update local state immediately.
+  // ── Option selection (host only) ─────────────────────────────────────────
+  function handleSelectOption(conflictId: string, optionId: string) {
+    if (!isHost) return;
     setSelectedResolutions((prev) => ({ ...prev, [conflictId]: optionId }));
-    try {
-      await fetch(`/api/conflicts/${encodeURIComponent(conflictId)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedResolution: optionId }),
-      });
-      // Re-fetch to keep in sync (non-fatal if this fails).
-      void fetchConflicts();
-    } catch {
-      // Non-fatal — local selection is still usable
-    }
   }
 
-  // ── Host: apply resolution & revise itinerary ─────────────────────────────
-  async function handleRevise(conflictId: string) {
-    const selectedOption = selectedResolutions[conflictId];
-    if (!selectedOption || revising) return;
+  // ── Host: submit all resolutions at once ──────────────────────────────────
+  async function handleSubmitAll() {
+    const openConflicts = conflicts.filter(c => c.status !== "resolved");
+    const allSelected = openConflicts.every(c => selectedResolutions[c.id]);
+    if (!allSelected || revising) return;
 
     setRevising(true);
     setRevisionError(null);
@@ -157,8 +148,10 @@ export default function NegotiationStage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: room.id,
-          conflictId,
-          selectedResolution: selectedOption,
+          conflicts: openConflicts.map(c => ({
+            conflictId: c.id,
+            selectedResolution: selectedResolutions[c.id],
+          })),
         }),
       });
       if (!res.ok) {
@@ -170,6 +163,8 @@ export default function NegotiationStage({
       const data = (await res.json()) as NegotiationResult;
       setItinerary(data);
       setDiffSummary(data.diffSummary);
+      if (data.updatedRoom) onRoomUpdated(data.updatedRoom);
+      void fetchConflicts();
     } catch (err) {
       setRevisionError(
         err instanceof Error ? err.message : "Failed to revise itinerary",
@@ -258,6 +253,10 @@ export default function NegotiationStage({
     const member = members.find((m: User) => m.id === userId);
     return member?.displayName ?? userId;
   }
+
+  // ── Derived ────────────────────────────────────────────────────────────────
+  const openConflicts = conflicts.filter(c => c.status !== "resolved");
+  const allOpenConflictsSelected = openConflicts.length > 0 && openConflicts.every(c => selectedResolutions[c.id]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -355,7 +354,6 @@ export default function NegotiationStage({
           onSelectOption={(optionId) =>
             void handleSelectOption(conflict.id, optionId)
           }
-          onRevise={() => void handleRevise(conflict.id)}
         />
       ))}
 
@@ -384,36 +382,56 @@ export default function NegotiationStage({
 
       {/* Host nav buttons */}
       {isHost ? (
-        <div className="flex flex-wrap items-center gap-3 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
-          {isHost && (
+        <>
+          {/* Global submit button — shown only when there are open conflicts */}
+          {openConflicts.length > 0 && (
+            <div className="flex flex-col gap-2 border-4 border-[#4ADE80] bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+              <button
+                type="button"
+                onClick={() => void handleSubmitAll()}
+                disabled={!allOpenConflictsSelected || revising}
+                className="border-4 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-4 py-3 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {revising ? "Regenerating itinerary…" : "✅ Apply selected resolutions and regenerate itinerary"}
+              </button>
+              {!allOpenConflictsSelected && (
+                <p className="text-xs font-semibold text-pt-text-primary opacity-70">
+                  Select a resolution for every conflict above to enable this button.
+                </p>
+              )}
+            </div>
+          )}
+          {/* Nav buttons */}
+          <div className="flex flex-wrap items-center gap-3 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
+            {isHost && (
+              <button
+                type="button"
+                onClick={() => void handleBackToItinerary()}
+                disabled={revising || advancing}
+                className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                ← Back to Itinerary
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => void handleBackToItinerary()}
+              onClick={() => void handleAdvanceToFeedback()}
               disabled={revising || advancing}
-              className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#fde68a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
             >
-              ← Back to Itinerary
+              {advancing ? "Advancing…" : "🔁 Another round of feedback"}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={() => void handleAdvanceToFeedback()}
-            disabled={revising || advancing}
-            className="border-4 border-pt-text-primary border-opacity-20 bg-[#FB923C] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#f97316] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {advancing ? "Advancing…" : "🔁 Another round of feedback"}
-          </button>
-          {advanceError && (
-            <p className="w-full text-sm font-semibold text-red-600">
-              {advanceError}
-            </p>
-          )}
-        </div>
+            {advanceError && (
+              <p className="w-full text-sm font-semibold text-red-600">
+                {advanceError}
+              </p>
+            )}
+          </div>
+        </>
       ) : (
         <div className="border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-4 shadow-pixel-card">
           <p className="text-sm font-semibold text-pt-text-primary">
-            Select a resolution option above. The host will apply the chosen
-            resolution and revise the itinerary.
+            ⏳ The host is selecting resolutions. You&apos;ll see the updated itinerary once they confirm.
           </p>
         </div>
       )}
@@ -430,7 +448,6 @@ interface ConflictCardProps {
   selectedOptionId: string | null;
   getMemberName: (userId: string) => string;
   onSelectOption: (optionId: string) => void;
-  onRevise: () => void;
 }
 
 function ConflictCard({
@@ -440,9 +457,7 @@ function ConflictCard({
   selectedOptionId,
   getMemberName,
   onSelectOption,
-  onRevise,
 }: ConflictCardProps) {
-  const canRevise = isHost && selectedOptionId !== null && !revising;
 
   return (
     <article className="flex flex-col gap-4 border-4 border-pt-text-primary border-opacity-20 bg-[var(--pt-bg-card)] p-5 shadow-pixel-card">
@@ -491,14 +506,14 @@ function ConflictCard({
             <button
               key={option.id}
               type="button"
-              onClick={() => onSelectOption(option.id)}
-              disabled={revising}
+              onClick={isHost ? () => onSelectOption(option.id) : undefined}
+              disabled={!isHost || revising}
               className={[
                 "flex flex-col gap-1 border-4 p-4 text-left transition-colors shadow-pixel-card",
                 isSelected
                   ? "border-[#4ADE80] bg-pt-card-hover"
                   : "border-pt-text-primary border-opacity-20 bg-pt-card hover:bg-pt-card-hover",
-                revising ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+                !isHost || revising ? "cursor-not-allowed opacity-60" : "cursor-pointer",
               ].join(" ")}
               aria-pressed={isSelected}
             >
@@ -520,24 +535,7 @@ function ConflictCard({
         })}
       </div>
 
-      {/* Host: apply resolution button */}
-      {isHost && (
-        <div className="flex flex-col gap-2 pt-1 border-t-2 border-dashed border-pt-text-primary border-opacity-20">
-          <button
-            type="button"
-            onClick={onRevise}
-            disabled={!canRevise}
-            className="self-start border-4 border-pt-text-primary border-opacity-20 bg-[#4ADE80] px-4 py-2 font-bold text-pt-text-primary shadow-pixel-card hover:bg-[#22c55e] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {revising ? "Revising itinerary…" : "Apply resolution & revise itinerary"}
-          </button>
-          {!selectedOptionId && (
-            <p className="text-xs font-semibold text-pt-text-primary opacity-70">
-              Select a resolution option above to enable this button.
-            </p>
-          )}
-        </div>
-      )}
+
     </article>
   );
 }

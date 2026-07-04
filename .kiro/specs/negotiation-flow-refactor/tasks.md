@@ -77,7 +77,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 ## Tasks
 
-- [ ] 1. Write bug condition exploration test
+- [x] 1. Write bug condition exploration test
   - **Property 1: Bug Condition** - Non-host mutation and per-conflict apply bugs
   - **CRITICAL**: This test MUST FAIL on unfixed code — failure confirms both bugs exist
   - **DO NOT attempt to fix the test or the code when it fails**
@@ -101,7 +101,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
   - Mark task complete when tests are written, run, and failures are documented
   - _Requirements: 1.1, 1.3, 1.4, 1.6_
 
-- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Unchanged behaviors that must survive the refactor
   - **IMPORTANT**: Follow observation-first methodology — observe on UNFIXED code first, then codify
   - **GOAL**: Establish a regression baseline before touching any production code
@@ -129,9 +129,9 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-- [ ] 3. Fix NegotiationStage.tsx — guard handleSelectOption and remove PATCH call
+- [x] 3. Fix NegotiationStage.tsx — guard handleSelectOption and remove PATCH call
 
-  - [ ] 3.1 Add `isHost` guard as the first statement in `handleSelectOption`
+  - [x] 3.1 Add `isHost` guard as the first statement in `handleSelectOption`
     - In `app/components/NegotiationStage.tsx` at the `handleSelectOption` function (line ~112)
     - Add `if (!isHost) return;` as the very first line of the function body
     - This prevents non-host users from updating `selectedResolutions` state or triggering any network call
@@ -139,7 +139,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Expected_Behavior: no_patch_request_fired(result) AND local_state_unchanged(result)_
     - _Requirements: 2.1, 2.6_
 
-  - [ ] 3.2 Remove the PATCH fetch call and the subsequent `fetchConflicts()` call from `handleSelectOption`
+  - [x] 3.2 Remove the PATCH fetch call and the subsequent `fetchConflicts()` call from `handleSelectOption`
     - Delete the entire `try { await fetch(...PATCH...) } catch {}` block inside `handleSelectOption`
     - Delete the `void fetchConflicts()` call inside that block
     - The function body should now be just: `if (!isHost) return;` followed by `setSelectedResolutions(prev => ({ ...prev, [conflictId]: optionId }));`
@@ -148,15 +148,15 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Preservation: host visual selection state still updates immediately (Requirement 3.1)_
     - _Requirements: 2.6, 3.1_
 
-- [ ] 4. Fix NegotiationStage.tsx — delete handleRevise and add handleSubmitAll
+- [x] 4. Fix NegotiationStage.tsx — delete handleRevise and add handleSubmitAll
 
-  - [ ] 4.1 Delete the `handleRevise` function entirely
+  - [x] 4.1 Delete the `handleRevise` function entirely
     - Remove the entire `async function handleRevise(conflictId: string) { ... }` block (lines ~126–153)
     - This eliminates the per-conflict submit path that causes N agent calls for N conflicts
     - _Bug_Condition: isBugCondition(X) where X.actorIsHost = true AND X.action = "applyResolution" AND X.submissionMode = "per-conflict"_
     - _Requirements: 1.3, 1.4, 1.5_
 
-  - [ ] 4.2 Add the new `handleSubmitAll` async function
+  - [x] 4.2 Add the new `handleSubmitAll` async function
     - Add after the now-deleted `handleRevise` block (keep it near the other handler functions)
     - Derive `openConflicts` as `conflicts.filter(c => c.status !== "resolved")`
     - Derive `allSelected` as `openConflicts.every(c => selectedResolutions[c.id])`
@@ -170,27 +170,27 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Preservation: error display, revising loading state, diff summary banner, itinerary refresh all preserved_
     - _Requirements: 2.3, 2.4, 3.2, 3.3, 3.5_
 
-  - [ ] 4.3 Derive the `allOpenConflictsSelected` boolean for button gating
+  - [x] 4.3 Derive the `allOpenConflictsSelected` boolean for button gating
     - Add a derived constant above the render block:
       `const openConflicts = conflicts.filter(c => c.status !== "resolved");`
       `const allOpenConflictsSelected = openConflicts.length > 0 && openConflicts.every(c => selectedResolutions[c.id]);`
     - This value is used to disable the global submit button until every open conflict has a selection
     - _Requirements: 2.5_
 
-- [ ] 5. Fix ConflictCard — remove onRevise prop and make option buttons read-only for non-hosts
+- [x] 5. Fix ConflictCard — remove onRevise prop and make option buttons read-only for non-hosts
 
-  - [ ] 5.1 Remove `onRevise` from `ConflictCardProps` interface and from the destructured parameters
+  - [x] 5.1 Remove `onRevise` from `ConflictCardProps` interface and from the destructured parameters
     - In the `ConflictCardProps` interface (line ~426), delete the `onRevise: () => void;` line
     - In the `ConflictCard` function signature (line ~436), remove `onRevise` from the destructured props
     - Delete the `canRevise` derived constant (no longer needed)
     - _Requirements: 2.5_
 
-  - [ ] 5.2 Delete the per-card "Apply resolution & revise itinerary" button JSX block
+  - [x] 5.2 Delete the per-card "Apply resolution & revise itinerary" button JSX block
     - Remove the entire `{isHost && ( <div>...<button onClick={onRevise}>Apply resolution & revise itinerary</button>...</div> )}` block from `ConflictCard`'s render (lines ~527–539)
     - This removes the per-conflict submit entry point that triggers Bug Condition case 2
     - _Requirements: 1.5, 2.5_
 
-  - [ ] 5.3 Make option buttons non-interactive for non-hosts
+  - [x] 5.3 Make option buttons non-interactive for non-hosts
     - In the `conflict.proposedOptions.map(...)` render, change the `onClick` attachment:
       - When `isHost` is true: keep `onClick={() => onSelectOption(option.id)}`
       - When `isHost` is false: omit `onClick` entirely (do not attach any handler)
@@ -201,21 +201,21 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Preservation: RESOLVED badge, conflict summary, affected members display, and host visual selection state all unchanged_
     - _Requirements: 2.1, 3.1, 3.6_
 
-  - [ ] 5.4 Remove `onRevise` from all `ConflictCard` usages in the parent render
+  - [x] 5.4 Remove `onRevise` from all `ConflictCard` usages in the parent render
     - In `NegotiationStage`'s `conflicts.map(...)` block, delete the `onRevise={() => void handleRevise(conflict.id)}` prop from each `<ConflictCard ... />` call
     - TypeScript will error until this is done — use the compiler as the guide
     - _Requirements: 2.5_
 
 - [ ] 6. Fix NegotiationStage.tsx — non-host status message and global submit button
 
-  - [ ] 6.1 Replace the non-host bottom message
+  - [x] 6.1 Replace the non-host bottom message
     - Find the `else` branch of `{isHost ? … : …}` near line ~399 (the bottom nav block)
     - Replace the text `"Select a resolution option above. The host will apply the chosen resolution and revise the itinerary."`
       with `"⏳ The host is selecting resolutions. You'll see the updated itinerary once they confirm."`
     - _Expected_Behavior: read-only status message shown to non-hosts (Requirement 2.2)_
     - _Requirements: 1.2, 2.2_
 
-  - [ ] 6.2 Add global "Apply selected resolutions and regenerate itinerary" button for the host
+  - [x] 6.2 Add global "Apply selected resolutions and regenerate itinerary" button for the host
     - Inside the `{isHost ? (…) : (…)}` block, in the host branch, add the global submit button
       ABOVE (or replacing) the existing nav buttons area — position it below the conflict card list
       but before the "← Back to Itinerary" and "🔁 Another round of feedback" nav buttons
@@ -232,7 +232,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 - [ ] 7. Fix app/api/agents/negotiation/route.ts — update PostBody to accept conflicts array
 
-  - [ ] 7.1 Update the `PostBody` interface
+  - [~] 7.1 Update the `PostBody` interface
     - In `app/api/agents/negotiation/route.ts`, replace the existing `PostBody` interface:
       ```typescript
       // BEFORE
@@ -250,7 +250,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       ```
     - _Requirements: 2.3_
 
-  - [ ] 7.2 Update body destructuring and validation
+  - [~] 7.2 Update body destructuring and validation
     - Replace `const { roomId, conflictId, selectedResolution } = body;` with `const { roomId, conflicts } = body;`
     - Remove the individual `conflictId` and `selectedResolution` string validation blocks
     - Add validation for the `conflicts` array:
@@ -259,7 +259,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - Define a typed alias: `const conflictEntries = conflicts as Array<{ conflictId: string; selectedResolution: string }>;`
     - _Requirements: 2.3_
 
-  - [ ] 7.3 Update the JSDoc comment on the `POST` function
+  - [~] 7.3 Update the JSDoc comment on the `POST` function
     - Update the `@param` body description to reflect the new contract:
       `Body: { roomId: string; conflicts: Array<{ conflictId: string; selectedResolution: string }> }`
     - Remove references to `conflictId` and `selectedResolution` as top-level fields
@@ -267,7 +267,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 - [ ] 8. Fix app/api/agents/negotiation/route.ts — load all conflicts, call agent once, bulk-resolve
 
-  - [ ] 8.1 Replace single-conflict DB load with bulk conflict load
+  - [~] 8.1 Replace single-conflict DB load with bulk conflict load
     - Replace the single `.eq("id", conflictId).single()` query with a bulk fetch:
       ```typescript
       const conflictIds = conflictEntries.map(e => e.conflictId);
@@ -281,7 +281,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - For each entry in `conflictEntries`, validate that the `selectedResolution` is present in that conflict's `proposedOptions` array — return 400 if any chosen option is not found
     - _Requirements: 2.3, 2.4_
 
-  - [ ] 8.2 Build combined agent context from all conflicts
+  - [~] 8.2 Build combined agent context from all conflicts
     - Replace the single-conflict `userPromptContext` object with a multi-conflict shape:
       ```typescript
       const userPromptContext = {
@@ -302,7 +302,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       ```
     - _Requirements: 2.4_
 
-  - [ ] 8.3 Replace single-conflict resolve with bulk resolve
+  - [~] 8.3 Replace single-conflict resolve with bulk resolve
     - Replace the single `.eq("id", conflictId)` update with:
       ```typescript
       const { error: resolveConflictsError } = await supabase
@@ -316,7 +316,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
       `[agent/negotiation] room ${room.room_code} revised itinerary to v${nextVersion} (${conflictIds.length} conflicts resolved)`
     - _Requirements: 2.4_
 
-  - [ ] 8.4 Include the new itinerary and updated room data in the response
+  - [~] 8.4 Include the new itinerary and updated room data in the response
     - Add `updatedRoom` to the 201 response body so the client can call `onRoomUpdated`:
       ```typescript
       return NextResponse.json(
@@ -330,7 +330,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 - [ ] 9. Fix app/api/agents/negotiation/route.ts — auto-advance room stage after successful revision
 
-  - [ ] 9.1 Add stage-advance query after persisting the new itinerary
+  - [~] 9.1 Add stage-advance query after persisting the new itinerary
     - After updating `current_itinerary_id` and before the bulk-resolve step (Task 8.3), add:
       ```typescript
       const { data: updatedRoomData, error: stageAdvanceError } = await supabase
@@ -345,7 +345,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - _Expected_Behavior: auto-advance room stage so the host does not need a separate action_
     - _Requirements: 2.7_
 
-  - [ ] 9.2 Broadcast stage-change on the room channel after advancing
+  - [~] 9.2 Broadcast stage-change on the room channel after advancing
     - After the stage advance, call `broadcastStageChange(roomId)` (or replicate the broadcast pattern from the client-side helper using the service Supabase client) so non-host clients advance their view automatically
     - Keep this non-fatal (wrap in try/catch, log on failure)
     - _Preservation: stage broadcast behavior consistent with existing patterns (Requirement 3.2)_
@@ -353,7 +353,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 - [ ] 10. Fix app/api/agents/negotiation/route.ts — update SYSTEM_PROMPT for multiple conflicts
 
-  - [ ] 10.1 Rewrite the SYSTEM_PROMPT to handle a conflicts array
+  - [~] 10.1 Rewrite the SYSTEM_PROMPT to handle a conflicts array
     - Replace the existing `SYSTEM_PROMPT` constant with a version that:
       - Instructs the agent that it will receive a `conflicts` array (not a single conflict)
       - States it must incorporate ALL chosen resolutions from the provided list in one pass
@@ -367,7 +367,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
 
 - [ ] 11. Verify bug condition exploration test now passes (after fix)
 
-  - [ ] 11.1 Verify Property 1: non-host cannot mutate selection state
+  - [~] 11.1 Verify Property 1: non-host cannot mutate selection state
     - **Property 1: Expected Behavior** - Non-host option click is a no-op
     - **IMPORTANT**: Re-run the SAME test from Task 1, Scenario A — do NOT write a new test
     - The test from Task 1 encodes the expected behavior (no PATCH fired, no state change)
@@ -376,7 +376,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - **EXPECTED OUTCOME**: Test PASSES (confirms non-host mutation bug is fixed)
     - _Requirements: 2.1, 2.6_
 
-  - [ ] 11.2 Verify Property 1: single agent call for all conflicts on submission
+  - [~] 11.2 Verify Property 1: single agent call for all conflicts on submission
     - **Property 1: Expected Behavior** - handleSubmitAll fires exactly one POST with all conflicts
     - **IMPORTANT**: Re-run the SAME test from Task 1, Scenarios B and C — do NOT write a new test
     - When this test passes, it confirms the per-conflict N-calls bug is fixed
@@ -384,7 +384,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - **EXPECTED OUTCOME**: Tests PASS (confirms single-agent-call behavior)
     - _Requirements: 2.3, 2.4_
 
-- [ ] 12. Verify preservation tests still pass (after fix)
+- [~] 12. Verify preservation tests still pass (after fix)
   - **Property 2: Preservation** - All baseline behaviors unchanged after the refactor
   - **IMPORTANT**: Re-run the SAME tests from Task 2 — do NOT write new tests
   - Run all preservation property tests on FIXED code
@@ -398,7 +398,7 @@ This plan fixes the four interrelated defects in `NegotiationStage.tsx` and `app
     - `selectedResolutions` still pre-populated from resolved conflicts on mount
   - Confirm no preservation tests are newly failing after the fix
 
-- [ ] 13. Checkpoint — build clean
+- [~] 13. Checkpoint — build clean
   - Run `npm run build` and confirm zero TypeScript errors
   - Run `npm run lint` and confirm zero lint errors
   - Verify the following assertions hold end-to-end:
