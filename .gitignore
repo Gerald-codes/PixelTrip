@@ -1,28 +1,45 @@
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+.pnp/
 .pnp.js
+.yarn/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
 
-# next.js
-/.next/
-/out/
+# Build output
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
 
-# production
-/build
+# Test / coverage
+coverage/
+.pytest_cache/
+.nyc_output/
 
-# misc
-.DS_Store
-*.pem
+# Environment files — ignore real and local variants, but keep the examples
+.env
+.env.*
+!.env.example
+!**/.env.example
 
-# debug
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env
-.env*.local
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Local runner logs
+.local-logs/

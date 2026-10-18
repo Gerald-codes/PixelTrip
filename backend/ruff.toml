@@ -1,0 +1,9 @@
+# Ruff configuration for the PixelArt Trip Planner backend.
+# Dedicated tooling config at the backend root (Requirement 4.1).
+
+line-length = 100
+target-version = "py311"
+src = ["app", "tests"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B"]

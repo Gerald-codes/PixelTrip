@@ -1,0 +1,13 @@
+# Keep secrets and local clutter out of the image.
+.env
+.env.*
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+tests/
+scripts/

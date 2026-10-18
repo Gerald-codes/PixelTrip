@@ -1,0 +1,52 @@
+/*
+ * Global stylesheet for the PixelArt Trip Planner frontend.
+ *
+ * Tailwind entry point: the three directives below are expanded by PostCSS
+ * (see postcss.config.mjs + tailwind.config.ts) into base resets, component
+ * classes, and the generated utilities scanned from app/ and src/.
+ *
+ * Only a minimal, token-free pixel base lives here. The design tokens
+ * (colors, spacing, fonts) are defined in Task 4; nothing here hard-codes a
+ * theme value.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Keep the retro art crisp: never smooth pixel sprites/backgrounds. */
+  html {
+    image-rendering: pixelated;
+    /* Room for the sticky "MILO is working" bar, so it never hides a focused or
+       scrolled-to control. */
+    scroll-padding-top: 64px;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* The display face defaults to this size wherever it is used; headings opt up
+     with a text-pixel-* utility (utilities win over this base rule). */
+  /* VT323 draws small for its size and has one weight, so it runs larger than the
+     body text and is never bolded (a faked bold smears the pixels). */
+  .font-display {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+
+  .font-title {
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  button:not(:disabled),
+  [role="tab"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "19.1 Implement `persist_itinerary_version` in `app/agents/nodes/itinerary.py`": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719543
+      },
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992747084
+      }
+    ],
+    "19.3 Implement `itinerary_node` in `app/agents/nodes/itinerary.py`": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719638
+      }
+    ],
+    "20.1 Implement `compute_affected_scope` and `detect_conflicts` in": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719782
+      }
+    ],
+    "20.3 Implement `negotiation_node` in `app/agents/nodes/negotiation.py`": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719843
+      }
+    ],
+    "21. Checkpoint — all specialist nodes verification": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719907
+      }
+    ],
+    "22.1 Implement SETUP guidance and WRAP summary helpers": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992719957
+      }
+    ],
+    "22.2 Add logging redaction enforcement in `app/agents/` modules": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992720043
+      }
+    ],
+    "24.1 Add the autouse `block_network` fixture in `tests/agents/conftest.py`": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992720122
+      }
+    ],
+    "25. Final checkpoint — full verification": [
+      {
+        "executionId": "19ee750c-9260-4d99-895c-481e6599b04f",
+        "chatSessionId": "sess_ef286161-edd9-44ad-9151-5b7e883335fd",
+        "timestamp": 1790992720227
+      }
+    ]
+  }
+}

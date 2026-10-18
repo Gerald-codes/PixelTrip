@@ -1,0 +1,191 @@
+{
+ "data": {
+  "listings": [
+   {
+    "id": "eb8706aea26c4368974e03f50a0f4b43",
+    "totalPriceWithDecimal": {
+     "price": 109.36
+    },
+    "airlines": [
+     {
+      "name": "AirAsia"
+     }
+    ],
+    "fareBrands": [
+     {
+      "price": [
+       {
+        "amount": 109.36,
+        "currencyCode": "USD",
+        "type": "TOTAL_PRICE"
+       }
+      ]
+     }
+    ],
+    "slices": [
+     {
+      "durationInMinutes": "80",
+      "segments": [
+       {
+        "departInfo": {
+         "airport": {
+          "code": "SIN",
+          "name": "Changi Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T13:50:00"
+         }
+        },
+        "arrivalInfo": {
+         "airport": {
+          "code": "PEN",
+          "name": "Penang Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T15:10:00"
+         }
+        },
+        "marketingAirline": "AK",
+        "flightNumber": "1722",
+        "duration": 80,
+        "stopQuantity": 0
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "eb52e1b74f5a4bb1a05338f9516cde51",
+    "totalPriceWithDecimal": {
+     "price": 109.36
+    },
+    "airlines": [
+     {
+      "name": "AirAsia"
+     }
+    ],
+    "fareBrands": [
+     {
+      "price": [
+       {
+        "amount": 109.36,
+        "currencyCode": "USD",
+        "type": "TOTAL_PRICE"
+       }
+      ]
+     }
+    ],
+    "slices": [
+     {
+      "durationInMinutes": "85",
+      "segments": [
+       {
+        "departInfo": {
+         "airport": {
+          "code": "SIN",
+          "name": "Changi Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T17:55:00"
+         }
+        },
+        "arrivalInfo": {
+         "airport": {
+          "code": "PEN",
+          "name": "Penang Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T19:20:00"
+         }
+        },
+        "marketingAirline": "AK",
+        "flightNumber": "1724",
+        "duration": 85,
+        "stopQuantity": 0
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "eb248c557fe54c0b8839a698f452a566",
+    "totalPriceWithDecimal": {
+     "price": 147.93
+    },
+    "airlines": [
+     {
+      "name": "AirAsia"
+     }
+    ],
+    "fareBrands": [
+     {
+      "price": [
+       {
+        "amount": 147.93,
+        "currencyCode": "USD",
+        "type": "TOTAL_PRICE"
+       }
+      ]
+     }
+    ],
+    "slices": [
+     {
+      "durationInMinutes": "215",
+      "segments": [
+       {
+        "departInfo": {
+         "airport": {
+          "code": "SIN",
+          "name": "Changi Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T08:55:00"
+         }
+        },
+        "arrivalInfo": {
+         "airport": {
+          "code": "KUL",
+          "name": "Kuala Lumpur Intl Apt"
+         },
+         "time": {
+          "dateTime": "2026-11-12T09:55:00"
+         }
+        },
+        "marketingAirline": "AK",
+        "flightNumber": "702",
+        "duration": 60,
+        "stopQuantity": 0
+       },
+       {
+        "departInfo": {
+         "airport": {
+          "code": "KUL",
+          "name": "Kuala Lumpur Intl Apt"
+         },
+         "time": {
+          "dateTime": "2026-11-12T11:25:00"
+         }
+        },
+        "arrivalInfo": {
+         "airport": {
+          "code": "PEN",
+          "name": "Penang Intl Airport"
+         },
+         "time": {
+          "dateTime": "2026-11-12T12:30:00"
+         }
+        },
+        "marketingAirline": "AK",
+        "flightNumber": "6126",
+        "duration": 65,
+        "stopQuantity": 0
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "status": true,
+ "message": "Successful"
+}

@@ -1,0 +1,248 @@
+{
+ "data": {
+  "flightOffers": [
+   {
+    "flightKey": "1_TR430_2_AK1721.SIN20261112.PEN20261116",
+    "segments": [
+     {
+      "departureAirport": {
+       "code": "SIN"
+      },
+      "arrivalAirport": {
+       "code": "PEN"
+      },
+      "departureTime": "2026-11-12T06:50:00",
+      "arrivalTime": "2026-11-12T08:30:00",
+      "totalTime": 6000,
+      "legs": [
+       {
+        "departureTime": "2026-11-12T06:50:00",
+        "arrivalTime": "2026-11-12T08:30:00",
+        "totalTime": 6000,
+        "carriersData": [
+         {
+          "name": "Scoot",
+          "code": "TR"
+         },
+         {
+          "name": "Scoot",
+          "code": "TR"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 430,
+         "carrierInfo": {
+          "marketingCarrier": "TR"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "departureAirport": {
+       "code": "PEN"
+      },
+      "arrivalAirport": {
+       "code": "SIN"
+      },
+      "departureTime": "2026-11-16T09:55:00",
+      "arrivalTime": "2026-11-16T11:20:00",
+      "totalTime": 5100,
+      "legs": [
+       {
+        "departureTime": "2026-11-16T09:55:00",
+        "arrivalTime": "2026-11-16T11:20:00",
+        "totalTime": 5100,
+        "carriersData": [
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         },
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 1721,
+         "carrierInfo": {
+          "marketingCarrier": "AK"
+         }
+        }
+       }
+      ]
+     }
+    ],
+    "priceBreakdown": {
+     "total": {
+      "currencyCode": "CAD",
+      "units": 156,
+      "nanos": 980000000
+     }
+    }
+   },
+   {
+    "flightKey": "1_AK1722_2_AK1721.SIN20261112.PEN20261116",
+    "segments": [
+     {
+      "departureAirport": {
+       "code": "SIN"
+      },
+      "arrivalAirport": {
+       "code": "PEN"
+      },
+      "departureTime": "2026-11-12T13:50:00",
+      "arrivalTime": "2026-11-12T15:10:00",
+      "totalTime": 4800,
+      "legs": [
+       {
+        "departureTime": "2026-11-12T13:50:00",
+        "arrivalTime": "2026-11-12T15:10:00",
+        "totalTime": 4800,
+        "carriersData": [
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         },
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 1722,
+         "carrierInfo": {
+          "marketingCarrier": "AK"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "departureAirport": {
+       "code": "PEN"
+      },
+      "arrivalAirport": {
+       "code": "SIN"
+      },
+      "departureTime": "2026-11-16T09:55:00",
+      "arrivalTime": "2026-11-16T11:20:00",
+      "totalTime": 5100,
+      "legs": [
+       {
+        "departureTime": "2026-11-16T09:55:00",
+        "arrivalTime": "2026-11-16T11:20:00",
+        "totalTime": 5100,
+        "carriersData": [
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         },
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 1721,
+         "carrierInfo": {
+          "marketingCarrier": "AK"
+         }
+        }
+       }
+      ]
+     }
+    ],
+    "priceBreakdown": {
+     "total": {
+      "currencyCode": "CAD",
+      "units": 162,
+      "nanos": 100000000
+     }
+    }
+   },
+   {
+    "flightKey": "1_AK1724_2_AK1721.SIN20261112.PEN20261116",
+    "segments": [
+     {
+      "departureAirport": {
+       "code": "SIN"
+      },
+      "arrivalAirport": {
+       "code": "PEN"
+      },
+      "departureTime": "2026-11-12T17:55:00",
+      "arrivalTime": "2026-11-12T19:20:00",
+      "totalTime": 5100,
+      "legs": [
+       {
+        "departureTime": "2026-11-12T17:55:00",
+        "arrivalTime": "2026-11-12T19:20:00",
+        "totalTime": 5100,
+        "carriersData": [
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         },
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 1724,
+         "carrierInfo": {
+          "marketingCarrier": "AK"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "departureAirport": {
+       "code": "PEN"
+      },
+      "arrivalAirport": {
+       "code": "SIN"
+      },
+      "departureTime": "2026-11-16T09:55:00",
+      "arrivalTime": "2026-11-16T11:20:00",
+      "totalTime": 5100,
+      "legs": [
+       {
+        "departureTime": "2026-11-16T09:55:00",
+        "arrivalTime": "2026-11-16T11:20:00",
+        "totalTime": 5100,
+        "carriersData": [
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         },
+         {
+          "name": "Air Asia",
+          "code": "AK"
+         }
+        ],
+        "flightInfo": {
+         "flightNumber": 1721,
+         "carrierInfo": {
+          "marketingCarrier": "AK"
+         }
+        }
+       }
+      ]
+     }
+    ],
+    "priceBreakdown": {
+     "total": {
+      "currencyCode": "CAD",
+      "units": 162,
+      "nanos": 140000000
+     }
+    }
+   }
+  ]
+ },
+ "status": true,
+ "message": "Successful"
+}

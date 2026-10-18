@@ -1,0 +1,44 @@
+{
+  "name": "pixelart-trip-planner-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PixelArt Trip Planner frontend — Next.js (App Router) + React + TypeScript + Tailwind. Contract-first service layer with mock/real implementations selected via NEXT_PUBLIC_SERVICE_MODE.",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.58.0",
+    "next": "15.5.27",
+    "react": "19.1.9",
+    "react-dom": "19.1.9"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "22.18.6",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "4.7.0",
+    "autoprefixer": "10.4.21",
+    "eslint": "9.36.0",
+    "eslint-config-next": "15.5.27",
+    "fast-check": "4.3.0",
+    "jsdom": "26.1.0",
+    "postcss": "8.5.6",
+    "prettier": "3.6.2",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4"
+  }
+}

@@ -1,0 +1,402 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Root monorepo scaffold and secrets hygiene": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185281
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916197105
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916418641
+      }
+    ],
+    "2.1 Scaffold the Next.js App Router application with React and TypeScript": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185470
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916423737
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916635832
+      }
+    ],
+    "2.2 Configure Tailwind and add thin App Router entry files": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185544
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916646933
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916801834
+      }
+    ],
+    "3. Create frontend folder conventions and stage placeholders": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185650
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916648338
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916804545
+      }
+    ],
+    "4. Define pixel design tokens in tailwind.config.ts": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185711
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916811461
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916993274
+      }
+    ],
+    "5. Add placeholder primitive component shells": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185763
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916812852
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916994938
+      }
+    ],
+    "6.1 Create `src/types` shapes for guest, room/member, message, vote, itinerary/version,": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185821
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916650225
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916803285
+      }
+    ],
+    "7. Define the contract-first service interfaces": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185890
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916813909
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916995891
+      }
+    ],
+    "8. Implement the single service selector": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916185936
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917122038
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917275134
+      }
+    ],
+    "9. Implement mock services and fixtures": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186015
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917282381
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917541002
+      }
+    ],
+    "10. Implement real placeholder services and lib clients": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186077
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917283595
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917542190
+      }
+    ],
+    "11. Checkpoint - frontend scaffold compiles and runs on mock": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186131
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917782781
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789918041270
+      }
+    ],
+    "12.1 Scaffold the FastAPI app and Python environment": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186183
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916425140
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916637271
+      }
+    ],
+    "12.2 Implement the health endpoint": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186239
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916651487
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916800211
+      }
+    ],
+    "13. Add backend env example with service-key ownership": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186290
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916426589
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916641372
+      }
+    ],
+    "14. Checkpoint - backend builds and serves /health independently": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186347
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917123369
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917276424
+      }
+    ],
+    "16. Create the docs/ structure": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186429
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916427981
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916638695
+      }
+    ],
+    "17. Verify secrets hygiene": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186475
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917552483
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917776494
+      }
+    ],
+    "18. Reconcile steering docs to the mock-inclusive service model (documentation only)": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186517
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916429229
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916640067
+      }
+    ],
+    "19. Final checkpoint - foundation complete and scope guards hold": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916186563
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789918046827
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789918251152
+      }
+    ],
+    "12. Initialize the FastAPI backend placeholder": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916800284
+      }
+    ],
+    "2. Initialize the Next.js frontend app (App Router + TS strict + Tailwind)": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916801892
+      }
+    ],
+    "6. Define shared types mirroring api-contracts.md": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789916803333
+      }
+    ],
+    "12.3 Add the /health smoke test (pytest)": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917015507
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917095319
+      }
+    ],
+    "6.2 Add a lightweight contract-shape check for the types": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917549568
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917775344
+      }
+    ],
+    "15. Frontend selector and mock-shape tests (Vitest, single-shot)": [
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917551444
+      },
+      {
+        "executionId": "a997e0b9-165f-49bb-bb60-633f9be6dc73",
+        "chatSessionId": "sess_9bfa7330-1ed0-4ee4-880e-0508d0d3d7bb",
+        "timestamp": 1789917773908
+      }
+    ]
+  }
+}

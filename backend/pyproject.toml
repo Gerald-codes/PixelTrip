@@ -1,0 +1,58 @@
+[project]
+name = "pixelart-trip-planner-backend"
+version = "0.1.0"
+description = "FastAPI backend placeholder for PixelArt Trip Planner (Foundation scaffolding)."
+requires-python = ">=3.11"
+
+# Runtime dependencies.
+#
+# The Foundation stage deliberately excluded LangGraph / AI / external-API deps.
+# Spec 03 (03-AI-agents) adds them: the agent layer is a runtime concern, and
+# `httpx` is promoted from dev-only to runtime because the External_Tool clients
+# use it for live flight/places/weather calls.
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "supabase>=2.4",         # async Supabase client (spec 02 repository layer)
+    "langgraph>=0.2",        # Agent_Graph StateGraph (spec 03)
+    "langchain-core>=0.3",   # LLM message/runnable primitives used by the nodes
+    "langchain-google-genai>=2.0",  # Gemini chat model; only app/agents/llm.py imports it
+    "httpx>=0.27",           # runtime: External_Tool HTTP clients
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",         # also used by fastapi TestClient for the /health smoke test
+    "ruff>=0.4",
+    "pytest-mock>=3.12",   # mocker fixture for repository/service unit tests
+    "pytest-asyncio>=0.23",# async node/repository tests
+    "hypothesis>=6.100",   # property-based tests for the correctness properties
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+# Prompt templates are read at runtime (app/agents/prompts/*.md).
+[tool.setuptools.package-data]
+"app.agents.prompts" = ["*.md"]
+
+# --- Tooling configuration ---
+# Ruff (lint/format) config lives in the dedicated ./ruff.toml at the backend root.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
+# Async node/repository tests use bare `async def test_*` without per-test markers.
+asyncio_mode = "auto"
+filterwarnings = [
+    # starlette's TestClient emits this via fastapi; not actionable here.
+    "ignore::DeprecationWarning:starlette.*",
+]
